@@ -1,5 +1,4 @@
-import SkipFuseUI
-import OpenMusicEventModels
+import SwiftUI
 
 enum ContentTab: String, Hashable {
     case welcome, home, settings

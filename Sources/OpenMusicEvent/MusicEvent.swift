@@ -23,10 +23,6 @@ public struct OpenMusicEventID<T>: Hashable, Sendable, ExpressibleByIntegerLiter
     }
 }
 
-public func randomID<T>() -> OpenMusicEventID<T> {
-    .init(Int.random(in: 0..<1_000_000))
-}
-
 // @Table
 public struct Organization: Equatable {
     public typealias ID = OpenMusicEventID<Organization>
@@ -38,23 +34,6 @@ public struct Organization: Equatable {
     public var address: String?
     public var timeZone: String?
     public var siteMapImageURL: URL?
-
-    public init(
-        id: ID?,
-        name: String,
-        imageURL: URL? = nil,
-        address: String? = nil,
-        timeZone: String? = nil,
-        siteMapImageURL: URL? = nil
-    ) {
-        self.id = id ?? randomID()
-        self.name = name
-        self.imageURL = imageURL
-        self.address = address
-        self.timeZone = timeZone
-        self.siteMapImageURL = siteMapImageURL
-    }
-//    public var colorScheme: ColorScheme?
 }
 
 //@Table

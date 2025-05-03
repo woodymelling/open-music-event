@@ -13,8 +13,7 @@
 //  Created by Woodrow Melling on 2/21/25.
 //
 
-import SkipFuseUI
-import OpenMusicEventModels
+import SwiftUI
 //import ImageCaching
 
 struct ArtistDetailView: View {

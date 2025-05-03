@@ -10,20 +10,19 @@ let package = Package(
         .library(name: "OpenMusicEvent", type: .dynamic, targets: ["OpenMusicEvent"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "1.5.0"),
-        .package(url: "https://source.skip.tools/skip-fuse-ui.git", "0.0.0"..<"2.0.0")
+//        .package(url: "https://source.skip.tools/skip.git", from: "1.5.0"),
+//        .package(url: "https://source.skip.tools/skip-fuse-ui.git", "0.0.0"..<"2.0.0"),
+        .package(url: "https://github.com/kean/Nuke", from: "12.8.0"),
     ],
     targets: [
         .target(
             name: "OpenMusicEvent",
             dependencies: [
-                "OpenMusicEventModels",
-                .product(name: "SkipFuseUI", package: "skip-fuse-ui")
+                .product(name: "Nuke", package: "Nuke")
             ],
             plugins: [
-                .plugin(name: "skipstone", package: "skip")
+//                .plugin(name: "skipstone", package: "skip")
             ]
         ),
-        .target(name: "OpenMusicEventModels"),
     ]
 )

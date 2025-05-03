@@ -5,8 +5,7 @@
 //  Created by Woodrow Melling on 5/3/25.
 //
 
-import SkipFuseUI
-import OpenMusicEventModels
+import SwiftUI
 
 @Observable
 public class ArtistsList {

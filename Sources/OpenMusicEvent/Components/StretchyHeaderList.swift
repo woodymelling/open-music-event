@@ -5,7 +5,7 @@
 //  Created by Woodrow Melling on 2/21/25.
 //
 
-import SkipFuseUI
+import SwiftUI
 
 
 struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
@@ -152,6 +152,7 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
 #if SKIP
 import SkipUI
 #endif
+
 
 
 struct StretchyHeaderListTitleView: View {

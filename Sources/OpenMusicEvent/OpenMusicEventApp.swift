@@ -1,7 +1,6 @@
 import Foundation
-import SkipFuse
-import SkipFuseUI
-
+import SwiftUI
+import OSLog
 /// A logger for the OpenMusicEvent module.
 let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "OpenMusicEvent")
 

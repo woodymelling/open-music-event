@@ -5,7 +5,7 @@
 //  Created by Woodrow Melling on 2/21/25.
 //
 
-import SkipFuseUI
+import SwiftUI
 
 #if SKIP
 import androidx.compose.foundation.background
