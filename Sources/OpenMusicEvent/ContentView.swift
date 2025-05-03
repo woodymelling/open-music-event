@@ -1,177 +1,157 @@
 import SkipFuseUI
+import OpenMusicEventModels
 
 enum ContentTab: String, Hashable {
     case welcome, home, settings
 }
 
-struct ContentView: View {
-    @AppStorage("tab") var tab = ContentTab.welcome
-    @AppStorage("name") var welcomeName = "Skipper"
-    @AppStorage("appearance") var appearance = ""
-    @State var viewModel = ViewModel()
+@Observable
+public class EventFeatures: Identifiable {
+    public enum Feature: String, Hashable, Codable {
+        case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications
+    }
 
-    var body: some View {
-        TabView(selection: $tab) {
+    public init() {
+
+        self.artists = ArtistsList()
+        self.schedule = Schedule()
+        self.notifications = Notifications()
+
+
+        let event: MusicEvent = .testival
+
+        if !event.contactNumbers.isEmpty {
+            self.contactInfo = ContactInfo(contactNumbers: event.contactNumbers)
+        }
+
+        if let location = event.location {
+            self.location = Location(location: location)
+        }
+    }
+
+
+//    public var orgLoader = OrganizationLoader()
+
+    public var selectedFeature: Feature = .artists
+
+    public var schedule: Schedule
+    public var artists: ArtistsList
+    public var workshops: Workshops?
+    public var siteMap: SiteMap?
+    public var location: Location?
+    public var contactInfo: ContactInfo?
+    public var notifications: Notifications
+
+    @Observable
+    public class Schedule {
+        // State
+        public var selectedStage: Stage.ID = 0
+
+        public init() { }
+
+        // Data
+        public var event: MusicEvent = .previewValue
+        public var stages: [Stage] = []
+
+        public func performances(for stageID: Stage.ID) -> [Performance] {
+            return []
+        }
+    }
+
+    @Observable
+    public class Workshops {}
+
+    @Observable
+    public class SiteMap {}
+
+    @Observable
+    public class Location {
+        public var location: MusicEvent.Location
+
+        public init(location: MusicEvent.Location) {
+            self.location = location
+        }
+    }
+
+    @Observable
+    public class ContactInfo {
+        public init(contactNumbers: [MusicEvent.ContactNumber]) {
+            self.contactNumbers = contactNumbers
+        }
+
+        public var contactNumbers: [MusicEvent.ContactNumber]
+    }
+
+    @Observable
+    public class Notifications {}
+
+}
+
+
+
+public struct EventFeaturesView: View {
+    public init(store: EventFeatures) {
+        self.store = store
+    }
+
+    @Bindable var store: EventFeatures
+
+    public var body: some View {
+        TabView(selection: $store.selectedFeature) {
+//            NavigationStack {
+//                ScheduleView(store: store.schedule)
+//            }
+//            .tabItem { Label("Schedule", systemImage: "calendar") }
+//            .tag(EventFeatures.Feature.schedule)
+
             NavigationStack {
-                WelcomeView(welcomeName: $welcomeName)
+                ArtistsListView(store: store.artists)
             }
-            .tabItem { Label("Welcome", systemImage: "heart.fill") }
-            .tag(ContentTab.welcome)
+            .tabItem { Label("Artists", systemImage: "person.3") }
+            .tag(EventFeatures.Feature.artists)
 
-            NavigationStack {
-                ItemListView()
-                    .navigationTitle(Text("\(viewModel.items.count) Items"))
-            }
-            .tabItem { Label("Home", systemImage: "house.fill") }
-            .tag(ContentTab.home)
+//            if let contactInfo = store.contactInfo {
+//                NavigationStack {
+//                    ContactInfoView(store: contactInfo)
+//                }
+//                .tabItem { Label("Contact Info", systemImage: "phone") }
+//                .tag(EventFeatures.Feature.contactInfo)
+//            }
 
-            NavigationStack {
-                SettingsView(appearance: $appearance, welcomeName: $welcomeName)
-                    .navigationTitle("Settings")
-            }
-            .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-            .tag(ContentTab.settings)
-        }
-        .environment(viewModel)
-        .preferredColorScheme(appearance == "dark" ? .dark : appearance == "light" ? .light : nil)
-    }
-}
+//            if let location = store.location {
+//                NavigationStack {
+//                    LocationView(store: location)
+//                }
+//                #if os(iOS)
+//                .tabItem { Label("Location", systemImage: "mappin") }
+//                #elseif os(Android)
+//                .tabItem { Label("Location", systemImage: "mappin.circle")}
+//                #endif
+//                .tag(EventFeatures.Feature.location)
+//            }
 
-struct WelcomeView : View {
-    @State var heartBeating = false
-    @Binding var welcomeName: String
+//            if let workshops = store.workshops {
+//                NavigationStack {
+//                    Text("TODO: Workshops")
+//                }
+//                .tabItem { Label("Workshops", systemImage: "figure.mind.and.body") }
+//                .tag(EventFeatures.Feature.workshops)
+//            }
+//
+//            if let siteMap = store.siteMap {
+//                NavigationStack {
+//                    Text("TODO: Site Map")
+//                }
+//                .tabItem { Label("Site Map", systemImage: "map") }
+//                .tag(EventFeatures.Feature.siteMap)
+//            }
 
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("Hello [\(welcomeName)](https://skip.tools)!")
-                .padding()
-            Image(systemName: "heart.fill")
-                .foregroundStyle(.red)
-                .scaleEffect(heartBeating ? 1.5 : 1.0)
-                .animation(.easeInOut(duration: 1).repeatForever(), value: heartBeating)
-                .onAppear { heartBeating = true }
-        }
-        .font(.largeTitle)
-    }
-}
-
-struct ItemListView : View {
-    @Environment(ViewModel.self) var viewModel: ViewModel
-
-    var body: some View {
-        List {
-            ForEach(viewModel.items) { item in
-                NavigationLink(value: item) {
-                    Label {
-                        Text(item.itemTitle)
-                    } icon: {
-                        if item.favorite {
-                            Image(systemName: "star.fill")
-                                .foregroundStyle(.yellow)
-                        }
-                    }
-                }
-            }
-            .onDelete { offsets in
-                viewModel.items.remove(atOffsets: offsets)
-            }
-            .onMove { fromOffsets, toOffset in
-                viewModel.items.move(fromOffsets: fromOffsets, toOffset: toOffset)
-            }
-        }
-        .navigationDestination(for: Item.self) { item in
-            ItemView(item: item)
-                .navigationTitle(item.itemTitle)
-        }
-        .toolbar {
-            ToolbarItemGroup {
-                Button {
-                    withAnimation {
-                        viewModel.items.insert(Item(), at: 0)
-                    }
-                } label: {
-                    Label("Add", systemImage: "plus")
-                }
-            }
+//
+//            NavigationStack {
+//                Text("TODO: Notifications")
+//            }
+//            .tabItem { Label("Notifications", systemImage: Icons.notifications) }
+//            .tag(EventFeatures.Feature.notifications)
         }
     }
 }
-
-struct ItemView : View {
-    @State var item: Item
-    @Environment(ViewModel.self) var viewModel: ViewModel
-    @Environment(\.dismiss) var dismiss
-
-    var body: some View {
-        Form {
-            TextField("Title", text: $item.title)
-                .textFieldStyle(.roundedBorder)
-            Toggle("Favorite", isOn: $item.favorite)
-            DatePicker("Date", selection: $item.date)
-            Text("Notes").font(.title3)
-            TextEditor(text: $item.notes)
-                .border(Color.secondary, width: 1.0)
-        }
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
-                }
-            }
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    viewModel.save(item: item)
-                    dismiss()
-                }
-                .disabled(!viewModel.isUpdated(item))
-            }
-        }
-    }
-}
-
-struct SettingsView : View {
-    @Binding var appearance: String
-    @Binding var welcomeName: String
-
-    var body: some View {
-        Form {
-            TextField("Name", text: $welcomeName)
-            Picker("Appearance", selection: $appearance) {
-                Text("System").tag("")
-                Text("Light").tag("light")
-                Text("Dark").tag("dark")
-            }
-            if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-               let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                Text("Version \(version) (\(buildNumber))")
-            }
-            HStack {
-                PlatformHeartView()
-                Text("Powered by [Skip](https://skip.tools)")
-            }
-        }
-    }
-}
-
-/// A view that shows a blue heart on iOS and a green heart on Android.
-struct PlatformHeartView : View {
-    var body: some View {
-        #if os(Android)
-        ComposeView {
-            HeartComposer()
-        }
-        #else
-        Text(verbatim: "💙")
-        #endif
-    }
-}
-
-#if SKIP
-/// Use a ContentComposer to integrate Compose content. This code will be transpiled to Kotlin.
-struct HeartComposer : ContentComposer {
-    @Composable func Compose(context: ComposeContext) {
-        androidx.compose.material3.Text("💚", modifier: context.modifier)
-    }
-}
-#endif

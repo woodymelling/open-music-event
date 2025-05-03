@@ -204,6 +204,7 @@
 			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* OpenMusicEvent.xcconfig */;
 			buildSettings = {
 				ENABLE_PREVIEWS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 			};
@@ -214,6 +215,7 @@
 			baseConfigurationReference = 496EB72F2A6AE4DE00C1253B /* OpenMusicEvent.xcconfig */;
 			buildSettings = {
 				ENABLE_PREVIEWS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 			};

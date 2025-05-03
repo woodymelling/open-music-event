@@ -12,8 +12,10 @@ let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "O
     /* SKIP @bridge */public init() {
     }
 
+    @State var store = EventFeatures()
+
     public var body: some View {
-        ContentView()
+        EventFeaturesView(store: store)
             .task {
                 logger.info("Skip app logs are viewable in the Xcode console for iOS; Android logs can be viewed in Studio or using adb logcat")
             }

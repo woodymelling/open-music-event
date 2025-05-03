@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "open-music-event",
     defaultLocalization: "en",
-    platforms: [.iOS(.v17), .macOS(.v14), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
+    platforms: [.iOS(.v18)],
     products: [
         .library(name: "OpenMusicEvent", type: .dynamic, targets: ["OpenMusicEvent"]),
     ],
@@ -14,8 +14,16 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip-fuse-ui.git", "0.0.0"..<"2.0.0")
     ],
     targets: [
-        .target(name: "OpenMusicEvent", dependencies: [
-            .product(name: "SkipFuseUI", package: "skip-fuse-ui")
-        ], plugins: [.plugin(name: "skipstone", package: "skip")]),
+        .target(
+            name: "OpenMusicEvent",
+            dependencies: [
+                "OpenMusicEventModels",
+                .product(name: "SkipFuseUI", package: "skip-fuse-ui")
+            ],
+            plugins: [
+                .plugin(name: "skipstone", package: "skip")
+            ]
+        ),
+        .target(name: "OpenMusicEventModels"),
     ]
 )
