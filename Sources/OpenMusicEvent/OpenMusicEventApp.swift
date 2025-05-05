@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import OSLog
 /// A logger for the OpenMusicEvent module.
-let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "OpenMusicEvent")
+private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "OpenMusicEvent")
 
 /// The shared top-level view for the app, loaded from the platform-specific App delegates below.
 ///

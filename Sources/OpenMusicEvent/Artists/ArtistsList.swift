@@ -13,15 +13,14 @@ public class ArtistsList {
 
     // MARK: Data
     public var event: MusicEvent = .previewValue
-    public var artists: [Artist] = Artist.previewValues
-
+    public var artists: [Artist] = []
     // MARK: State
     public var searchText: String = ""
 
     @Observable
     public class Detail {
         init(artistID: Artist.ID) {
-            self.artist = Artist.previewValues.first(where: { $0.id == artistID })!
+            fatalError()
         }
 
         var artist: Artist

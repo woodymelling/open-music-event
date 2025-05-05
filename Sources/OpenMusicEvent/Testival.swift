@@ -8,8 +8,9 @@
 public extension MusicEvent {
     static let testival = MusicEvent(
         id: 0,
-        name: "Testival",
         organizationID: 0,
+        name: "Testival",
+        timeZone: .autoupdatingCurrent,
         imageURL: nil,
         siteMapImageURL: nil,
         location: nil,
@@ -20,7 +21,14 @@ public extension MusicEvent {
 }
 
 public extension Artist {
-    static let previewValues = [
-        Artist(id: 0, eventID: 0, name: "Overgrowth", links: [])
+    static let previewValues: [Artist] = [
+        Artist(
+            id: 0,
+            eventID: nil,
+            name: "Overgrowth",
+            bio: "",
+            imageURL: nil,
+            links: []
+        )
     ]
 }

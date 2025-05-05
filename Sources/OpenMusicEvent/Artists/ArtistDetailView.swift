@@ -18,7 +18,7 @@ import SwiftUI
 
 struct ArtistDetailView: View {
     init(artist: Artist.ID) {
-        self.artist = .init(id: 9, eventID: 4, name: "Artis", links: [])
+        fatalError()
     }
 
     var artist: Artist
@@ -61,7 +61,7 @@ struct ArtistDetailView: View {
                 // MARK: Socials
                 if !artist.links.isEmpty {
                     Section("Links") {
-                        ForEach(artist.links, id: \.self) { link in
+                        ForEach(artist.links, id: \.url) { link in
 //                            Text(link.url.absoluteString)
 //                            NavigationLinkButton {
 //                                store.send(.didTapURL(link.url))
