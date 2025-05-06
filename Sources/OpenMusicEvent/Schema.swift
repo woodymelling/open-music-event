@@ -9,7 +9,7 @@
 import Foundation
 import StructuredQueries
 
-public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable {
+public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
     public let rawValue: Int
     public init(_ intValue: Int) {
         self.rawValue = intValue
@@ -24,19 +24,26 @@ public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepr
     }
 }
 
-@Table
-public struct Organization: Equatable {
-    public typealias ID = OmeID<Organization>
 
-    public var id: ID
+@Table
+public struct Organization: Equatable, Identifiable, Sendable {
+    @Column(primaryKey: true)
+    public var url: URL
+
+    public var id: URL {
+        self.url
+    }
 
     public var name: String
     public var imageURL: URL?
 }
 
+extension Organization.Draft: Equatable {}
+extension Organization.Draft: Sendable {}
+
 // MARK: Music Event
 @Table
-public struct MusicEvent: Equatable, Identifiable, Sendable {
+public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
     
     public let id: MusicEvent.ID
@@ -73,6 +80,9 @@ public struct MusicEvent: Equatable, Identifiable, Sendable {
     }
 }
 
+extension MusicEvent.Draft: Codable {}
+extension MusicEvent.Draft: Equatable {}
+
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
@@ -97,6 +107,8 @@ public struct Artist: Identifiable, Equatable, Sendable {
         }
     }
 }
+
+extension Artist.Draft: Codable, Equatable {}
 
 // MARK: Stage
 @Table
@@ -144,6 +156,7 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     // A join table for the many-to-many relationship of Performance -> Artist
     @Table("performanceArtists")
     public struct Artists: Equatable, Sendable {
+
         public let performanceID: Performance.ID
         public let artistID: Artist.ID?
         public let anonymousArtistName: String?

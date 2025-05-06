@@ -1,0 +1,11 @@
+version: "0.1.0" # Schema Version
+
+siteMapImageURL: "https://www.example.com/amap"
+imageURL: "https://www.example.com/main-image"
+address: "1234, somewhere in a forest"
+timeZone: "America/Denver"
+
+# Colors
+colorScheme:
+  primaryColor: "#FF5733"
+  workshopsColor: "#C70039"

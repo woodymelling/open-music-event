@@ -64,6 +64,9 @@
         }
       }
     },
+    "Add Organization" : {
+
+    },
     "Appearance" : {
       "comment" : "Settings select label for the interface style of the controls (light, dark, or default)",
       "extractionState" : "stale",
@@ -186,6 +189,9 @@
           }
         }
       }
+    },
+    "Events" : {
+
     },
     "Favorite" : {
       "comment" : "Item editor title label for marking the item as a favorite",
@@ -310,6 +316,9 @@
     "Links" : {
 
     },
+    "Loading Organization..." : {
+
+    },
     "Name" : {
       "comment" : "Placeholder title for the Name field in a form",
       "extractionState" : "stale",
@@ -371,6 +380,9 @@
       }
     },
     "offset: %lf" : {
+
+    },
+    "Organizations" : {
 
     },
     "Powered by [Skip](https://skip.tools)" : {

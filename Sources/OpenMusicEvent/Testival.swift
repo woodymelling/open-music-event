@@ -4,11 +4,12 @@
 //
 //  Created by Woodrow Melling on 5/3/25.
 //
+import Foundation
 
 public extension MusicEvent {
     static let testival = MusicEvent(
         id: 0,
-        organizationID: 0,
+        organizationID: URL.temporaryDirectory,
         name: "Testival",
         timeZone: .autoupdatingCurrent,
         imageURL: nil,

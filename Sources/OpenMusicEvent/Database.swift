@@ -44,26 +44,29 @@ func appDatabase() throws -> any DatabaseWriter {
     }
 
     var migrator = DatabaseMigrator()
+    #if DEBUG
+    migrator.eraseDatabaseOnSchemaChange = true
+    #endif
     migrator.registerMigration("Create tables") { db in
         try #sql("""
         CREATE TABLE organizations (
-            "url" TEXT PRIMARY KEY AUTOINCREMENT,
+            "url" TEXT PRIMARY KEY NOT NULL,
             "name" TEXT NOT NULL,
-            "imageURL" TEXT,
+            "imageURL" TEXT
         ) STRICT;
         """).execute(db)
 
         try #sql("""
         CREATE TABLE musicEvents(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "organizationID" INTEGER,
+            "organizationURL" INTEGER,
             "name" TEXT NOT NULL,
             "imageURL" TEXT,
             "siteMapImageURL" TEXT,
             "location" TEXT,
             "contactNumbers" TEXT,
         
-            FOREIGN KEY("organizationID") REFERENCES "organizations"("id") ON DELETE CASCADE
+            FOREIGN KEY("organizationURL") REFERENCES "organizations"("url") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
@@ -82,10 +85,10 @@ func appDatabase() throws -> any DatabaseWriter {
 
         try #sql("""
         CREATE TABLE stages(
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "eventID" INTEGER,
             "name" TEXT NOT NULL,
-            "iconImageURL" TEXT
+            "iconImageURL" TEXT,
             
             FOREIGN KEY("eventID") REFERENCES "events"("id") ON DELETE CASCADE
         ) STRICT;
@@ -94,41 +97,45 @@ func appDatabase() throws -> any DatabaseWriter {
 
         try #sql("""
         CREATE TABLE schedules(
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT
-            "eventID" INTEGER
-            "startTime" TEXT
-            "endTime" TEXT
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "eventID" INTEGER,
+            "startTime" TEXT,
+            "endTime" TEXT,
             "customTitle" TEXT
         ) STRICT;
         """).execute(db)
 
         try #sql("""
         CREATE TABLE performances(
-            "id" INTEGER PRIMARY KEY AUTOINCREMENT
-            "stageID" INTEGER NOT NULL
-            "scheduleID" INTEGER
-            "customTitle" TEXT
-            "description" TEXT
-            "startTime" TEXT NOT NULL
-            "endTime" TEXT NOT NULL
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "stageID" INTEGER NOT NULL,
+            "scheduleID" INTEGER,
+            "customTitle" TEXT,
+            "description" TEXT,
+            "startTime" TEXT NOT NULL,
+            "endTime" TEXT NOT NULL,
         
-            FOREIGN KEY("eventID") REFERENCES "events"("id") ON DELETE CASCADE
             FOREIGN KEY("stageID") REFERENCES "stages"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
         try #sql("""
-        CREATE TABLE performanceArtists(
-            "id" INTEGER PRIMARY KET AUTOINCREMENT
-            "performanceID" INTEGER NOT NULL
-            "artistID" INTEGER
-            "anonymousArtistName" STRING
-        
-            FOREIGN KEY("performanceID") REFERENCES "performances"("id") ON DELETE CASCADE
-            FOREIGN KEY("artistID") REFERENCES "artists"("id") ON DELETE CASCADE
+        CREATE TABLE performance_artists (
+            "performanceID" INTEGER NOT NULL REFERENCES performances(id) ON DELETE CASCADE,
+            "artistID" INTEGER REFERENCES artists(id) ON DELETE SET NULL,
+            "anonymousArtistName" TEXT,
+
+            CHECK(
+                (artistID IS NOT NULL AND anonymousArtistName IS NULL) OR
+                (artistID IS NULL AND anonymousArtistName IS NOT NULL)
+            ),
+
+            PRIMARY KEY (performanceID, artistID, anonymousArtistName)
         ) STRICT;
         """).execute(db)
     }
+
+    try migrator.migrate(database)
 
     return database
 }

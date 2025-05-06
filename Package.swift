@@ -12,18 +12,68 @@ let package = Package(
     dependencies: [
 //        .package(url: "https://source.skip.tools/skip.git", from: "1.5.0"),
 //        .package(url: "https://source.skip.tools/skip-fuse-ui.git", "0.0.0"..<"2.0.0"),
-        .package(url: "https://github.com/kean/Nuke", from: "12.8.0"),
-        .package(url: "https://github.com/pointfreeco/sharing-grdb", from: "0.2.0")
+        .package(url: "https://github.com/pointfreeco/swift-composable-architecture", from: "1.17.0"),
+        .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
+        .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.1"),
+        .package(url: "https://github.com/pointfreeco/swift-identified-collections", from: "1.0.0"),
+        .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
+        .package(url: "https://github.com/pointfreeco/swift-validated", from: "0.2.0"),
+        .package(url: "https://github.com/pointfreeco/swift-prelude", branch: "main"),
+        .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
+
+        .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
+
+        .package(url: "https://github.com/pointfreeco/sharing-grdb", from: "0.2.0"),
+        .package(url: "https://github.com/woodymelling/swift-image-caching", branch: "trunk"),
+        .package(url: "https://github.com/woodymelling/swift-file-tree", from: "0.2.0"),
+        .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
+        .package(url: "https://github.com/vapor-community/Zip.git", from: "2.0.0"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
     ],
     targets: [
         .target(
             name: "OpenMusicEvent",
             dependencies: [
-                .product(name: "Nuke", package: "Nuke"),
-                .product(name: "SharingGRDB", package: "sharing-grdb")
+                .product(name: "SharingGRDB", package: "sharing-grdb"),
+                .product(name: "Zip", package: "Zip"),
+                .product(name: "FileTree", package: "swift-file-tree"),
+                .product(name: "ImageCaching", package: "swift-image-caching"),
+                .product(name: "Yams", package: "Yams")
             ],
             plugins: [
 //                .plugin(name: "skipstone", package: "skip")
+            ]
+        ),
+        .target(
+            name: "OpenMusicEventParser",
+            dependencies: [
+                "Yams",
+                .product(name: "FileTree", package: "swift-file-tree"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
+                .product(name: "DependenciesMacros", package: "swift-dependencies"),
+                .product(name: "CustomDump", package: "swift-custom-dump"),
+                .product(name: "Validated", package: "swift-validated"),
+                .product(name: "Prelude", package: "swift-prelude"),
+                .product(name: "Parsing", package: "swift-parsing"),
+                .product(name: "Conversions", package: "swift-parsing"),
+
+                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+                .product(name: "CustomDump", package: "swift-custom-dump"),
+                .product(name: "Collections", package: "swift-collections"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
+                .product(name: "Tagged", package: "swift-tagged")
+            ]
+        ),
+        .testTarget(
+            name: "OpenMusicEventParserTests",
+            dependencies: [
+                 "OpenMusicEventParser",
+                 "Yams",
+                 .product(name: "CustomDump", package: "swift-custom-dump"),
+                 .product(name: "DependenciesTestSupport", package: "swift-dependencies")
+            ],
+            resources: [
+                .copy("ExampleFestivals")
             ]
         ),
     ]
