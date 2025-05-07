@@ -158,11 +158,11 @@ import SkipUI
 struct StretchyHeaderListTitleView: View {
     var titleContent: Text
 
-//    #if !SKIP
-//    let mainColor = Color(.systemBackground)
-//    #else
-//    let mainColor: Color = Color.systemBackground
-//    #endif
+    #if !SKIP
+    let mainColor = Color(.systemBackground)
+    #else
+    let mainColor: Color = Color.systemBackground
+    #endif
     var body: some View {
         self.titleContent
             .font(.largeTitle)
@@ -175,7 +175,7 @@ struct StretchyHeaderListTitleView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
                 LinearGradient(
-                    colors: [.red, .clear],
+                    colors: [mainColor, .clear],
                     startPoint: .bottom,
                     endPoint: .top
                 )

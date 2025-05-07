@@ -12,9 +12,9 @@ import Collections
 
 public typealias OpenFestivalIDType = UUID
 
-public struct Organization: Equatable, Identifiable {
+public struct Organization: Equatable, Identifiable, Sendable {
     public var id: Tagged<Self, OpenFestivalIDType>
-    public struct Info: Decodable, Equatable {
+    public struct Info: Decodable, Equatable, Sendable {
 
         public init(name: String, imageURL: URL? = nil) {
             self.name = name
@@ -37,7 +37,6 @@ public struct Event: Equatable, Sendable {
     public var stages: Stages
     public var schedule: [StringlyTyped.Schedule]
     public var colorScheme: ColorScheme?
-
 
     public struct Info: Equatable, Sendable {
         public var name: String //

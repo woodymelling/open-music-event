@@ -14,22 +14,24 @@ import Conversions
 import Foundation
 
 
+public func read(from url: URL) throws -> Organization {
+    try Organization.fileTree.read(from: url)
+}
+
 
 extension Organization {
-    var fileTree: some FileTreeViewable<Organization> {
+    static var fileTree: some FileTreeViewable<Organization> {
         FileTree {
             Organization.Info.file
 
-            Directory("schedules") {
-                Directory.Many {
-                    EventFileTree()
-                }
+            Directory.Many {
+                EventFileTree()
             }
         }
         .convert(fileConversion)
     }
 
-    var fileConversion: some Conversion<(Organization.Info, [DirectoryContent<Event>]), Organization> {
+    static var fileConversion: some Conversion<(Organization.Info, [DirectoryContent<Event>]), Organization> {
         Convert {
             Organization.init(
                 id: .init(),

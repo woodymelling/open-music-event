@@ -47,7 +47,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
     
     public let id: MusicEvent.ID
-    public let organizationID: Organization.ID?
+    public let organizationURL: Organization.ID?
     
     public let name: String  //
     

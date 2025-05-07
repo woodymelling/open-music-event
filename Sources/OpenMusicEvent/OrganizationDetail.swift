@@ -13,50 +13,61 @@ import Dependencies
 import OSLog
 import ImageCaching
 import SharingGRDB
-import OpenMusicEventParser
 
-@Observable
-@MainActor
-public class OrganizationDetail {
-    let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationDetails")
+struct OrganizationDetailView: View {
+    @Observable
+    @MainActor
+    public class ViewModel {
+        let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationDetails")
 
-    public init(url: URL) {
-        self.url = url
+        public init(id: Organization.ID) {
+            self.id = id
 
-        _organization = FetchOne(wrappedValue: nil, Organization?.find(url))
-        _events =  FetchAll(MusicEvent.where { $0.organizationID == url })
-    }
+            _organization = FetchOne(wrappedValue: nil, Organization?.find(id))
+            _events = FetchAll(MusicEvent.where { $0.organizationURL == id })
+        }
 
-    public let url: URL
+        public let id: Organization.ID
 
-    @ObservationIgnored
-    @FetchOne
-    public var organization: Organization?
+        @ObservationIgnored
+        @FetchOne
+        public var organization: Organization?
 
-    @ObservationIgnored
-    @FetchAll
-    var events: [MusicEvent] = []
+        @ObservationIgnored
+        @FetchAll
+        var events: [MusicEvent] = []
 
 
-    public var currentEvent: EventFeatures?
+        public var currentEvent: EventFeatures?
 
-    public func onAppear() async {
-        logger.log("Fetching: \(String(describing: self.url))")
+        public func onAppear() async {
+//            logger.log("Fetching: \(String(describing: self.url))")
+//
+//            do {
+//                try await loadAndStoreOrganizationInfo(from: url)
+//            } catch {
+//                logger.error("Error: \(error.localizedDescription)")
+//            }
+        }
 
-        do {
-            try await loadAndStoreOrganizationInfo(from: url)
-        } catch {
-            logger.error("Error: \(error.localizedDescription)")
+        public func didTapEvent(id: MusicEvent.ID) {
+            self.currentEvent = EventFeatures()
+        }
+
+        @ObservationIgnored
+        @Dependency(DataFetchingClient.self)
+        var dataFetchingClient
+
+        public func onPullToRefresh() async  {
+            do {
+                _ = try await dataFetchingClient.fetchOrganization(id: self.id)
+            } catch {
+                logger.error("\(error.localizedDescription)")
+            }
         }
     }
 
-    public func didTapEvent(id: MusicEvent.ID) {
-        self.currentEvent = EventFeatures()
-    }
-}
-
-struct OrganizationDetailView: View {
-    @State var store = OrganizationDetail(url: URL(string: "https://github.com/woodymelling/wicked-woods/archive/refs/heads/main.zip")!)
+    @Bindable var store: ViewModel
 
     var body: some View {
         Group {
@@ -81,10 +92,10 @@ struct OrganizationDetailView: View {
                 ProgressView("Loading Organization...")
             }
         }
-        .task { await store.onAppear() }
         .fullScreenCover(item: $store.currentEvent) {
             EventFeaturesView(store: $0)
         }
+        .refreshable { await store.onPullToRefresh() }
     }
 
     struct EventsListView: View {
@@ -107,26 +118,26 @@ struct OrganizationDetailView: View {
         let organization: Organization
 
         var body: some View {
-//            CachedAsyncImage(
-//                requests: [
-//                    ImageRequest(
-//                        url: organization.imageURL,
-//                        processors: [.resize(width: 440)]
-//                    ).withPipeline(.organization)
-//                ]
-//            ) {
-//                $0.resizable()
-//            } placeholder: {
-//                #if !SKIP
-//                AnimatedMeshView()
-//                    .overlay(Material.thinMaterial)
-//                    .opacity(0.25)
-//                #else
-//                ProgressView().frame(square: 440)
-//                #endif
-//
-//            }
-//            .frame(maxWidth: .infinity)
+            CachedAsyncImage(
+                requests: [
+                    ImageRequest(
+                        url: organization.imageURL,
+                        processors: [.resize(width: 440)]
+                    ).withPipeline(.images)
+                ]
+            ) {
+                $0.resizable()
+            } placeholder: {
+                #if !SKIP
+                AnimatedMeshView()
+                    .overlay(Material.thinMaterial)
+                    .opacity(0.25)
+                #else
+                ProgressView().frame(square: 440)
+                #endif
+
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 
@@ -170,85 +181,12 @@ struct OrganizationDetailView: View {
 }
 
 
-import OSLog
-private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationDetails")
-func loadAndStoreOrganizationInfo(from url: URL) async throws {
-    let (zipData, response) = try await URLSession.shared.data(from: url)
-    logger.log("Response: \((response as! HTTPURLResponse).statusCode), data: \(zipData)")
-
-    let baseURL = URL.cachesDirectory.appending(path: "organizations")
-    logger.log("Creating Directory at: \(baseURL)")
-
-    let zipDestination = baseURL.appendingPathComponent("wicked-woods.zip")
-    let unzipped = baseURL.appendingPathComponent("wicked-woods")
-
-    logger.log("Creating Directory at: \(baseURL)")
-    try FileManager.default.createDirectory(at: baseURL, withIntermediateDirectories: true)
-
-    logger.log("Writing data to: \(zipDestination)")
-    try zipData.write(to: zipDestination, options: [.noFileProtection])
-
-    if FileManager.default.isDeletableFile(atPath: unzipped.absoluteString) {
-        logger.log("Clearing \(unzipped)")
-        try FileManager.default.removeItem(at: unzipped)
-    }
-
-    logger.log("Unzipping from \(zipDestination) to \(unzipped)")
-    try Zip.unzipFile(zipDestination, destination: unzipped)
-
-    let finalDestination = unzipped.appendingPathComponent("wicked-woods-main")
-
-    let contents = try FileManager.default.contentsOfDirectory(
-        at: finalDestination,
-        includingPropertiesForKeys: nil
-    )
-
-    logger.log("Reading from: \(finalDestination): Contents \(contents.map { $0.lastPathComponent })")
-
-//    var organization = try OpenMusicEventParser.Organization.fileTree.read(from: url)
-//    organization.url = url
-//
-//    @dependency(\.defaultdatabase) var database
-//
-//    try await database.write { [organization] db in
-//        let url = try organization.upsert(organization).returning(\.url).fetchone(db)!
-//    }
-
-//    let organization = try OpenMusicEventParser.Organization.fileTree.read(from: finalDestination)
-
-//
-//    let organizationID = upsertOrganization(draft: organization.draft(url: url))
-//
-//    for event in organization.events {
-//        let draft = event.draft(organizationID: organizationID)
-//        let id = upsertEvent(draft: draft)
-//
-//        for artist in event.artists {
-////                _ = upsertEventArtist(draft: artist.0.description, eventID: id)
-//        }
-//    }
-//
-
-
-
-    //        let (organization, events) = try Organization.fileTree.read(from: finalDestination)
-    //
-    //        self.organization = organization
-    //        self.currentEvent = currentEvent
-}
-
 import Sharing
 extension SharedKey where Self == AppStorageKey<MusicEvent.ID?> {
     static var eventID: Self {
-        .appStorage("OME.eventID")
+        .appStorage("OME-eventID")
     }
 }
-
-//extension FileExtension {
-//    static let yaml: Self = "yml"
-//}
-import FileTree
-
 
 
 extension ImagePipeline {
@@ -264,5 +202,5 @@ extension ImagePipeline {
 
         return ImagePipeline(configuration: configuration)
     }()
-    
 }
+

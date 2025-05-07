@@ -6,10 +6,18 @@
 //
 import Foundation
 
+public extension Organization {
+    static let wickedWoods = Organization(
+        url: URL(string: "https://github.com/woodymelling/wicked-woods")!,
+        name: "Wicked Woods",
+        imageURL: URL(string: "https://images.squarespace-cdn.com/content/v1/66eb917b86dbd460ad209478/5be5a6e6-c5ca-4271-acc3-55767c498061/WW-off_white.png?format=1500w")
+    )
+}
+
 public extension MusicEvent {
     static let testival = MusicEvent(
         id: 0,
-        organizationID: URL.temporaryDirectory,
+        organizationURL: URL.temporaryDirectory,
         name: "Testival",
         timeZone: .autoupdatingCurrent,
         imageURL: nil,

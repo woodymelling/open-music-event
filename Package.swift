@@ -20,6 +20,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-validated", from: "0.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-prelude", branch: "main"),
         .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
+        .package(url: "https://github.com/woodymelling/swift-navigation", from: "2.3.0"),
 
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
 
@@ -38,7 +39,10 @@ let package = Package(
                 .product(name: "Zip", package: "Zip"),
                 .product(name: "FileTree", package: "swift-file-tree"),
                 .product(name: "ImageCaching", package: "swift-image-caching"),
-                .product(name: "Yams", package: "Yams")
+                .product(name: "Yams", package: "Yams"),
+                .product(name: "SwiftUINavigation", package: "swift-navigation"),
+                .product(name: "DependenciesMacros", package: "swift-dependencies"),
+                "OpenMusicEventParser"
             ],
             plugins: [
 //                .plugin(name: "skipstone", package: "skip")
@@ -61,7 +65,8 @@ let package = Package(
                 .product(name: "CustomDump", package: "swift-custom-dump"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
-                .product(name: "Tagged", package: "swift-tagged")
+                .product(name: "Tagged", package: "swift-tagged"),
+
             ]
         ),
         .testTarget(

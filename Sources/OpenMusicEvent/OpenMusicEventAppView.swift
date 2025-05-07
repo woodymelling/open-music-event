@@ -9,6 +9,7 @@ import SwiftUI
 import Sharing
 import SharingGRDB
 import ImageCaching
+import CasePaths
 
 public struct OpenFestivalAppEntryPointView: View {
     public init(store: ViewModel) {
@@ -20,6 +21,7 @@ public struct OpenFestivalAppEntryPointView: View {
     @MainActor
     @Observable
     public class ViewModel {
+        @CasePathable
         enum State {
             case eventViewer(EventViewerView.ViewModel)
             case festivalList(OrganizationListView.ViewModel)
@@ -44,76 +46,13 @@ public struct OpenFestivalAppEntryPointView: View {
             EventViewerView(store: store)
 
         case .festivalList(let store):
-            OrganizationListView(store: store)
+            NavigationStack {
+                OrganizationListView(store: store)
+            }
         }
     }
 }
 
-struct OrganizationListView: View {
-    @MainActor
-    @Observable
-    class ViewModel {
-        @ObservationIgnored
-        @FetchAll(Organization.all.order(by: \.name))
-        var organizations
-
-        func didTapOrganization(id: Organization.ID) {
-            unimplemented()
-        }
-
-        func didTapAddOrganizationButton() {
-
-        }
-    }
-
-    let store: ViewModel
-
-    public var body: some View {
-        List(store.organizations, id: \.url) { org in
-            Button {
-                store.didTapOrganization(id: org.id)
-            } label: {
-                HStack {
-                    CachedAsyncImage(
-                        url: org.imageURL,
-                        content: { $0.resizable() },
-                        placeholder: {
-                            Image(systemName: "photo.artframe")
-                                .resizable()
-                        }
-                    )
-                    .frame(width: 60, height: 60)
-                    .aspectRatio(contentMode: .fit)
-
-                    Text(org.name)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-//            .buttonStyle(.navigationLink)
-        }
-        .listStyle(.plain)
-        .navigationTitle("Organizations")
-        .toolbar {
-            Button("Add Organization", systemImage: "plus") {
-                store.didTapAddOrganizationButton()
-            }
-        }
-//        .sheet(
-//            item: $store.scope(
-//                state: \.destination?.addRepository,
-//                action: \.destination.addRepository
-//            ),
-//            content: AddRepositoryView.init(store:)
-//        )
-//        .navigationDestination(
-//            item: $store.scope(
-//                state: \.destination?.organizationDetail,
-//                action: \.destination.organizationDetail
-//            ),
-//            destination: OrganizationDetailView.init(store:)
-//        )
-    }
-}
 
 struct EventViewerView: View {
 
@@ -133,5 +72,9 @@ struct EventViewerView: View {
 }
 
 #Preview {
+    let _ = try! prepareDependencies {
+      $0.defaultDatabase = try appDatabase()
+    }
+
     OpenFestivalAppEntryPointView(store: .init())
 }

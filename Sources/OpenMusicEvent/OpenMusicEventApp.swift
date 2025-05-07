@@ -16,10 +16,10 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
         }
     }
 
-    @State var store = EventFeatures()
+    static var store = OpenFestivalAppEntryPointView.ViewModel()
 
     public var body: some View {
-        EventFeaturesView(store: store)
+        OpenFestivalAppEntryPointView(store: Self.store)
             .task {
                 logger.info("Skip app logs are viewable in the Xcode console for iOS; Android logs can be viewed in Studio or using adb logcat")
             }

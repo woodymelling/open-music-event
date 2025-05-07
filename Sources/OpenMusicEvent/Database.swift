@@ -15,8 +15,8 @@ private let logger = Logger(
 )
 
 func appDatabase() throws -> any DatabaseWriter {
+    print("Preparing Database")
     let database: any DatabaseWriter
-
     var configuration = Configuration()
 
     configuration.foreignKeysEnabled = true
@@ -59,8 +59,9 @@ func appDatabase() throws -> any DatabaseWriter {
         try #sql("""
         CREATE TABLE musicEvents(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "organizationURL" INTEGER,
+            "organizationURL" TEXT,
             "name" TEXT NOT NULL,
+            "timeZone" TEXT,
             "imageURL" TEXT,
             "siteMapImageURL" TEXT,
             "location" TEXT,
@@ -135,9 +136,27 @@ func appDatabase() throws -> any DatabaseWriter {
         """).execute(db)
     }
 
+    #if DEBUG
+    if context != .test {
+        migrator.registerMigration("Seed sample data") { db in
+            try db.seedSampleData()
+        }
+    }
+    #endif
+
     try migrator.migrate(database)
 
     return database
 }
 
 
+#if DEBUG
+extension Database {
+    func seedSampleData() throws {
+        logger.log("Seeding sample data...")
+        try seed {
+            Organization.wickedWoods
+        }
+    }
+}
+#endif
