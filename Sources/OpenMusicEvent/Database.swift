@@ -74,24 +74,24 @@ func appDatabase() throws -> any DatabaseWriter {
         try #sql("""
         CREATE TABLE artists(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "eventID" INTEGER,
+            "musicEventID" INTEGER,
             "name" TEXT NOT NULL,
             "bio" TEXT,
             "imageURL" TEXT,
             "links" TEXT,
         
-            FOREIGN KEY("eventID") REFERENCES "events"("id") ON DELETE CASCADE
+            FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
         try #sql("""
         CREATE TABLE stages(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "eventID" INTEGER,
+            "musicEventID" INTEGER,
             "name" TEXT NOT NULL,
             "iconImageURL" TEXT,
             
-            FOREIGN KEY("eventID") REFERENCES "events"("id") ON DELETE CASCADE
+            FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
@@ -99,7 +99,7 @@ func appDatabase() throws -> any DatabaseWriter {
         try #sql("""
         CREATE TABLE schedules(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "eventID" INTEGER,
+            "musicEventID" INTEGER,
             "startTime" TEXT,
             "endTime" TEXT,
             "customTitle" TEXT

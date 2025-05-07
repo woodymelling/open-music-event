@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "%lld" : {
+
+    },
     "%lld Items" : {
       "comment" : "Header title for a list that contains the number of items",
       "extractionState" : "stale",

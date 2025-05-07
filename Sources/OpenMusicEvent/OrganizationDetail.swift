@@ -24,7 +24,10 @@ struct OrganizationDetailView: View {
             self.id = id
 
             _organization = FetchOne(wrappedValue: nil, Organization?.find(id))
-            _events = FetchAll(MusicEvent.where { $0.organizationURL == id })
+            _events = FetchAll(
+                MusicEvent
+                    .where { $0.organizationURL == id }
+            )
         }
 
         public let id: Organization.ID
@@ -38,7 +41,7 @@ struct OrganizationDetailView: View {
         var events: [MusicEvent] = []
 
 
-        public var currentEvent: EventFeatures?
+        public var currentEvent: MusicEventFeatures?
 
         public func onAppear() async {
 //            logger.log("Fetching: \(String(describing: self.url))")
@@ -51,7 +54,11 @@ struct OrganizationDetailView: View {
         }
 
         public func didTapEvent(id: MusicEvent.ID) {
-            self.currentEvent = EventFeatures()
+            withDependencies(from: self) {
+                $0.musicEventID = id
+            } operation: {
+                self.currentEvent = MusicEventFeatures()
+            }
         }
 
         @ObservationIgnored
@@ -60,7 +67,8 @@ struct OrganizationDetailView: View {
 
         public func onPullToRefresh() async  {
             do {
-                _ = try await dataFetchingClient.fetchOrganization(id: self.id)
+                try await downloadAndStoreOrganization(id: self.id)
+
             } catch {
                 logger.error("\(error.localizedDescription)")
             }
@@ -93,7 +101,7 @@ struct OrganizationDetailView: View {
             }
         }
         .fullScreenCover(item: $store.currentEvent) {
-            EventFeaturesView(store: $0)
+            MusicEventFeaturesView(store: $0)
         }
         .refreshable { await store.onPullToRefresh() }
     }
@@ -204,3 +212,142 @@ extension ImagePipeline {
     }()
 }
 
+extension MusicEvent.ID: TestDependencyKey {
+    public static let testValue: OmeID<MusicEvent> = .init(rawValue: 0)
+}
+
+extension DependencyValues {
+    var musicEventID: MusicEvent.ID {
+        get { self[MusicEvent.ID.self] }
+        set { self[MusicEvent.ID.self] = newValue }
+    }
+}
+
+private func downloadAndStoreOrganization(id: Organization.ID) async throws {
+    @Dependency(DataFetchingClient.self) var dataFetchingClient
+    @Dependency(\.defaultDatabase) var database
+
+    let organization = try await dataFetchingClient.fetchOrganization(id: id)
+
+    let organizationDraft = Organization.Draft(
+        url: id,
+        name: organization.info.name,
+        imageURL: organization.info.imageURL
+    )
+
+    let organizationURL = id
+
+    try await database.write { db in
+        try Organization
+            .where { $0.url == organizationURL }
+            .delete()
+            .execute(db)
+
+        try Organization.upsert(organizationDraft)
+            .execute(db)
+
+        for event in organization.events {
+            let eventDraft = MusicEvent.Draft(
+                organizationURL: organizationURL,
+                name: event.info.name,
+                timeZone: event.info.timeZone,
+                imageURL: event.info.imageURL?.rawValue,
+                siteMapImageURL: event.info.siteMapImageURL?.rawValue,
+                location: event.info.location?.draft,
+                contactNumbers: event.info.contactNumbers.map { $0.draft }
+            )
+
+            let eventID = try MusicEvent.insert(eventDraft)
+                .returning(\.id)
+                .fetchOne(db)!
+
+            for artist in event.artists {
+                let artistDraft = Artist.Draft(
+                    musicEventID: eventID,
+                    name: artist.name,
+                    bio: artist.bio,
+                    imageURL: artist.imageURL,
+                    links: artist.links.map { $0.draft }
+                )
+
+                try Artist.insert(artistDraft)
+                    .execute(db)
+//
+//                for performance in artist.performances {
+//                    let stageDraft = Stage.Draft(
+//                        eventID: eventID,
+//                        name: performance.stage.name,
+//                        iconImageURL: performance.stage.iconImageURL
+//                    )
+//
+//                    let stageID = try Stage.upsert(stageDraft)
+//                        .returning(\.id)
+//                        .fetchOne(db)!
+//
+//                    let scheduleDraft = Schedule.Draft(
+//                        eventID: eventID,
+//                        startTime: performance.schedule?.startTime,
+//                        endTime: performance.schedule?.endTime,
+//                        customTitle: performance.schedule?.customTitle
+//                    )
+//
+//                    let scheduleID = try Schedule.insert(scheduleDraft)
+//                        .returning(\.id)
+//                        .fetchOne(db)
+//
+//                    let performanceDraft = Performance.Draft(
+//                        stageID: stageID,
+//                        scheduleID: scheduleID,
+//                        startTime: performance.startTime,
+//                        endTime: performance.endTime,
+//                        customTitle: performance.customTitle,
+//                        description: performance.description
+//                    )
+//
+//                    let performanceID = try Performance.insert(performanceDraft)
+//                        .returning(\.id)
+//                        .fetchOne(db)!
+//
+//                    let artistLinkDraft = Performance.Artists(
+//                        performanceID: performanceID,
+//                        artistID: artistID,
+//                        anonymousArtistName: nil
+//                    )
+//
+//                    try Performance.Artists.insert(artistLinkDraft)
+//                        .execute(db)
+//                }
+            }
+        }
+    }
+}
+
+import OpenMusicEventParser
+
+extension OpenMusicEventParser.Event.Location {
+    var draft: MusicEvent.Location {
+        let location = if let latitude, let longitude {
+            MusicEvent.Location.Coordinates(latitude: latitude, longitude: longitude)
+        } else {
+            MusicEvent.Location.Coordinates?.none
+        }
+
+        return .init(
+            address: self.address,
+            directions: self.directions,
+            coordinates: location
+        )
+    }
+}
+
+extension OpenMusicEventParser.Event.ContactNumber {
+    var draft: MusicEvent.ContactNumber {
+        .init(phoneNumber: self.phoneNumber, title: self.title, description: self.description)
+    }
+}
+
+extension OpenMusicEventParser.Event.Artist.Link {
+    var draft: Artist.Link {
+        .init(url: self.url, label: self.label)
+    }
+}

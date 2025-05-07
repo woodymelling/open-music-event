@@ -33,7 +33,7 @@ public extension Artist {
     static let previewValues: [Artist] = [
         Artist(
             id: 0,
-            eventID: nil,
+            musicEventID: nil,
             name: "Overgrowth",
             bio: "",
             imageURL: nil,

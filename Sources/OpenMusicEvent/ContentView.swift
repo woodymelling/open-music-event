@@ -5,7 +5,7 @@ enum ContentTab: String, Hashable {
 }
 
 @Observable
-public class EventFeatures: Identifiable {
+public class MusicEventFeatures: Identifiable {
     public enum Feature: String, Hashable, Codable {
         case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications
     }
@@ -88,12 +88,12 @@ public class EventFeatures: Identifiable {
 
 
 
-public struct EventFeaturesView: View {
-    public init(store: EventFeatures) {
+public struct MusicEventFeaturesView: View {
+    public init(store: MusicEventFeatures) {
         self.store = store
     }
 
-    @Bindable var store: EventFeatures
+    @Bindable var store: MusicEventFeatures
 
     public var body: some View {
         TabView(selection: $store.selectedFeature) {
@@ -101,20 +101,20 @@ public struct EventFeaturesView: View {
 //                ScheduleView(store: store.schedule)
 //            }
 //            .tabItem { Label("Schedule", systemImage: "calendar") }
-//            .tag(EventFeatures.Feature.schedule)
+//            .tag(MusicEventFeatures.Feature.schedule)
 
             NavigationStack {
                 ArtistsListView(store: store.artists)
             }
             .tabItem { Label("Artists", systemImage: "person.3") }
-            .tag(EventFeatures.Feature.artists)
+            .tag(MusicEventFeatures.Feature.artists)
 
 //            if let contactInfo = store.contactInfo {
 //                NavigationStack {
 //                    ContactInfoView(store: contactInfo)
 //                }
 //                .tabItem { Label("Contact Info", systemImage: "phone") }
-//                .tag(EventFeatures.Feature.contactInfo)
+//                .tag(MusicEventFeatures.Feature.contactInfo)
 //            }
 
 //            if let location = store.location {
@@ -126,7 +126,7 @@ public struct EventFeaturesView: View {
 //                #elseif os(Android)
 //                .tabItem { Label("Location", systemImage: "mappin.circle")}
 //                #endif
-//                .tag(EventFeatures.Feature.location)
+//                .tag(MusicEventFeatures.Feature.location)
 //            }
 
 //            if let workshops = store.workshops {
@@ -134,7 +134,7 @@ public struct EventFeaturesView: View {
 //                    Text("TODO: Workshops")
 //                }
 //                .tabItem { Label("Workshops", systemImage: "figure.mind.and.body") }
-//                .tag(EventFeatures.Feature.workshops)
+//                .tag(MusicEventFeatures.Feature.workshops)
 //            }
 //
 //            if let siteMap = store.siteMap {
@@ -142,7 +142,7 @@ public struct EventFeaturesView: View {
 //                    Text("TODO: Site Map")
 //                }
 //                .tabItem { Label("Site Map", systemImage: "map") }
-//                .tag(EventFeatures.Feature.siteMap)
+//                .tag(MusicEventFeatures.Feature.siteMap)
 //            }
 
 //
@@ -150,7 +150,7 @@ public struct EventFeaturesView: View {
 //                Text("TODO: Notifications")
 //            }
 //            .tabItem { Label("Notifications", systemImage: Icons.notifications) }
-//            .tag(EventFeatures.Feature.notifications)
+//            .tag(MusicEventFeatures.Feature.notifications)
         }
     }
 }

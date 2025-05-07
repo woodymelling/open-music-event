@@ -16,6 +16,9 @@
 import SwiftUI
 //import ImageCaching
 
+
+
+
 struct ArtistDetailView: View {
     init(artist: Artist.ID) {
         fatalError()

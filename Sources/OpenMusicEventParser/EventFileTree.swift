@@ -24,9 +24,9 @@ extension Organization {
         FileTree {
             Organization.Info.file
 
-            Directory.Many {
-                EventFileTree()
-            }
+                Directory.Many {
+                    EventFileTree()
+                }
         }
         .convert(fileConversion)
     }

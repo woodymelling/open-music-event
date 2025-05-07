@@ -8,6 +8,7 @@
 
 import Foundation
 import StructuredQueries
+import Dependencies
 
 public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
     public let rawValue: Int
@@ -86,9 +87,15 @@ extension MusicEvent.Draft: Equatable {}
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
+
+    public static let all = Self.where {
+        @Dependency(\.musicEventID) var musicEventID
+        return $0.musicEventID == musicEventID
+    }
+
     public typealias ID = OmeID<Artist>
     public let id: ID
-    public let eventID: MusicEvent.ID?
+    public let musicEventID: MusicEvent.ID?
 
     public let name: String
     public let bio: String?
@@ -108,14 +115,12 @@ public struct Artist: Identifiable, Equatable, Sendable {
     }
 }
 
-extension Artist.Draft: Codable, Equatable {}
-
 // MARK: Stage
 @Table
 public struct Stage: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Stage>
     public let id: ID
-    public let eventID: MusicEvent.ID?
+    public let musicEventID: MusicEvent.ID?
     public let name: String
     public let iconImageURL: URL?
 }
@@ -125,7 +130,7 @@ public struct Stage: Identifiable, Equatable, Sendable {
 public struct Schedule: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Schedule>
     public let id: ID
-    public let eventID: MusicEvent.ID
+    public let musicEventID: MusicEvent.ID
 
     @Column(as: Date.ISO8601Representation?.self)
     public let startTime: Date?
