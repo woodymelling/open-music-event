@@ -38,28 +38,14 @@ struct OrganizationListView: View {
         }
     }
 
-    @Bindable var store: ViewModel
+    @State var store = ViewModel()
 
     public var body: some View {
         List(store.organizations, id: \.url) { org in
             Button {
                 store.didTapOrganization(id: org.id)
             } label: {
-                HStack {
-                    CachedAsyncImage(
-                        url: org.imageURL,
-                        content: { $0.resizable() },
-                        placeholder: {
-                            Image(systemName: "photo.artframe")
-                                .resizable()
-                        }
-                    )
-                    .frame(width: 60, height: 60)
-                    .aspectRatio(contentMode: .fit)
-
-                    Text(org.name)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Row(org: org)
             }
 //            .buttonStyle(.navigationLink)
         }
@@ -88,5 +74,27 @@ struct OrganizationListView: View {
 //            ),
 //            destination: OrganizationDetailView.init(store:)
 //        )
+    }
+
+    struct Row: View {
+        var org: Organization
+
+        var body: some View {
+            HStack {
+                CachedAsyncImage(
+                    url: org.imageURL,
+                    content: { $0.resizable() },
+                    placeholder: {
+                        Image(systemName: "photo.artframe")
+                            .resizable()
+                    }
+                )
+                .frame(width: 60, height: 60)
+                .aspectRatio(contentMode: .fit)
+
+                Text(org.name)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }

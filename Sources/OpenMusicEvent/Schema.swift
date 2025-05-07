@@ -54,6 +54,12 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     
     public var timeZone: TimeZone
     
+    @Column(as: Date?.ISO8601Representation.self)
+    public var startTime: Date?
+    
+    @Column(as: Date?.ISO8601Representation.self)
+    public var endTime: Date?
+    
     public let imageURL: URL?
     public let siteMapImageURL: URL?
     
@@ -87,7 +93,6 @@ extension MusicEvent.Draft: Equatable {}
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
-
     public static let all = Self.where {
         @Dependency(\.musicEventID) var musicEventID
         return $0.musicEventID == musicEventID

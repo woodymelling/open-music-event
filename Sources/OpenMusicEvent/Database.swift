@@ -61,6 +61,8 @@ func appDatabase() throws -> any DatabaseWriter {
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "organizationURL" TEXT,
             "name" TEXT NOT NULL,
+            "startTime" TEXT,
+            "endTime" TEXT,
             "timeZone" TEXT,
             "imageURL" TEXT,
             "siteMapImageURL" TEXT,
@@ -155,7 +157,12 @@ extension Database {
     func seedSampleData() throws {
         logger.log("Seeding sample data...")
         try seed {
-            Organization.wickedWoods
+            Organization.ome
+            MusicEvent.testival
+            
+            for artist in Artist.previewValues {
+                artist
+            }
         }
     }
 }

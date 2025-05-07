@@ -14,23 +14,13 @@ public class ArtistsList {
     public init() {}
 
     // MARK: Data
-    public var event: MusicEvent = .previewValue
-
-    @FetchAll(Artist.all)
     @ObservationIgnored
+    @FetchAll(Current.artists)
     public var artists: [Artist]
 
     // MARK: State
     public var searchText: String = ""
 
-    @Observable
-    public class Detail {
-        init(artistID: Artist.ID) {
-            fatalError()
-        }
-
-        var artist: Artist
-    }
 }
 
 struct ArtistsListView: View {
@@ -47,11 +37,8 @@ struct ArtistsListView: View {
         .textInputAutocapitalization(.never)
         .navigationTitle("Artists")
         .listStyle(.plain)
-        .toolbar {
-            Text("\(store.artists.count)")
-        }
         .navigationDestination(for: Artist.ID.self) {
-            ArtistDetailView(artist: $0)
+            ArtistDetailView(store: .init(artistID: $0))
         }
     }
 
@@ -124,5 +111,15 @@ struct ArtistsListView: View {
 extension View {
     func frame(square: CGFloat, alignment: Alignment = .center) -> some View {
         self.frame(width: square, height: square, alignment: alignment)
+    }
+}
+
+#Preview {
+    try! prepareDependencies {
+        $0.defaultDatabase = try appDatabase()
+    }
+
+    return NavigationStack {
+        ArtistsListView(store: .init())
     }
 }

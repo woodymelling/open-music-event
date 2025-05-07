@@ -139,7 +139,10 @@ public struct EventFileTree: FileTreeViewable {
             return Event(
                 name: input.0.name ?? "",
                 // TODO?
+
                 timeZone: try TimeZoneConversion().apply(input.0.timeZone) ?? TimeZone.current,
+                startTime: input.0.startDate?.date,
+                endTime: input.0.endDate?.date,
                 imageURL: input.0.imageURL.map { Event.ImageURL($0) },
                 siteMapImageURL: input.0.siteMapImageURL.map { Event.SiteMapImageURL($0) },
                 location: Event.Location(

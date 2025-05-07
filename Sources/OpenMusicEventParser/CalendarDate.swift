@@ -46,23 +46,44 @@ public struct CalendarDate: Equatable, Hashable, Sendable {
 
 extension CalendarDate: LosslessStringConvertible {
     public init?(_ description: String) {
-        if let date = Self.formatter.date(from: description) {
-            self.init(date)
-        } else {
-            return nil
+        for formatter in Self.allFormatters {
+            if let date = formatter.date(from: description) {
+                self = date.calendarDate
+                return
+            }
         }
+        return nil
     }
 
     public var description: String {
-        Self.formatter.string(from: self.date)
+        Self.defaultFormatter.string(from: self.date)
     }
 
-    private static let formatter: DateFormatter = {
+    private static let defaultFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.dateFormat = "yyyy-MM-dd" // Always stable and sortable
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
+
+    private static let allFormatters: [DateFormatter] = [
+        "M/d/yy",         // 8/30/24
+        "MM/dd/yy",       // 08/30/24
+        "M/d/yyyy",       // 8/30/2024
+        "MM/dd/yyyy",     // 08/30/2024
+        "yyyy/M/d",       // 2024/8/30
+        "yyyy.MM.dd",     // 2024.08.30
+        "MMM d, yyyy",    // Aug 30, 2024
+        "MMMM d, yyyy"    // August 30, 2024
+    ].map { (format: String) in
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+//        formatter.calendar = .gregorian
+        return formatter
+    }
 }
+
 
 extension CalendarDate: Codable {
     public init(from decoder: Decoder) throws {

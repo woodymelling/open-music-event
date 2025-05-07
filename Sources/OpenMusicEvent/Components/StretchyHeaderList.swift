@@ -54,7 +54,7 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     var showingStretchListDebugInformation = false
 
     var headerContentHeight: CGFloat = UIScreen.main.bounds.width
-
+    var headerContentWidth: CGFloat = UIScreen.main.bounds.width
 
     var body: some View {
         List {
@@ -64,9 +64,9 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
                 .scaleEffect(scale, anchor: .bottom) // For stretching
                 .listRowInsets(EdgeInsets()) // Remove side + bottom padding from row
                 .ignoresSafeArea()
-                .frame(height: headerContentHeight, alignment: .center) // Set content height
+                .frame(width: headerContentWidth, height: headerContentHeight, alignment: .center) // Set content height
                 .listRowSeparator(.hidden, edges: .top) // Remove the top separator
-                // The image can can be bigger then the bounds. clip it, but give it plenty of vertical size so that it can never go off the top of the screen
+//                // The image can can be bigger then the bounds. clip it, but give it plenty of vertical size so that it can never go off the top of the screen
                 .clipShape(ScaledShape(shape: Rectangle(), scale: .init(width: 1, height: 2), anchor: .bottom))
                 .overlay(alignment: .bottomLeading) {
                     StretchyHeaderListTitleView(titleContent: self.titleContent)
@@ -143,17 +143,11 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     #else
     #error("Unsuppported Platform")
     #endif
-
-
-
-
 }
 
 #if SKIP
 import SkipUI
 #endif
-
-
 
 struct StretchyHeaderListTitleView: View {
     var titleContent: Text
@@ -161,7 +155,7 @@ struct StretchyHeaderListTitleView: View {
     #if !SKIP
     let mainColor = Color(.systemBackground)
     #else
-    let mainColor: Color = Color.systemBackground
+    let mainColor = Color.systemBackground
     #endif
     var body: some View {
         self.titleContent
@@ -181,4 +175,25 @@ struct StretchyHeaderListTitleView: View {
                 )
             }
     }
+}
+
+
+#Preview {
+    StretchyHeaderList(title: Text("Blobs Your Uncle")) {
+        AnimatedMeshView()
+            .frame(width: 500)
+    } listContent: {
+        Text("Hello, World!")
+    }
+    .listStyle(.plain)
+}
+
+#Preview {
+    StretchyHeaderList(title: Text("Blobs Your Uncle")) {
+        AnimatedMeshView()
+            .frame(height: 1000)
+    } listContent: {
+        Text("Hello, World!")
+    }
+    .listStyle(.plain)
 }

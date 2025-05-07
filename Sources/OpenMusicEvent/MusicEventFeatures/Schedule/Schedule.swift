@@ -1,0 +1,174 @@
+//
+//  Schedule.swift
+//  open-music-event
+//
+//  Created by Woodrow Melling on 5/9/25.
+//
+
+
+//
+//  Schedule.swift
+//
+//
+//  Created by Woody on 2/17/2022.
+//
+
+import CoreGraphics
+import SwiftUI
+import Dependencies
+import SharingGRDB
+
+@MainActor
+@Observable
+public class ScheduleFeature {
+    public init() {
+
+    }
+    
+
+//    @Presents var destination: Destination.State?
+
+//    @Shared(.favoriteArtists) var favoriteArtists = Set()
+//    @Shared(.highlightedPerformance) var highlightedPerformance
+
+//    public var selection = true
+//
+    @ObservationIgnored
+    @Shared(.inMemory("selectedStage"))
+    public var selectedStage: Stage.ID?
+
+
+    @ObservationIgnored
+    @FetchAll(Current.stages)
+    public var stages: [Stage]
+
+//    public var selectedDay: Event.DailySchedule.ID
+//    public var showingComingSoonScreen: Bool = false
+//
+
+    public var filteringFavorites: Bool = false
+    var isFiltering: Bool {
+        // For future filters
+        return filteringFavorites
+    }
+//
+//    var showTimeIndicator: Bool {
+//        @Dependency(\.date) var date
+//
+//        if let selectedDay = event.schedule[day: selectedDay]?.metadata,
+//           selectedDay.date == CalendarDate(date()) {
+//            return true
+//        } else {
+//            return false
+//        }
+//    }
+}
+
+public struct ScheduleView: View {
+    @Bindable var store: ScheduleFeature
+
+    public init(store: ScheduleFeature) {
+        self.store = store
+    }
+
+    @SharedReader(.interfaceOrientation)
+    var interfaceOrientation
+
+    public var body: some View {
+        Group {
+            if interfaceOrientation.isPortrait {
+                SingleStageAtOnceView(store: store)
+            } else {
+                AllStagesAtOnceView(store: store)
+            }
+        }
+//        .scrollPosition(id: $scrolledEvent)
+//        .modifier(EventDaySelectorViewModifier(selectedDay: $store.selectedDay))
+        .toolbar {
+            ToolbarItem {
+                FilterMenu(store: store)
+            }
+        }
+//        .environment(\.dayStartsAtNoon, true)
+    }
+
+
+    struct FilterMenu: View {
+        @Bindable var store: ScheduleFeature
+
+        var body: some View {
+            Menu {
+                Toggle(isOn: $store.filteringFavorites.animation()) {
+                    Label(
+                        "Favorites",
+                        systemImage:  store.isFiltering ? "heart.fill" : "heart"
+                    )
+                }
+            } label: {
+                Label(
+                    "Filter",
+                    systemImage: store.isFiltering ?
+                    "line.3.horizontal.decrease.circle.fill" :
+                        "line.3.horizontal.decrease.circle"
+                )
+            }
+        }
+    }
+
+    struct ScheduleSelectorModifier: ViewModifier {
+        @Binding var selectedDay: Schedule.ID
+//        @Shared(.event) var event
+
+
+//
+//
+        func label(for day: Schedule) -> String {
+            if let customTitle = day.customTitle {
+                return customTitle
+            } else if let startTime = day.startTime {
+                return startTime.formatted(.dateTime.weekday(.wide))
+            } else {
+                return String(day.id.rawValue)
+            }
+        }
+//
+//
+        @FetchAll(Current.schedules)
+        var schedules
+
+
+        func body(content: Content) -> some View {
+            content
+                .toolbarTitleMenu {
+                    ForEach(schedules) { schedule in
+                        Button(label(for: schedule)) {
+                            selectedDay = schedule.id
+                        }
+                    }
+                }
+//                .navigationTitle(selectedDayMetadata.map { label(for: $0) } ?? "")
+                .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+
+
+
+//
+//func determineDayScheduleAtLaunch(from schedule: Event.Schedule) -> Event.DailySchedule.ID? {
+//    @Dependency(\.date) var date
+//
+//    if let todaysSchedule = schedule.first(where: { $0.metadata.date == CalendarDate(date()) }) {
+//        return todaysSchedule.id
+//    } else {
+//        // TODO: maybe need to sort this
+//        return schedule.first?.id
+//    }
+//}
+//
+//
+//func determineLaunchStage(for event: Event, on day: Event.DailySchedule.ID) -> Stage.ID? {
+//
+//    return Stages.first?.id
+//}

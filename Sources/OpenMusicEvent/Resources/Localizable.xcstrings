@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "%@" : {
+
+    },
     "%lld" : {
 
     },
@@ -133,6 +136,9 @@
         }
       }
     },
+    "Contact Info" : {
+
+    },
     "Dark" : {
       "comment" : "Menu item indicating that the appearance should be in dark mode",
       "extractionState" : "stale",
@@ -193,6 +199,9 @@
         }
       }
     },
+    "Directions" : {
+
+    },
     "Events" : {
 
     },
@@ -225,6 +234,12 @@
           }
         }
       }
+    },
+    "Favorites" : {
+
+    },
+    "Filter" : {
+
     },
     "Hello [%@](https://skip.tools)!" : {
       "comment" : "Welcome tab contents",
@@ -320,6 +335,9 @@
 
     },
     "Loading Organization..." : {
+
+    },
+    "Location" : {
 
     },
     "Name" : {
@@ -449,6 +467,12 @@
       }
     },
     "scale: %lf" : {
+
+    },
+    "Schedule" : {
+
+    },
+    "Schedule Coming Soon!" : {
 
     },
     "ScrollVisibility" : {

@@ -88,6 +88,9 @@ extension Event.Info {
         var imageURL: URL?
         var siteMapImageURL: URL?
 
+        var startDate: CalendarDate?
+        var endDate: CalendarDate?
+
         var colorScheme: ColorScheme?
 
         var contactNumbers: [ContactInfoDTO]?

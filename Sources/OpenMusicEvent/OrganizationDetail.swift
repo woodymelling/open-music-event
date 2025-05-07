@@ -27,6 +27,7 @@ struct OrganizationDetailView: View {
             _events = FetchAll(
                 MusicEvent
                     .where { $0.organizationURL == id }
+                    .order { $0.startTime.desc(nulls: .last)  }
             )
         }
 
@@ -38,10 +39,11 @@ struct OrganizationDetailView: View {
 
         @ObservationIgnored
         @FetchAll
-        var events: [MusicEvent] = []
+        var events: [MusicEvent]
 
-
-        public var currentEvent: MusicEventFeatures?
+        @ObservationIgnored
+        @Shared(Current.musicEventID)
+        public var currentEvent
 
         public func onAppear() async {
 //            logger.log("Fetching: \(String(describing: self.url))")
@@ -54,11 +56,7 @@ struct OrganizationDetailView: View {
         }
 
         public func didTapEvent(id: MusicEvent.ID) {
-            withDependencies(from: self) {
-                $0.musicEventID = id
-            } operation: {
-                self.currentEvent = MusicEventFeatures()
-            }
+            self.$currentEvent.withLock { $0 = id}
         }
 
         @ObservationIgnored
@@ -68,9 +66,8 @@ struct OrganizationDetailView: View {
         public func onPullToRefresh() async  {
             do {
                 try await downloadAndStoreOrganization(id: self.id)
-
             } catch {
-                logger.error("\(error.localizedDescription)")
+                logger.critical("\(error)")
             }
         }
     }
@@ -88,11 +85,14 @@ struct OrganizationDetailView: View {
                     listContent: {
                         Section("Events") {
                             EventsListView(events: store.events) { eventID in
-                                store.didTapEvent(id: eventID)
+                                Task {
+                                    try await store.didTapEvent(id: eventID)
+                                }
                             }
                         }
                     }
                 )
+                .refreshable { await store.onPullToRefresh() }
                 .listStyle(.plain)
             } else if let error = store.$organization.loadError {
                 Text("Error: \(error)").foregroundStyle(.red)
@@ -100,10 +100,7 @@ struct OrganizationDetailView: View {
                 ProgressView("Loading Organization...")
             }
         }
-        .fullScreenCover(item: $store.currentEvent) {
-            MusicEventFeaturesView(store: $0)
-        }
-        .refreshable { await store.onPullToRefresh() }
+
     }
 
     struct EventsListView: View {
@@ -115,7 +112,7 @@ struct OrganizationDetailView: View {
         var body: some View {
             ForEach(events) { event in
                 Button(action: { onTapEvent(event.id) }) {
-                    EventRow(event: event)
+                    EventRowView(event: event)
                 }
                 .buttonStyle(.plain)
             }
@@ -149,26 +146,64 @@ struct OrganizationDetailView: View {
         }
     }
 
-    struct EventRow: View {
+    struct EventRowView: View {
         var event: MusicEvent
 
-        var body: some View {
-            HStack(spacing: 10) {
-                EventImageView(eventInfo: event)
+        static let intervalFormatter = {
+            let f = DateIntervalFormatter()
+            f.dateStyle = .short
+            f.timeStyle = .none
+            return f
+        }()
 
-                Text(event.name)
-                    .lineLimit(1)
+        var eventDateString: String? {
+            if let startTime = event.startTime, let endTime = event.endTime {
+                guard startTime <= endTime
+                else {
+                    reportIssue("Start time (\(String(describing: startTime))) is after end time (\(String(describing: endTime)))")
+                    return nil
+                }
+
+                return Self.intervalFormatter.string(from: startTime, to: endTime)
+            } else if let startTime = event.startTime {
+                return startTime.formatted()
+            } else {
+                return nil
+            }
+        }
+
+        var body: some View {
+            ZStack {
+                NavigationLink(destination: { EmptyView() }, label: { EmptyView() })
+                HStack(spacing: 10) {
+
+                    EventImageView(event: event)
+                        .frame(width: 60, height: 60)
+//                    .foregroundColor(.label)
+    //                .invertForLightMode()
+
+                    VStack(alignment: .leading) {
+                        Text(event.name)
+                        if let eventDateString {
+                            Text(eventDateString)
+                                .lineLimit(1)
+                                .font(.caption2)
+                        }
+                    }
+
+                    Spacer()
+                }
             }
         }
 
         struct EventImageView: View {
-            var eventInfo: MusicEvent
+            var event: MusicEvent
 
             var body: some View {
                 CachedAsyncImage(
                     requests: [
                         ImageRequest(
-                            url: eventInfo.imageURL,
+                            url: event.imageURL,
                             processors: [
                                 .resize(size: CGSize(width: 60, height: 60))
                             ]
@@ -196,6 +231,33 @@ extension SharedKey where Self == AppStorageKey<MusicEvent.ID?> {
     }
 }
 
+enum Current {
+    static var musicEventID: AppStorageKey<MusicEvent.ID?> {
+        .appStorage("OME-eventID")
+    }
+
+    static var artists: Where<Artist> {
+        Artist.where {
+            @Dependency(\.musicEventID) var eventID
+            eventID == $0.musicEventID
+        }
+    }
+
+    static var stages: Where<Stage> {
+        Stage.where {
+            @Dependency(\.musicEventID) var eventID
+            eventID == $0.musicEventID
+        }
+    }
+
+    static var schedules: Where<Schedule> {
+        Schedule.where {
+            @Dependency(\.musicEventID) var eventID
+            eventID == $0.musicEventID
+        }
+    }
+}
+
 
 extension ImagePipeline {
     static let images: ImagePipeline = {
@@ -212,142 +274,6 @@ extension ImagePipeline {
     }()
 }
 
-extension MusicEvent.ID: TestDependencyKey {
-    public static let testValue: OmeID<MusicEvent> = .init(rawValue: 0)
-}
+let intervalFormatter = DateIntervalFormatter()
 
-extension DependencyValues {
-    var musicEventID: MusicEvent.ID {
-        get { self[MusicEvent.ID.self] }
-        set { self[MusicEvent.ID.self] = newValue }
-    }
-}
 
-private func downloadAndStoreOrganization(id: Organization.ID) async throws {
-    @Dependency(DataFetchingClient.self) var dataFetchingClient
-    @Dependency(\.defaultDatabase) var database
-
-    let organization = try await dataFetchingClient.fetchOrganization(id: id)
-
-    let organizationDraft = Organization.Draft(
-        url: id,
-        name: organization.info.name,
-        imageURL: organization.info.imageURL
-    )
-
-    let organizationURL = id
-
-    try await database.write { db in
-        try Organization
-            .where { $0.url == organizationURL }
-            .delete()
-            .execute(db)
-
-        try Organization.upsert(organizationDraft)
-            .execute(db)
-
-        for event in organization.events {
-            let eventDraft = MusicEvent.Draft(
-                organizationURL: organizationURL,
-                name: event.info.name,
-                timeZone: event.info.timeZone,
-                imageURL: event.info.imageURL?.rawValue,
-                siteMapImageURL: event.info.siteMapImageURL?.rawValue,
-                location: event.info.location?.draft,
-                contactNumbers: event.info.contactNumbers.map { $0.draft }
-            )
-
-            let eventID = try MusicEvent.insert(eventDraft)
-                .returning(\.id)
-                .fetchOne(db)!
-
-            for artist in event.artists {
-                let artistDraft = Artist.Draft(
-                    musicEventID: eventID,
-                    name: artist.name,
-                    bio: artist.bio,
-                    imageURL: artist.imageURL,
-                    links: artist.links.map { $0.draft }
-                )
-
-                try Artist.insert(artistDraft)
-                    .execute(db)
-//
-//                for performance in artist.performances {
-//                    let stageDraft = Stage.Draft(
-//                        eventID: eventID,
-//                        name: performance.stage.name,
-//                        iconImageURL: performance.stage.iconImageURL
-//                    )
-//
-//                    let stageID = try Stage.upsert(stageDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)!
-//
-//                    let scheduleDraft = Schedule.Draft(
-//                        eventID: eventID,
-//                        startTime: performance.schedule?.startTime,
-//                        endTime: performance.schedule?.endTime,
-//                        customTitle: performance.schedule?.customTitle
-//                    )
-//
-//                    let scheduleID = try Schedule.insert(scheduleDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)
-//
-//                    let performanceDraft = Performance.Draft(
-//                        stageID: stageID,
-//                        scheduleID: scheduleID,
-//                        startTime: performance.startTime,
-//                        endTime: performance.endTime,
-//                        customTitle: performance.customTitle,
-//                        description: performance.description
-//                    )
-//
-//                    let performanceID = try Performance.insert(performanceDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)!
-//
-//                    let artistLinkDraft = Performance.Artists(
-//                        performanceID: performanceID,
-//                        artistID: artistID,
-//                        anonymousArtistName: nil
-//                    )
-//
-//                    try Performance.Artists.insert(artistLinkDraft)
-//                        .execute(db)
-//                }
-            }
-        }
-    }
-}
-
-import OpenMusicEventParser
-
-extension OpenMusicEventParser.Event.Location {
-    var draft: MusicEvent.Location {
-        let location = if let latitude, let longitude {
-            MusicEvent.Location.Coordinates(latitude: latitude, longitude: longitude)
-        } else {
-            MusicEvent.Location.Coordinates?.none
-        }
-
-        return .init(
-            address: self.address,
-            directions: self.directions,
-            coordinates: location
-        )
-    }
-}
-
-extension OpenMusicEventParser.Event.ContactNumber {
-    var draft: MusicEvent.ContactNumber {
-        .init(phoneNumber: self.phoneNumber, title: self.title, description: self.description)
-    }
-}
-
-extension OpenMusicEventParser.Event.Artist.Link {
-    var draft: Artist.Link {
-        .init(url: self.url, label: self.label)
-    }
-}

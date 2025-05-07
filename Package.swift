@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-validated", from: "0.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-prelude", branch: "main"),
         .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
-        .package(url: "https://github.com/woodymelling/swift-navigation", from: "2.3.0"),
+        .package(url: "https://github.com/pointfreeco/swift-navigation", from: "2.3.0"),
 
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
 
@@ -30,6 +30,8 @@ let package = Package(
         .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
         .package(url: "https://github.com/vapor-community/Zip.git", from: "2.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
+
+        .package(url: "https://github.com/woodymelling/swiftui-customizable-tab-view", branch: "main"),
     ],
     targets: [
         .target(
@@ -42,7 +44,8 @@ let package = Package(
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "SwiftUINavigation", package: "swift-navigation"),
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
-                "OpenMusicEventParser"
+                "OpenMusicEventParser",
+                .product(name: "CustomizableTabView", package: "swiftui-customizable-tab-view"),
             ],
             plugins: [
 //                .plugin(name: "skipstone", package: "skip")

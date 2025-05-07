@@ -14,8 +14,8 @@ public typealias OpenFestivalIDType = UUID
 
 public struct Organization: Equatable, Identifiable, Sendable {
     public var id: Tagged<Self, OpenFestivalIDType>
-    public struct Info: Decodable, Equatable, Sendable {
 
+    public struct Info: Decodable, Equatable, Sendable {
         public init(name: String, imageURL: URL? = nil) {
             self.name = name
             self.imageURL = imageURL
@@ -29,18 +29,19 @@ public struct Organization: Equatable, Identifiable, Sendable {
     public var events: [Event]
 }
 
-
 public struct Event: Equatable, Sendable {
-
     public var info: Info
     public var artists: [Artist]
     public var stages: Stages
     public var schedule: [StringlyTyped.Schedule]
     public var colorScheme: ColorScheme?
 
+    // MARK: TO BE REMOVED
     public struct Info: Equatable, Sendable {
         public var name: String //
         public var timeZone: TimeZone
+        public var startTime: Date?
+        public var endTime: Date?
 
         public var imageURL: Event.ImageURL? = nil
         public var siteMapImageURL: SiteMapImageURL? = nil
@@ -49,9 +50,20 @@ public struct Event: Equatable, Sendable {
 
         public var contactNumbers: [ContactNumber] = []
 
-        public init(name: String, timeZone: TimeZone, imageURL: Event.ImageURL? = nil, siteMapImageURL: SiteMapImageURL? = nil, location: Location? = nil, contactNumbers: [ContactNumber]) {
+        public init(
+            name: String,
+            timeZone: TimeZone,
+            startTime: Date?,
+            endTime: Date?,
+            imageURL: Event.ImageURL? = nil,
+            siteMapImageURL: SiteMapImageURL? = nil,
+            location: Location? = nil,
+            contactNumbers: [ContactNumber]
+        ) {
             self.name = name
             self.timeZone = timeZone
+            self.startTime = startTime
+            self.endTime = endTime
             self.imageURL = imageURL
             self.siteMapImageURL = siteMapImageURL
             self.location = location
@@ -68,6 +80,8 @@ public struct Event: Equatable, Sendable {
     public init(
         name: String,
         timeZone: TimeZone,
+        startTime: Date?,
+        endTime: Date?,
         imageURL: ImageURL? = nil,
         siteMapImageURL: SiteMapImageURL? = nil,
         location: Location? = nil,
@@ -80,6 +94,8 @@ public struct Event: Equatable, Sendable {
         self.info = Info(
             name: name,
             timeZone: timeZone,
+            startTime: startTime,
+            endTime: endTime,
             imageURL: imageURL,
             siteMapImageURL: siteMapImageURL,
             location: location,
@@ -235,6 +251,8 @@ public extension Event {
         .init(
             name: "",
             timeZone: .current,
+            startTime: .now,
+            endTime: .now,
             artists: [],
             stages: [],
             schedule: [],
@@ -246,6 +264,8 @@ public extension Event {
         .init(
             name: "Testival",
             timeZone: .current,
+            startTime: nil,
+            endTime: nil,
             siteMapImageURL: .init(string: "https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2FSite%20Map.webp?alt=media&token=48272d3c-ace0-4d5b-96a9-a5142f1c744a"),
             location: Location(address: "1234 Pine Ave, Somewhere in the forest"),
             artists: [
@@ -362,14 +382,14 @@ public extension Event {
 //                    date: CalendarDate(year: 2024, month: 6, day: 16),
 //                    customTitle: nil,
 //                    stageSchedules: [
-//                            Event.Performance(
+//                            Performance(
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(9))],
 //                                startTime: Date(year: 2024, month: 6, day: 12, hour: 16, minute: 30)!,
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 18, minute: 30)!,
 //                                stageID: Stage.ID(0)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(1),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(12))],
@@ -377,7 +397,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 20)!,
 //                                stageID: Stage.ID(0)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(12),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(2))],
@@ -386,7 +406,7 @@ public extension Event {
 //                                stageID: Stage.ID(0)
 //                            ),
 //                            // Additional performances for other artists
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(14),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(0))],
@@ -396,7 +416,7 @@ public extension Event {
 //                            )
 //                        ],
 //                        Stage.ID(1): [
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(4),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(0))],
@@ -404,7 +424,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 22)!,
 //                                stageID: Stage.ID(1)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(5),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(4))],
@@ -412,7 +432,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 23, minute: 30)!,
 //                                stageID: Stage.ID(1)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(6),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(5))],
@@ -423,7 +443,7 @@ public extension Event {
 //                        ],
 //                        Stage.ID(2): [
 //                            // Performances for artists on Village stage
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(7),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(6))],
@@ -431,7 +451,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 18, minute: 30)!,
 //                                stageID: Stage.ID(2)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(8),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(7))],
@@ -439,7 +459,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 20)!,
 //                                stageID: Stage.ID(2)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(9),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(8))],
@@ -447,7 +467,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 21, minute: 30)!,
 //                                stageID: Stage.ID(2)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(10),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(9))],
@@ -455,7 +475,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 12, hour: 23)!,
 //                                stageID: Stage.ID(2)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(11),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(12))],
@@ -463,7 +483,7 @@ public extension Event {
 //                                endTime: Date(year: 2024, month: 6, day: 13, hour: 0, minute: 30)!,
 //                                stageID: Stage.ID(2)
 //                            ),
-//                            Event.Performance(
+//                            Performance(
 //                                id: Performance.ID(12),
 //                                customTitle: nil,
 //                                artistIDs: [.known(Artist.ID(11)), .known(Artist.ID(10))],
