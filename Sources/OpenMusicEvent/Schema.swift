@@ -124,8 +124,32 @@ public struct Stage: Identifiable, Equatable, Sendable {
     public var name: String
     public var iconImageURL: URL?
 
-    public var color: Int? = 0x4a99ef_ff
+    public var color: Int = 0x4a99ef
 }
+
+
+#if canImport(SwiftUI)
+import SwiftUI
+extension Stage {
+    var uiColor: Color {
+        Color(hex: UInt(self.color))
+    }
+}
+
+extension Color {
+    init(hex: UInt, alpha: Double = 1) {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xff) / 255,
+            green: Double((hex >> 08) & 0xff) / 255,
+            blue: Double((hex >> 00) & 0xff) / 255,
+            opacity: alpha
+        )
+    }
+}
+#endif
+
+
 
 // MARK: Schedule
 @Table

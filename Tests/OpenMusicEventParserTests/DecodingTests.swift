@@ -42,7 +42,6 @@ struct YamlCodingTests {
             imageURL: URL(string: "http://example.com/event-image.jpg"),
             siteMapImageURL: URL(string: "http://example.com/site-map.jpg"),
             contactNumbers: nil
-//            colorScheme: .init(primaryColor: "#FF5733", workshopsColor: "#C70039")
         )
 
         let result = try Conversions.YamlConversion(Event.Info.YamlRepresentation.self).apply(yaml)
@@ -56,21 +55,21 @@ struct YamlCodingTests {
     func decodingSimpleStageInfo() throws {
         let yaml = Data("""
         - name: "Mystic Grove"
-          color: "#1DB954"
+          color: 0x1DB954
           imageURL: "http://example.com/mystic-grove.jpg"
 
         - name: "Bass Haven"
-          color: "#FF5733"
+          color: 0xFF5733
           imageURL: "http://example.com/bass-haven.jpg"
 
         - name: "Tranquil Meadow"
-          color: "#4287f5"
+          color: 0x4287f5
         """.utf8)
 
         let expectedResult = [
-            StageDTO(name: "Mystic Grove", color: "#1DB954", imageURL: URL(string: "http://example.com/mystic-grove.jpg")!),
-            StageDTO(name: "Bass Haven", color: "#FF5733", imageURL: URL(string: "http://example.com/bass-haven.jpg")!),
-            StageDTO(name: "Tranquil Meadow", color: "#4287f5", imageURL: nil)
+            StageDTO(name: "Mystic Grove", color: 0x1DB954, imageURL: URL(string: "http://example.com/mystic-grove.jpg")!),
+            StageDTO(name: "Bass Haven", color: 0xFF5733, imageURL: URL(string: "http://example.com/bass-haven.jpg")!),
+            StageDTO(name: "Tranquil Meadow", color: 0x4287f5, imageURL: nil)
         ]
 
         let result = try Conversions.YamlConversion([StageDTO].self).apply(yaml)

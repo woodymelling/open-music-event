@@ -27,7 +27,6 @@ extension ScheduleView {
         }
 
         @Environment(\.dayStartsAtNoon) var dayStartsAtNoon
-
 //        @FetchAll(Current.stages)
 //        var stages: []
 

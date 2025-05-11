@@ -18,13 +18,19 @@ public struct OpenMusicEventAppEntryPoint: View {
     public var body: some View {
         if let eventID {
             MusicEventViewer(id: eventID)
-                .transition(.scale)
+                .environment(\.exitEvent) {
+                    $eventID.withLock { $0 = nil }
+                }
         } else {
             NavigationStack {
                  OrganizationListView()
             }
         }
     }
+}
+
+extension EnvironmentValues {
+    @Entry var exitEvent: () -> Void = { unimplemented() }
 }
 
 

@@ -1,6 +1,6 @@
 //
 //  SwiftUIView.swift
-//  
+//
 //
 //  Created by Woody on 2/17/22.
 //
@@ -61,38 +61,31 @@ struct ScheduleHeaderButton: View {
     var onSelect: (Stage.ID) -> Void
 
     @Environment(\.colorScheme) var colorScheme
-//    @Environment(\.eventColorScheme) var eventColorScheme
-
-    var stageColor: Color {
-        .accentColor
-    }
 
     var body: some View {
-        CachedAsyncIcon(url: stage.iconImageURL) {
-            Text(stage.name.first.map(String.init) ?? "")
-                .font(.system(.largeTitle, design: .rounded, weight: .heavy))
-        }
-        .foregroundStyle(isSelected ? .white : stageColor)
-        .frame(idealWidth: 60, idealHeight: 60)
-        .frame(maxWidth: 60, maxHeight: 60)
-        .background {
-            if isSelected {
-                Circle()
-                    .fill(stageColor)
-                    .shadow()
+        StageIconView(stageID: stage.id)
+            .foregroundStyle(isSelected ? .white : stage.uiColor)
+            .frame(idealWidth: 60, idealHeight: 60)
+            .frame(maxWidth: 60, maxHeight: 60)
+            .contentShape(Circle())
+            .background {
+                if isSelected {
+                    Circle()
+                        .fill(stage.uiColor)
+                        .shadow()
+                }
             }
-        }
-        .scaleEffect(press ? 0.8 : 1)
-        .pressAndReleaseAction(
-            pressing: $press,
-            animation: .easeInOut(duration: 0.05),
-            onRelease: {
-                #if canImport(UIKit)
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                #endif
-                onSelect(stage.id)
-            }
-        )
+            .scaleEffect(press ? 0.8 : 1)
+            .pressAndReleaseAction(
+                pressing: $press,
+                animation: .easeInOut(duration: 0.05),
+                onRelease: {
+#if canImport(UIKit)
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+#endif
+                    onSelect(stage.id)
+                }
+            )
     }
 }
 //

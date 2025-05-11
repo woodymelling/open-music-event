@@ -5,7 +5,3 @@ imageURL: "https://www.example.com/main-image"
 address: "1234, somewhere in a forest"
 timeZone: "America/Denver"
 
-# Colors
-colorScheme:
-  primaryColor: "#FF5733"
-  workshopsColor: "#C70039"

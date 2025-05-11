@@ -50,8 +50,6 @@ extension DTOs.Event {
         var date: CalendarDate? // This could be defined in the yaml, or from the title of the file
         var performances: [String: [PerformanceDTO]]
 
-
-
         init(from decoder: Decoder) throws {
             let container = try decoder.singleValueContainer()
             
@@ -94,12 +92,14 @@ extension Event.Info {
         var colorScheme: ColorScheme?
 
         var contactNumbers: [ContactInfoDTO]?
+
+        var stages: [StageDTO]?
     }
 }
 
 public struct StageDTO: Codable, Equatable, Sendable {
     public var name: String
-    public var color: Int?
+    public var color: Int
     public var imageURL: URL?
 }
 

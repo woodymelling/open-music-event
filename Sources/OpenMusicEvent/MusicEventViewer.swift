@@ -15,6 +15,8 @@ struct MusicEventViewer: View {
     @State
     var error: LocalizedStringKey?
 
+    @Environment(\.exitEvent) var dismiss
+
     var body: some View {
         Group {
             if let eventFeatures {
@@ -39,9 +41,11 @@ struct MusicEventViewer: View {
                     } operation: {
                         self.eventFeatures = MusicEventFeatures(event)
                     }
+                } else {
+                    dismiss()
                 }
             } catch {
-
+                dismiss()
             }
         }
 

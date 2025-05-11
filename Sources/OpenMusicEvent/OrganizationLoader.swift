@@ -30,12 +30,18 @@ extension DataFetchingClient: DependencyKey {
 
         logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
 
+
         try Zip.unzipFile(downloadURL, destination: unzippedURL, customFileExtension: "tmp")
 
         let finalDestination = try getUnzippedDirectory(from: unzippedURL)
         logger.info("Parsing organization from directory: \(finalDestination)")
 
-        return try OpenMusicEventParser.read(from: finalDestination)
+        let organizationData = try OpenMusicEventParser.read(from: finalDestination)
+
+        logger.info("Clearing temporary directory")
+        try FileManager.default.clearDirectory(unzippedURL)
+
+        return organizationData
     }
 }
 
@@ -55,6 +61,15 @@ private func getUnzippedDirectory(from zipURL: URL) throws -> URL {
     return directoryURL
 }
 
+extension FileManager {
+    func clearDirectory(_ url: URL) throws {
+        let contents = try contentsOfDirectory(atPath: url.path())
+        try contents.forEach { file in
+            let fileUrl = url.appendingPathComponent(file)
+            try removeItem(atPath: fileUrl.path)
+        }
+    }
+}
 
 
 extension Zip {

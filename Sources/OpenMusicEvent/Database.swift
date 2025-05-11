@@ -92,7 +92,7 @@ func appDatabase() throws -> any DatabaseWriter {
             "musicEventID" INTEGER,
             "name" TEXT NOT NULL,
             "iconImageURL" TEXT,
-            "color" INTEGER,
+            "color" INTEGER NOT NULL,
             
             FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
@@ -158,6 +158,7 @@ extension Database {
     func seedSampleData() throws {
         logger.log("Seeding sample data...")
         try seed {
+            
             Organization.ome
             MusicEvent.testival
             

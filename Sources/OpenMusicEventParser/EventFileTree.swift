@@ -101,9 +101,6 @@ public struct EventFileTree: FileTreeViewable {
         FileTree {
             Event.Info.file
 
-            File("stages", .yaml)
-                .convert(Conversions.YamlConversion<[StageDTO]>())
-
             Directory("schedules") {
                 File.Many(withExtension: .yaml)
                     .map(ScheduleConversion())
@@ -128,28 +125,25 @@ public struct EventFileTree: FileTreeViewable {
     }
 
     struct EventConversion: Conversion {
-        typealias Input = (Event.Info.YamlRepresentation, [StageDTO], [StringlyTyped.Schedule], [Event.Artist])
+        typealias Input = (Event.Info.YamlRepresentation, [StringlyTyped.Schedule], [Event.Artist])
         typealias Output = Event
 
         func apply(_ input: Input) throws -> Event {
-            let artists = input.3
-            let stages = input.1
-
+            let artists = input.2
+            let eventInfo = input.0
 
             return Event(
-                name: input.0.name ?? "",
-                // TODO?
-
-                timeZone: try TimeZoneConversion().apply(input.0.timeZone) ?? TimeZone.current,
-                startTime: input.0.startDate?.date,
-                endTime: input.0.endDate?.date,
-                imageURL: input.0.imageURL.map { Event.ImageURL($0) },
-                siteMapImageURL: input.0.siteMapImageURL.map { Event.SiteMapImageURL($0) },
+                name: eventInfo.name ?? "",
+                timeZone: try TimeZoneConversion().apply(eventInfo.timeZone) ?? TimeZone.current,
+                startTime: eventInfo.startDate?.date,
+                endTime: eventInfo.endDate?.date,
+                imageURL: eventInfo.imageURL.map { Event.ImageURL($0) },
+                siteMapImageURL: eventInfo.siteMapImageURL.map { Event.SiteMapImageURL($0) },
                 location: Event.Location(
-                    address: input.0.address
+                    address: eventInfo.address
                     // TODO: More here
                 ),
-                contactNumbers: (input.0.contactNumbers ?? []).map {
+                contactNumbers: (eventInfo.contactNumbers ?? []).map {
                     .init(
                         id: .init(),
                         title: $0.title,
@@ -158,61 +152,14 @@ public struct EventFileTree: FileTreeViewable {
                     )
                 },
                 artists: artists,
-                stages: input.1,
+                stages: eventInfo.stages ?? [],
                 schedule: [],
                 colorScheme: nil // TODO:
             )
         }
 
         func unapply(_ output: Event) throws -> Input {
-//            let schedules = output.schedule.map {
-//
-//                StringlyTyped.Schedule(
-//                    metadata: $0.metadata,
-//                    stageSchedules: Dictionary(
-//                        uniqueKeysWithValues: $0.stageSchedules.map { stageID, performances in
-//                            guard let stageName = output.stages[id: stageID]?.name else {
-//                                fatalError("Missing stage name for \(stageID)")
-//                            }
-//                            let stringlyTypedPerformances = performances.map { performance in
-//                                StringlyTyped.Schedule.Performance(
-//                                    artistNames: OrderedSet(performance.artistIDs.compactMap {
-//                                        switch $0 {
-//                                        case .known(let artistID):
-//                                            output.artists[id: artistID]?.name
-//                                        case .anonymous(let artistName):
-//                                            artistName
-//                                        }
-//                                    }),
-//                                    startTime: performance.startTime,
-//                                    endTime: performance.endTime,
-//                                    stageName: stageName
-//                                )
-//                            }
-//                            .sorted(by: { $0.startTime < $1.startTime })
-//
-//
-//                            return (stageName, stringlyTypedPerformances)
-//                        })
-//                )
-//            }
-
-            return (
-                Event.Info.YamlRepresentation(
-                    name: output.info.name,
-                    address: output.info.location?.address,
-                    timeZone: output.info.timeZone.identifier,
-                    imageURL: output.info.imageURL?.rawValue,
-                    siteMapImageURL: output.info.siteMapImageURL?.rawValue,
-                    colorScheme: nil,
-                    contactNumbers: output.info.contactNumbers.map {
-                        .init(phoneNumber: $0.phoneNumber, title: $0.title, description: $0.description)
-                    }
-                ),
-                Array(output.stages),
-                [],
-                Array(output.artists)
-            )
+            throw UnimplementedFailure(description: "EventConversion.unapply")
         }
 
         struct TimeZoneConversion: Conversion {
@@ -229,11 +176,6 @@ public struct EventFileTree: FileTreeViewable {
         }
     }
 }
-
-extension Event {
-    
-}
-
 
 extension Dictionary {
     func mapValuesWithKeys<NewValue>(_ transform: (Key, Value) -> NewValue) -> [Key: NewValue] {
