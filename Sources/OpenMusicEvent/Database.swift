@@ -159,7 +159,7 @@ extension Database {
         logger.log("Seeding sample data...")
         try seed {
             
-            Organization.ome
+            Organization.wickedWoods
             MusicEvent.testival
             
             for artist in Artist.previewValues {

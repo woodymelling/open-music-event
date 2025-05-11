@@ -77,6 +77,8 @@ public class MusicEventFeatures: Identifiable {
         self.artists = ArtistsList()
         self.schedule = ScheduleFeature()
         self.notifications = Notifications()
+        self.more = MoreTabFeature()
+
 
         if !event.contactNumbers.isEmpty {
             self.contactInfo = ContactInfoFeature()
@@ -105,6 +107,7 @@ public class MusicEventFeatures: Identifiable {
     public var location: LocationFeature?
     public var contactInfo: ContactInfoFeature?
     public var notifications: Notifications
+    var more: MoreTabFeature
 
     @Observable
     public class Schedule {
@@ -181,7 +184,7 @@ public struct MusicEventFeaturesView: View {
             }
 
             NavigationStack {
-                MoreView()
+                MoreView(store: store.more)
             }
             .tabItem { Label("More", systemImage: "ellipsis") }
             .tag(MusicEventFeatures.Feature.more)

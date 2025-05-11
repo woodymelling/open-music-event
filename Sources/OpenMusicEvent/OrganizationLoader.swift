@@ -117,6 +117,8 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
         for event in organization.events {
             let eventDraft = MusicEvent.Draft(
+                // Make a stable identifier for events that don't change their name
+                id: .init((organizationURL.absoluteString + event.info.name).hashValue),
                 organizationURL: organizationURL,
                 name: event.info.name,
                 timeZone: event.info.timeZone,
@@ -132,6 +134,9 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                 .returning(\.id)
                 .fetchOne(db)!
 
+            var stageNameIDMapping: [String: Stage.ID] = [:]
+            var artistNameIDMapping: [String: Artist.ID] = [:]
+
             for stage in event.stages {
                 let stageDraft = Stage.Draft(
                     musicEventID: eventID,
@@ -140,8 +145,11 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     color: stage.color
                 )
 
-                try Stage.insert(stageDraft)
-                    .execute(db)
+                let stageID = try Stage.insert(stageDraft)
+                    .returning(\.id)
+                    .fetchOne(db)!
+
+                stageNameIDMapping[stage.name] = stageID
             }
 
             for artist in event.artists {
@@ -153,53 +161,11 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     links: artist.links.map { $0.draft }
                 )
 
-                try Artist.insert(artistDraft)
-                    .execute(db)
-//
-//                for performance in artist.performances {
-//                    let stageDraft = Stage.Draft(
-//                        eventID: eventID,
-//                        name: performance.stage.name,
-//                        iconImageURL: performance.stage.iconImageURL
-//                    )
-//
-//                    let stageID = try Stage.upsert(stageDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)!
-//
-//                    let scheduleDraft = Schedule.Draft(
-//                        eventID: eventID,
-//                        startTime: performance.schedule?.startTime,
-//                        endTime: performance.schedule?.endTime,
-//                        customTitle: performance.schedule?.customTitle
-//                    )
-//
-//                    let scheduleID = try Schedule.insert(scheduleDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)
-//
-//                    let performanceDraft = Performance.Draft(
-//                        stageID: stageID,
-//                        scheduleID: scheduleID,
-//                        startTime: performance.startTime,
-//                        endTime: performance.endTime,
-//                        customTitle: performance.customTitle,
-//                        description: performance.description
-//                    )
-//
-//                    let performanceID = try Performance.insert(performanceDraft)
-//                        .returning(\.id)
-//                        .fetchOne(db)!
-//
-//                    let artistLinkDraft = Performance.Artists(
-//                        performanceID: performanceID,
-//                        artistID: artistID,
-//                        anonymousArtistName: nil
-//                    )
-//
-//                    try Performance.Artists.insert(artistLinkDraft)
-//                        .execute(db)
-//                }
+                let artistID = try Artist.insert(artistDraft)
+                    .returning(\.id)
+                    .fetchOne(db)!
+
+                artistNameIDMapping[artist.name] = artistID
             }
         }
     }

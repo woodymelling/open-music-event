@@ -130,6 +130,7 @@ public struct EventFileTree: FileTreeViewable {
 
         func apply(_ input: Input) throws -> Event {
             let artists = input.2
+            let schedule = input.1
             let eventInfo = input.0
 
             return Event(
@@ -153,7 +154,7 @@ public struct EventFileTree: FileTreeViewable {
                 },
                 artists: artists,
                 stages: eventInfo.stages ?? [],
-                schedule: [],
+                schedule: schedule,
                 colorScheme: nil // TODO:
             )
         }
@@ -311,9 +312,7 @@ struct OpenFestivalDecoder {
     public func decode(from url: URL) throws -> Event {
         return try EventFileTree().read(from: url)
     }
-
 }
-
 
 extension Collection {
     var nilIfEmpty: Self? {

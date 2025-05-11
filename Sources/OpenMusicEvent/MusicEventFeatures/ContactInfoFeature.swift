@@ -16,13 +16,6 @@
 import SwiftUI
 import SharingGRDB
 
-extension MusicEvent {
-    static var current: Where<Self> {
-        @Dependency(\.musicEventID) var musicEventID
-        return MusicEvent.find(musicEventID)
-    }
-}
-
 extension Optional where Wrapped == MusicEvent {
     static var current: Where<Self> {
         @Dependency(\.musicEventID) var musicEventID
@@ -36,7 +29,7 @@ extension Optional where Wrapped == MusicEvent {
 public class ContactInfoFeature {
 
     @ObservationIgnored
-    @FetchOne(MusicEvent.current.select(\.contactNumbers))
+    @FetchOne(Current.musicEvent.select(\.contactNumbers))
     var contactNumbers: [MusicEvent.ContactNumber] = []
 
     func didTapContactNumber(_ contactNumber: MusicEvent.ContactNumber) async {
