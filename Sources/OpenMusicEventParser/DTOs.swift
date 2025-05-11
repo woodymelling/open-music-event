@@ -97,10 +97,10 @@ extension Event.Info {
     }
 }
 
-struct StageDTO: Codable, Equatable {
-    var name: String
-    var color: String?
-    var imageURL: URL?
+public struct StageDTO: Codable, Equatable, Sendable {
+    public var name: String
+    public var color: Int?
+    public var imageURL: URL?
 }
 
 struct ContactInfoDTO: Codable, Equatable {

@@ -10,20 +10,26 @@ import SharingGRDB
 import ImageCaching
 
 struct StagesLegend: View {
-    @FetchAll(Current.stages)
-    var stages: [Stage]
+    @FetchAll(Current.stages.select{ $0.id } )
+    var stages: [Stage.ID]
 
     var body: some View {
         HStack {
-            ForEach(stages) { stage in
-                CachedAsyncIcon(url: stage.iconImageURL) {
-                    ProgressView()
-                }
-                .foregroundColor(.accentColor)
-                .frame(square: 50)
+            ForEach(stages, id: \.self) {
+                StageIconView(stageID: $0)
+                    .frame(square: 50)
             }
         }
     }
+}
+
+
+#Preview() {
+    try! prepareDependencies {
+        $0.musicEventID = 0
+        $0.defaultDatabase = try appDatabase()
+    }
+    return StagesLegend()
 }
 
 
@@ -39,7 +45,6 @@ extension Stage {
 }
 public struct StageIconView: View {
     public init(stageID: Stage.ID) {
-//        self.stageID = stageID
         _stage = FetchOne(wrappedValue: .placeholder, Stage.find(stageID))
     }
 
@@ -64,20 +69,21 @@ public struct StageIconView: View {
 
 struct DefaultStageIcon: View {
     var stage: Stage
-    var stageColor: Color {
-        .accentColor
+
+    var symbol: String {
+        stage.name
+            .split(separator: " ")
+            .filter { !$0.contains("The") }
+            .compactMap { $0.first.map(String.init) }
+            .joined()
     }
 
     var body: some View {
         ZStack {
-            Text("\(stage.name.first.map(String.init) ?? "")")
+            Text(symbol)
                 .font(.system(size: 300, weight: .heavy))
                 .minimumScaleFactor(0.001)
                 .padding()
-                .background {
-                    Circle()
-                        .fill(stageColor)
-                }
         }
     }
 }

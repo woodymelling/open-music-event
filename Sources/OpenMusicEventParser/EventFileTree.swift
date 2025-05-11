@@ -24,9 +24,9 @@ extension Organization {
         FileTree {
             Organization.Info.file
 
-                Directory.Many {
-                    EventFileTree()
-                }
+            Directory.Many {
+                EventFileTree()
+            }
         }
         .convert(fileConversion)
     }
@@ -102,7 +102,7 @@ public struct EventFileTree: FileTreeViewable {
             Event.Info.file
 
             File("stages", .yaml)
-                .convert(StagesConversion())
+                .convert(Conversions.YamlConversion<[StageDTO]>())
 
             Directory("schedules") {
                 File.Many(withExtension: .yaml)
@@ -128,7 +128,7 @@ public struct EventFileTree: FileTreeViewable {
     }
 
     struct EventConversion: Conversion {
-        typealias Input = (Event.Info.YamlRepresentation, [Event.Stage], [StringlyTyped.Schedule], [Event.Artist])
+        typealias Input = (Event.Info.YamlRepresentation, [StageDTO], [StringlyTyped.Schedule], [Event.Artist])
         typealias Output = Event
 
         func apply(_ input: Input) throws -> Event {
@@ -225,57 +225,6 @@ public struct EventFileTree: FileTreeViewable {
 
             func unapply(_ output: TimeZone?) throws -> String? {
                 output.map { $0.identifier }
-            }
-        }
-    }
-
-
-    struct StagesConversion: Conversion {
-        var body: some Conversion<Data, [Event.Stage]> {
-            Conversions.YamlConversion([StageDTO].self)
-                .mapValues {
-                    Event.Stage(
-                        name: $0.name,
-                        iconImageURL: $0.imageURL
-                    )
-                } unapply: {
-                    StageDTO(
-                        name: $0.name,
-                        color: nil, // Needs to get set from the Event Color Scheme?
-                        imageURL: $0.iconImageURL
-                    )
-                }
-        }
-    }
-
-    struct ContactInfoConversion: Conversion {
-        typealias Input = Data
-        typealias Output = [Event.ContactNumber]
-
-        var body: some Conversion<Data, [Event.ContactNumber]> {
-            Conversions.YamlConversion([ContactInfoDTO].self)
-            Conversions.MapValues(ContactNumberDTOConversion())
-        }
-
-
-        struct ContactNumberDTOConversion: Conversion {
-            typealias Input = ContactInfoDTO
-            typealias Output = Event.ContactNumber
-            func apply(_ input: Input) throws -> Output {
-                Event.ContactNumber(
-                    id: .init(),
-                    title: input.title,
-                    phoneNumber: input.phoneNumber,
-                    description: input.description
-                )
-            }
-
-            func unapply(_ output: Output) throws -> Input {
-                ContactInfoDTO(
-                    phoneNumber: output.phoneNumber,
-                    title: output.title,
-                    description: output.description
-                )
             }
         }
     }

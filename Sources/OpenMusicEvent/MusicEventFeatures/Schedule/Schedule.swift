@@ -37,6 +37,10 @@ public class ScheduleFeature {
     @Shared(.inMemory("selectedStage"))
     public var selectedStage: Stage.ID?
 
+    @ObservationIgnored
+    @Shared(.inMemory("selectedSchedule"))
+    public var selectedSchedule: Schedule.ID?
+
 
     @ObservationIgnored
     @FetchAll(Current.stages)
@@ -83,7 +87,7 @@ public struct ScheduleView: View {
             }
         }
 //        .scrollPosition(id: $scrolledEvent)
-//        .modifier(EventDaySelectorViewModifier(selectedDay: $store.selectedDay))
+        .modifier(ScheduleSelectorModifier(selectedScheduleID: Binding(store.$selectedSchedule)))
         .toolbar {
             ToolbarItem {
                 FilterMenu(store: store)
@@ -116,12 +120,8 @@ public struct ScheduleView: View {
     }
 
     struct ScheduleSelectorModifier: ViewModifier {
-        @Binding var selectedDay: Schedule.ID
-//        @Shared(.event) var event
+        @Binding var selectedScheduleID: Schedule.ID?
 
-
-//
-//
         func label(for day: Schedule) -> String {
             if let customTitle = day.customTitle {
                 return customTitle
@@ -136,17 +136,20 @@ public struct ScheduleView: View {
         @FetchAll(Current.schedules)
         var schedules
 
+        var selectedSchedule: Schedule? {
+            schedules.first { $0.id == selectedScheduleID }
+        }
 
         func body(content: Content) -> some View {
             content
                 .toolbarTitleMenu {
                     ForEach(schedules) { schedule in
                         Button(label(for: schedule)) {
-                            selectedDay = schedule.id
+                            selectedScheduleID = schedule.id
                         }
                     }
                 }
-//                .navigationTitle(selectedDayMetadata.map { label(for: $0) } ?? "")
+                .navigationTitle(selectedSchedule.map { label(for: $0) } ?? "")
                 .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -172,3 +175,14 @@ public struct ScheduleView: View {
 //
 //    return Stages.first?.id
 //}
+
+#Preview {
+    try! prepareDependencies {
+        $0.defaultDatabase = try appDatabase()
+    }
+
+
+    return NavigationStack {
+        ScheduleView(store: ScheduleFeature())
+    }
+}

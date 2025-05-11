@@ -42,12 +42,12 @@ struct OrganizationListView: View {
 
     public var body: some View {
         List(store.organizations, id: \.url) { org in
-            Button {
+            
+            NavigationLinkButton {
                 store.didTapOrganization(id: org.id)
             } label: {
                 Row(org: org)
             }
-//            .buttonStyle(.navigationLink)
         }
         .listStyle(.plain)
         .navigationTitle("Organizations")

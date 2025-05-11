@@ -130,17 +130,8 @@ public extension Event {
 }
 
 public extension Event {
-    typealias Stages = [Stage]
-
-    struct Stage: Equatable, Sendable {
-        public var name: String
-        public var iconImageURL: URL?
-
-        public init(name: String, iconImageURL: URL? = nil) {
-            self.name = name
-            self.iconImageURL = iconImageURL
-        }
-    }
+    typealias Stages = [StageDTO]
+    typealias Stage = StageDTO
 }
 
 public extension Event {
@@ -362,19 +353,19 @@ public extension Event {
                 )
             ],
             stages: [
-                Stage(
-                    name: "Fractal Forest",
-                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F0545133C-90A6-4A64-99F9-EA563A8E976E.png?alt=media&token=35509f1f-a977-47d2-bd76-2d3898d0e465")
-                ),
-
-                Stage(
-                    name: "Village",
-                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F96A24076-86EB-4327-BC13-26B3A8B1B769.png?alt=media&token=cb596866-35e6-4e39-a018-004b7338d7e8")
-                ),
-                Stage(
-                    name: "Grove",
-                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F980B90FE-4868-4E65-B0B8-045A54BEFBD2.png?alt=media&token=91037e7e-5702-424d-a4f5-f0c78c5c9fde")
-                )
+//                Stage(
+//                    name: "Fractal Forest",
+//                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F0545133C-90A6-4A64-99F9-EA563A8E976E.png?alt=media&token=35509f1f-a977-47d2-bd76-2d3898d0e465")
+//                ),
+//
+//                Stage(
+//                    name: "Village",
+//                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F96A24076-86EB-4327-BC13-26B3A8B1B769.png?alt=media&token=cb596866-35e6-4e39-a018-004b7338d7e8")
+//                ),
+//                Stage(
+//                    name: "Grove",
+//                    iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F980B90FE-4868-4E65-B0B8-045A54BEFBD2.png?alt=media&token=91037e7e-5702-424d-a4f5-f0c78c5c9fde")
+//                )
 
             ],
             schedule: [

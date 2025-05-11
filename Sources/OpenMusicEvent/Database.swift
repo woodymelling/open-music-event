@@ -92,6 +92,7 @@ func appDatabase() throws -> any DatabaseWriter {
             "musicEventID" INTEGER,
             "name" TEXT NOT NULL,
             "iconImageURL" TEXT,
+            "color" INTEGER,
             
             FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
@@ -163,7 +164,12 @@ extension Database {
             for artist in Artist.previewValues {
                 artist
             }
+
+            for stage in Stage.previewValues {
+                stage
+            }
         }
     }
 }
 #endif
+

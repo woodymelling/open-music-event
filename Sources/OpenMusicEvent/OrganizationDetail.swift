@@ -236,6 +236,12 @@ enum Current {
         .appStorage("OME-eventID")
     }
 
+
+    static var musicEvent: Where<MusicEvent> {
+        @Dependency(\.musicEventID) var musicEventID
+        return MusicEvent.find(musicEventID)
+    }
+
     static var artists: Where<Artist> {
         Artist.where {
             @Dependency(\.musicEventID) var eventID

@@ -340,6 +340,9 @@
     "Location" : {
 
     },
+    "More" : {
+
+    },
     "Name" : {
       "comment" : "Placeholder title for the Name field in a form",
       "extractionState" : "stale",
@@ -476,6 +479,9 @@
 
     },
     "ScrollVisibility" : {
+
+    },
+    "See other Wicked Wood events" : {
 
     },
     "Settings" : {

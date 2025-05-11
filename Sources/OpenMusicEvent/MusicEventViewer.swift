@@ -65,7 +65,7 @@ extension DependencyValues {
 @Observable
 public class MusicEventFeatures: Identifiable {
     public enum Feature: String, Hashable, Codable {
-        case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications
+        case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications, more
     }
 
     public init(_ event: MusicEvent) {
@@ -175,6 +175,12 @@ public struct MusicEventFeaturesView: View {
                 #endif
                 .tag(MusicEventFeatures.Feature.location)
             }
+
+            NavigationStack {
+                MoreView()
+            }
+            .tabItem { Label("More", systemImage: "ellipsis") }
+            .tag(MusicEventFeatures.Feature.more)
 
 //            if let workshops = store.workshops {
 //                NavigationStack {

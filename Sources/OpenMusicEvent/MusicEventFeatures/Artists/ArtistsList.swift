@@ -11,7 +11,8 @@ import ImageCaching
 
 @Observable
 public class ArtistsList {
-    public init() {}
+    public init() {
+    }
 
     // MARK: Data
     @ObservationIgnored

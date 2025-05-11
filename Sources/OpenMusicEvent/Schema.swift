@@ -93,11 +93,6 @@ extension MusicEvent.Draft: Equatable {}
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
-    public static let all = Self.where {
-        @Dependency(\.musicEventID) var musicEventID
-        return $0.musicEventID == musicEventID
-    }
-
     public typealias ID = OmeID<Artist>
     public let id: ID
     public let musicEventID: MusicEvent.ID?
@@ -125,9 +120,11 @@ public struct Artist: Identifiable, Equatable, Sendable {
 public struct Stage: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Stage>
     public let id: ID
-    public let musicEventID: MusicEvent.ID?
-    public let name: String
-    public let iconImageURL: URL?
+    public var musicEventID: MusicEvent.ID?
+    public var name: String
+    public var iconImageURL: URL?
+
+    public var color: Int? = 0x4a99ef_ff
 }
 
 // MARK: Schedule

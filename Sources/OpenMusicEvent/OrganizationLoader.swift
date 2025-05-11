@@ -117,6 +117,18 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                 .returning(\.id)
                 .fetchOne(db)!
 
+            for stage in event.stages {
+                let stageDraft = Stage.Draft(
+                    musicEventID: eventID,
+                    name: stage.name,
+                    iconImageURL: stage.imageURL,
+                    color: stage.color
+                )
+
+                try Stage.insert(stageDraft)
+                    .execute(db)
+            }
+
             for artist in event.artists {
                 let artistDraft = Artist.Draft(
                     musicEventID: eventID,
