@@ -32,7 +32,8 @@ struct ArtistDetailView: View {
         init(artistID: Artist.ID) {
             self.artistID = artistID
             self._artist = FetchOne(wrappedValue: .placeholder, Artist.find(artistID))
-            self._performances = FetchAll(Self.performances(for: artistID))
+
+//            self._performances = FetchAll(placholder: [], Artist.performances(artistID)
         }
 
         let artistID: Artist.ID
@@ -46,41 +47,22 @@ struct ArtistDetailView: View {
         @FetchAll
         var performances: [PerformanceDetail]
 
-        @Selection
-        struct PerformanceDetail: Identifiable {
-            public typealias ID = OmeID<Performance>
-            public let id: ID
-            public let stageID: Stage.ID
 
-            @Column(as: Date.ISO8601Representation.self)
-            public let startTime: Date
-
-            @Column(as: Date.ISO8601Representation.self)
-            public let endTime: Date
-
-            public let customTitle: String?
-
-            @Column(as: Color.HexRepresentation.self)
-            public let stageColor: Color
-    //        public let description: String?
-        }
-
-        static func performances(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<PerformanceDetail> {
-            Performance.Artists
-                .where { $0.artistID.eq(artistID) }
-                .join(Performance.all) { $0.performanceID.eq($1.id) }
-                .join(Stage.all) { $1.stageID.eq($2.id) }
-                .select {
-                    PerformanceDetail.Columns(
-                        id: $1.id,
-                        stageID: $1.stageID,
-                        startTime: $1.startTime,
-                        endTime: $1.endTime,
-                        customTitle: $1.customTitle,
-                        stageColor: $2.color
-                    )
-                }
-        }
+//        static func performances(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<PerformanceDetail> {
+//            fatalError()
+////            Artist.performances(artistID)
+//                .join(Stage.all) { $0.id.eq($0.stageID) }
+//                .select {
+//                    PerformanceDetail.Columns(
+//                        id: $1.0.id,
+//                        stageID: $1.0.stageID,
+//                        startTime: $1.0.startTime,
+//                        endTime: $1.0.endTime,
+//                        customTitle: $1.0.customTitle,
+//                        stageColor: $1.1.color
+//                    )
+//                }
+//        }
 
         static func performanceColors(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<Color.HexRepresentation.QueryValue> {
             Performance.Artists
@@ -197,3 +179,4 @@ struct ArtistDetailView: View {
 
     return ArtistDetailView(store: .init(artistID: 0))
 }
+

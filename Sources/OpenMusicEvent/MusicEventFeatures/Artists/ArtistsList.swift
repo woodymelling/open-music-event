@@ -45,9 +45,10 @@ public class ArtistsList {
 //    }
 
     // MARK: Data
-//    @ObservationIgnored
-//    @FetchAll(ArtistsList.artists())
-    var artists: [ArtistsListView.Row.ArtistInformation] = []
+    @ObservationIgnored
+    @FetchAll(Current.artists)
+    var artists
+//    var artists: [ArtistsListView.Row.ArtistInformation] = []
 
     // MARK: State
     var searchText: String = ""
@@ -74,22 +75,15 @@ struct ArtistsListView: View {
     }
 
     struct Row: View {
-        init(artist: ArtistInformation) {
+        init(artist: Artist) {
             self.artist = artist
         }
 
-        @Selection
-        struct ArtistInformation: Identifiable {
-            var id: Artist.ID
-            var name: String
-            var imageURL: URL?
-//
-//            @Column(as: [Color].JSONRepresentation.self)
-//            var performanceColors: [Color]
-        }
 
 
-        var artist: ArtistInformation
+        var artist: Artist
+
+        var stageColors: [Color] = []
 
         private var imageSize: CGFloat = 60
 

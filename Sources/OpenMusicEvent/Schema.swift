@@ -42,7 +42,7 @@ public typealias OmeID<T> = Int
 //  }
 //}
 
-
+// MARK: Organization
 @Table
 public struct Organization: Equatable, Identifiable, Sendable {
     @Column(primaryKey: true)
@@ -200,6 +200,7 @@ public protocol TimelineRepresentable {
     var endTime: Date { get }
 }
 
+// MARK: TimeZone
 extension TimeZone: @retroactive QueryBindable {
     public var queryBinding: StructuredQueriesCore.QueryBinding {
         .text(identifier)
@@ -216,15 +217,7 @@ extension TimeZone: @retroactive QueryBindable {
 
 private struct InvalidTimeZone: Error {}
 
-func _f() {
-
-    let artistID: Artist.ID = 0
-    Performance.Artists
-        .where { $0.artistID.eq(artistID) }
-        .join(Performance.all) { $0.performanceID.eq($1.id) }
-
-}
-
+// MARK: Color HexRepresentation
 #if canImport(SwiftUI)
 import SwiftUI
 extension Color {
@@ -293,3 +286,78 @@ extension Color {
     }
 }
 #endif
+
+// MARK: Queries
+
+extension Performance {
+    static let withStage = Self.all.join(Stage.all) { $0.stageID.eq($1.id) }
+
+    static let withColor = Self.withStage.select { ($0, $1.color) }
+
+
+}
+
+//extension SelectOf<Performance> {
+//    var performanceDetail: SelectOf<PerformanceDetail> {
+//        self
+//            .withColor
+//            .select {
+//                PerformanceDetail.Columns(
+//                    id: $1.0.id,
+//                    stageID: $1.0.stageID,
+//                    startTime: $1.0.startTime,
+//                    endTime: $1.0.endTime,
+//                    customTitle: $1.0.customTitle,
+//                    stageColor: $1.1.color
+//                )
+//            }
+//    }
+//}
+
+extension Performance.Artists {
+    static func forArtist(_ artistID: Artist.ID) -> Where<Self> {
+        Self.where { $0.artistID.eq(artistID) }
+    }
+}
+
+extension Artist {
+    static let performances = { @Sendable (artistID: Artist.ID) in
+        Performance.Artists
+            .forArtist(artistID)
+            .join(Performance.all) { $0.performanceID == $1.id }
+            .select { $1 }
+    }
+    
+}
+
+
+@Selection
+struct ArtistRow: Identifiable {
+    var id: Artist.ID
+    var name: String
+    var imageURL: URL?
+
+    @Column(as: [Color].JSONRepresentation.self)
+    var performanceColors: [Color]
+}
+
+
+
+@Selection
+@Table
+struct PerformanceDetail: Identifiable {
+    public typealias ID = OmeID<Performance>
+    public let id: ID
+    public let stageID: Stage.ID
+
+    @Column(as: Date.ISO8601Representation.self)
+    public let startTime: Date
+
+    @Column(as: Date.ISO8601Representation.self)
+    public let endTime: Date
+
+    public let customTitle: String?
+
+    @Column(as: Color.HexRepresentation.self)
+    public let stageColor: Color
+}
