@@ -102,7 +102,7 @@ public struct EventFileTree: FileTreeViewable {
             Event.Info.file
 
             Directory("schedules") {
-                File.Many(withExtension: .yaml)
+                File.Many(withExtension: "yml")
                     .map(ScheduleConversion())
             }
 

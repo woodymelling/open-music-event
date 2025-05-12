@@ -98,7 +98,7 @@ public class MusicEventFeatures: Identifiable {
 
 //    public var orgLoader = OrganizationLoader()
 
-    public var selectedFeature: Feature = .artists
+    public var selectedFeature: Feature = .schedule
 
     public var schedule: ScheduleFeature
     public var artists: ArtistsList

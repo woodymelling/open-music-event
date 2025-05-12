@@ -12,15 +12,15 @@ import Collections
 public enum StringlyTyped {
 
     public struct Schedule: Equatable, Sendable {
-        var metadata: Metadata
-        var stageSchedules: [String : [Performance]]
+        public var metadata: Metadata
+        public var stageSchedules: [String : [Performance]]
 
-        struct Performance: Equatable {
-            var customTitle: String?
-            var artistNames: OrderedSet<String>
-            var startTime: Date
-            var endTime: Date
-            var stageName: String
+        public struct Performance: Equatable, Sendable {
+            public var customTitle: String?
+            public var artistNames: OrderedSet<String>
+            public var startTime: Date
+            public var endTime: Date
+            public var stageName: String
         }
     }
 
@@ -35,5 +35,13 @@ public enum StringlyTyped {
 
         public var date: CalendarDate?
         public var customTitle: String?
+
+        public var startTime: Date? {
+            date?.date
+        }
+
+        public var endTime: Date? {
+            nil
+        }
     }
 }

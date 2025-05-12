@@ -22,17 +22,9 @@ import SharingGRDB
 @Observable
 public class ScheduleFeature {
     public init() {
-
+        
     }
-    
 
-//    @Presents var destination: Destination.State?
-
-//    @Shared(.favoriteArtists) var favoriteArtists = Set()
-//    @Shared(.highlightedPerformance) var highlightedPerformance
-
-//    public var selection = true
-//
     @ObservationIgnored
     @Shared(.inMemory("selectedStage"))
     public var selectedStage: Stage.ID?
@@ -46,9 +38,9 @@ public class ScheduleFeature {
     @FetchAll(Current.stages)
     public var stages: [Stage]
 
-//    public var selectedDay: Event.DailySchedule.ID
-//    public var showingComingSoonScreen: Bool = false
-//
+    @ObservationIgnored
+    @FetchAll(Current.schedules)
+    public var schedules
 
     public var filteringFavorites: Bool = false
     var isFiltering: Bool {
@@ -66,6 +58,16 @@ public class ScheduleFeature {
 //            return false
 //        }
 //    }
+
+    public func task() async {
+        if self.selectedStage == nil || !stages.contains(where: { $0.id == self.selectedStage }) {
+            self.$selectedStage.withLock { $0 = stages.first?.id }
+        }
+
+        if self.selectedSchedule == nil || !schedules.contains(where: { $0.id == self.selectedSchedule }) {
+            self.$selectedSchedule.withLock { $0 = schedules.first?.id }
+        }
+    }
 }
 
 public struct ScheduleView: View {
@@ -87,12 +89,19 @@ public struct ScheduleView: View {
             }
         }
 //        .scrollPosition(id: $scrolledEvent)
-        .modifier(ScheduleSelectorModifier(selectedScheduleID: Binding(store.$selectedSchedule)))
+        .modifier(
+            ScheduleSelectorModifier(
+                selectedScheduleID: Binding(store.$selectedSchedule),
+                schedules: store.schedules
+            )
+        )
         .toolbar {
             ToolbarItem {
                 FilterMenu(store: store)
             }
         }
+        .task { await store.task() }
+
 //        .environment(\.dayStartsAtNoon, true)
     }
 
@@ -121,6 +130,7 @@ public struct ScheduleView: View {
 
     struct ScheduleSelectorModifier: ViewModifier {
         @Binding var selectedScheduleID: Schedule.ID?
+        var schedules: [Schedule]
 
         func label(for day: Schedule) -> String {
             if let customTitle = day.customTitle {
@@ -131,10 +141,7 @@ public struct ScheduleView: View {
                 return String(day.id.rawValue)
             }
         }
-//
-//
-        @FetchAll(Current.schedules)
-        var schedules
+
 
         var selectedSchedule: Schedule? {
             schedules.first { $0.id == selectedScheduleID }

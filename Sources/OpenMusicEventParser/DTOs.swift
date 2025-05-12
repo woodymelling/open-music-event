@@ -59,7 +59,7 @@ extension DTOs.Event {
             } else {
                 let keyedContainer = try decoder.container(keyedBy: CodingKeys.self)
                 self.date = try? keyedContainer.decode(CalendarDate.self, forKey: .date)
-                self.customTitle = try? keyedContainer.decode(String.self, forKey: .date)
+                self.customTitle = try? keyedContainer.decode(String.self, forKey: .customTitle)
                 self.performances = try keyedContainer.decode([String: [PerformanceDTO]].self, forKey: .performances)
             }
         }

@@ -167,6 +167,19 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
                 artistNameIDMapping[artist.name] = artistID
             }
+
+            for schedule in event.schedule {
+                let draft = Schedule.Draft(
+                    musicEventID: eventID,
+                    startTime: schedule.metadata.startTime,
+                    endTime: schedule.metadata.endTime,
+                    customTitle: schedule.metadata.customTitle
+                )
+
+                let scheduleID = try Schedule.insert(draft)
+                    .returning(\.id)
+                    .fetchOne(db)!
+            }
         }
     }
 }

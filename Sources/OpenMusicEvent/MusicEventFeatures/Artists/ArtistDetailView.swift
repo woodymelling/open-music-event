@@ -1,13 +1,5 @@
 //
 //  ArtistDetailView.swift
-//  open-music-event
-//
-//  Created by Woodrow Melling on 5/3/25.
-//
-
-
-//
-//  ArtistDetailView.swift
 //  event-viewer
 //
 //  Created by Woodrow Melling on 2/21/25.
@@ -50,15 +42,14 @@ struct ArtistDetailView: View {
         guard let bio = store.artist.bio, !bio.isEmpty
         else { return nil }
 
+        #if SKIP
         return try? AttributedString(markdown: bio)
-//        #if SKIP
-//        #else
-//        return try? AttributedString(
-//            markdown: bio,
-//            options: .init(failurePolicy: .returnPartiallyParsedIfPossible)
-//        )
-//        #endif
-
+        #else
+        return try? AttributedString(
+            markdown: bio,
+            options: .init(failurePolicy: .returnPartiallyParsedIfPossible)
+        )
+        #endif
     }
 
     var body: some View {

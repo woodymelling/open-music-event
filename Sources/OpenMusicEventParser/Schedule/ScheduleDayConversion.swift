@@ -9,6 +9,7 @@
 import FileTree
 import Foundation
 import Conversions
+import IssueReporting
 
 struct ScheduleDayConversion: Conversion {
     typealias Input = FileContent<DTOs.Event.DaySchedule>
@@ -141,8 +142,19 @@ struct ScheduleDayConversion: Conversion {
         typealias Output = StringlyTyped.Schedule
 
         func apply(_ input: Input) throws -> Output {
+
             let customTitle = input.data.0
-            let scheduleDate = input.data.1 ?? CalendarDate(input.fileName) ?? .today // Default to today if nothing is provided
+            let dateFromYaml = input.data.1
+            let dateFromFileName = CalendarDate(input.fileName)
+
+            let scheduleDate: CalendarDate
+            if let dateFromYaml, let dateFromFileName, dateFromYaml != dateFromFileName {
+                reportIssue("Date from filename (\(dateFromFileName)) does not match date from YAML (\(dateFromYaml)), using date from filename: \(dateFromFileName)")
+                scheduleDate = dateFromFileName
+            } else {
+                scheduleDate = (dateFromFileName ?? dateFromYaml ?? .today)
+            }
+            
 
             let schedule = input.data.2.mapValuesWithKeys { key, value in
                 value.map {

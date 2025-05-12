@@ -156,7 +156,9 @@ extension Color {
 public struct Schedule: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Schedule>
     public let id: ID
-    public let musicEventID: MusicEvent.ID
+
+
+    public let musicEventID: MusicEvent.ID?
 
     @Column(as: Date.ISO8601Representation?.self)
     public let startTime: Date?
