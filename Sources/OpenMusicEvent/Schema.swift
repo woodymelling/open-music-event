@@ -110,8 +110,7 @@ extension MusicEvent.Draft: Equatable {}
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
-    public typealias ID = Int
-    public let id: ID
+    public let id: Int
     public let musicEventID: MusicEvent.ID?
 
     public let name: String
@@ -141,7 +140,6 @@ public struct Stage: Identifiable, Equatable, Sendable {
     public var name: String
     public var iconImageURL: URL?
 
-    @Column(as: Color.HexRepresentation.self)
     public var color: Color
 }
 
@@ -216,6 +214,25 @@ extension TimeZone: @retroactive QueryBindable {
 }
 
 private struct InvalidTimeZone: Error {}
+private struct InvalidColor: Error {}
+
+extension Color: QueryBindable {
+    public var queryBinding: StructuredQueriesCore.QueryBinding {
+        do {
+            return try .int(Int64(self.hex))
+        } catch {
+            return .invalid((error))
+        }
+    }
+    
+    public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
+        let int = try Int(decoder: &decoder)
+        let color = Color(hex: int)
+        self = color
+    }
+    
+
+}
 
 // MARK: Color HexRepresentation
 #if canImport(SwiftUI)
@@ -259,6 +276,8 @@ extension Color: Codable {
     }
 }
 
+extension Color.HexRepresentation: Codable { }
+
 
 extension Color {
     init(hex: Int) {
@@ -291,73 +310,54 @@ extension Color {
 
 extension Performance {
     static let withStage = Self.all.join(Stage.all) { $0.stageID.eq($1.id) }
-
     static let withColor = Self.withStage.select { ($0, $1.color) }
 
 
-}
-
-//extension SelectOf<Performance> {
-//    var performanceDetail: SelectOf<PerformanceDetail> {
-//        self
-//            .withColor
-//            .select {
-//                PerformanceDetail.Columns(
-//                    id: $1.0.id,
-//                    stageID: $1.0.stageID,
-//                    startTime: $1.0.startTime,
-//                    endTime: $1.0.endTime,
-//                    customTitle: $1.0.customTitle,
-//                    stageColor: $1.1.color
-//                )
-//            }
-//    }
-//}
-
-extension Performance.Artists {
-    static func forArtist(_ artistID: Artist.ID) -> Where<Self> {
-        Self.where { $0.artistID.eq(artistID) }
-    }
-}
-
-extension Artist {
     static let performances = { @Sendable (artistID: Artist.ID) in
         Performance.Artists
-            .forArtist(artistID)
+            .where { $0.artistID == artistID }
             .join(Performance.all) { $0.performanceID == $1.id }
             .select { $1 }
     }
-    
+
+    static let performanceDetails = Performance
+        .withStage
+        .select {
+            ArtistDetail.ArtistPerformance.Columns(
+                id: $0.id,
+                stageID: $1.id,
+                startTime: $0.startTime,
+                endTime: $0.endTime,
+                customTitle: $0.customTitle,
+                stageColor: $1.color
+            )
+        }
+}
+
+
+extension ArtistsList {
+    static let rowsQuery = Current.artists
+        .group(by: \.id)
+        .rightJoin(Performance.Artists.all) { $1.artistID.eq($0.id) }
+        .join(Performance.all) { $1.performanceID.eq($2.id) }
+        .join(Stage.all) { $2.stageID.eq($3.id) }
+        .select {
+            ArtistRow.Columns(
+                id: $0.id,
+                name: $0.name,
+                imageURL: $0.imageURL,
+                performanceColors: $3.color.jsonGroupArray()
+            )
+        }
 }
 
 
 @Selection
 struct ArtistRow: Identifiable {
-    var id: Artist.ID
-    var name: String
+    var id: Artist.ID?
+    var name: String?
     var imageURL: URL?
 
     @Column(as: [Color].JSONRepresentation.self)
     var performanceColors: [Color]
-}
-
-
-
-@Selection
-@Table
-struct PerformanceDetail: Identifiable {
-    public typealias ID = OmeID<Performance>
-    public let id: ID
-    public let stageID: Stage.ID
-
-    @Column(as: Date.ISO8601Representation.self)
-    public let startTime: Date
-
-    @Column(as: Date.ISO8601Representation.self)
-    public let endTime: Date
-
-    public let customTitle: String?
-
-    @Column(as: Color.HexRepresentation.self)
-    public let stageColor: Color
 }

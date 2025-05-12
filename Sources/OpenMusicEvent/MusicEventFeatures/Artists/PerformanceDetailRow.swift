@@ -11,11 +11,11 @@ import SharingGRDB
 
 public struct PerformanceDetailRow: View {
 
-    init(performance: PerformanceDetail) {
+    init(performance: ArtistDetail.ArtistPerformance) {
         self.performance = performance
     }
 
-    var performance: PerformanceDetail
+    var performance: ArtistDetail.ArtistPerformance
 
     var timeIntervalLabel: String {
         (performance.startTime..<performance.endTime)

@@ -22,30 +22,62 @@ extension Artist {
 
 
 
+@Observable
+class ArtistDetail {
+    init(artistID: Artist.ID) {
+        self.artistID = artistID
+        self._artist = FetchOne(wrappedValue: .placeholder, Artist.find(artistID))
+
+        self._performances = FetchAll(ArtistDetail.performancesQuery(artistID))
+    }
+
+    let artistID: Artist.ID
+
+    @ObservationIgnored
+    @FetchOne
+    var artist: Artist
 
 
-
-struct ArtistDetailView: View {
-
-    @Observable
-    class ViewModel {
-        init(artistID: Artist.ID) {
-            self.artistID = artistID
-            self._artist = FetchOne(wrappedValue: .placeholder, Artist.find(artistID))
-
-//            self._performances = FetchAll(placholder: [], Artist.performances(artistID)
-        }
-
-        let artistID: Artist.ID
-
-        @ObservationIgnored
-        @FetchOne
-        var artist: Artist
+    @ObservationIgnored
+    @FetchAll
+    var performances: [ArtistPerformance]
 
 
-        @ObservationIgnored
-        @FetchAll
-        var performances: [PerformanceDetail]
+    @Selection
+    @Table
+    struct ArtistPerformance: Identifiable {
+        public typealias ID = OmeID<Performance>
+        public let id: ID
+        public let stageID: Stage.ID
+
+        @Column(as: Date.ISO8601Representation.self)
+        public let startTime: Date
+
+        @Column(as: Date.ISO8601Representation.self)
+        public let endTime: Date
+
+        public let customTitle: String?
+
+        public let stageColor: Color
+    }
+
+
+    static let performancesQuery = { @Sendable (artistID: Artist.ID) in
+        Performance.Artists
+            .where { $0.artistID == artistID }
+            .join(Performance.all) { $0.performanceID.eq($1.id) }
+            .join(Stage.all) { $1.stageID.eq($2.id) }
+            .select {
+                ArtistPerformance.Columns(
+                    id: $1.id,
+                    stageID: $2.id,
+                    startTime: $1.startTime,
+                    endTime: $1.endTime,
+                    customTitle: $1.customTitle,
+                    stageColor: $2.color
+                )
+            }
+    }
 
 
 //        static func performances(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<PerformanceDetail> {
@@ -64,19 +96,13 @@ struct ArtistDetailView: View {
 //                }
 //        }
 
-        static func performanceColors(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<Color.HexRepresentation.QueryValue> {
-            Performance.Artists
-                .where { $0.artistID.eq(artistID) }
-                .join(Performance.all) { $0.performanceID.eq($1.id) }
-                .join(Stage.all) { $1.stageID.eq($2.id) }
-                .select { $2.color }
-        }
-    }
-
-    
+}
 
 
-    let store: ViewModel
+
+
+struct ArtistDetailView: View {
+    let store: ArtistDetail
 
     var bioMarkdown: AttributedString? {
         guard let bio = store.artist.bio, !bio.isEmpty
