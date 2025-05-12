@@ -13,11 +13,6 @@ public struct PerformanceDetailRow: View {
 
     init(performance: ArtistDetailView.ViewModel.PerformanceDetail) {
         self.performance = performance
-
-        _stageColorHex = FetchOne(
-            wrappedValue: 0,
-            Stage.find(performance.stageID).select { $0.color }
-        )
     }
 
     var performance: ArtistDetailView.ViewModel.PerformanceDetail
@@ -27,16 +22,10 @@ public struct PerformanceDetailRow: View {
             .formatted(.performanceTime)
     }
 
-    @FetchOne
-    var stageColorHex: Int
-
-    var color: Color? {
-        Color(hex: UInt(stageColorHex))
-    }
 
     public var body: some View {
         HStack(spacing: 10) {
-            StagesIndicatorView(stageIDs: [performance.stageID])
+            StagesIndicatorView(colors: [performance.stageColor])
                 .frame(width: 5)
 
             StageIconView(stageID: performance.stageID)
@@ -70,27 +59,15 @@ public struct PerformanceDetailRow: View {
 
 
 public struct StagesIndicatorView: View {
-    public init(stageID: Stage.ID) {
-        self.init(stageIDs: [stageID])
+    public init(colors: [Color]) {
+        self.colors = colors
     }
 
-    public init(stageIDs: [Stage.ID]) {
-        _colorHexes = FetchAll(
-            Stage.all
-            .where { $0.id.in(stageIDs) }
-            .select { $0.color }
-        )
-    }
 
     var angleHeight: CGFloat = 5 / 2
 
+    var colors: [Color]
 
-    @FetchAll
-    var colorHexes: [Int]
-
-    var colors: [Color] {
-        colorHexes.map { Color(hex: UInt($0)) }
-    }
 
     public var body: some View {
         Canvas { context, size in

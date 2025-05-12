@@ -39,7 +39,8 @@ extension Stage {
             id: -1,
             musicEventID: nil,
             name: "",
-            iconImageURL: nil
+            iconImageURL: nil,
+            color: .clear
         )
     }
 }

@@ -9,6 +9,7 @@ import OpenMusicEventParser
 import Dependencies
 import DependenciesMacros
 import Zip
+import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
@@ -142,7 +143,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     musicEventID: eventID,
                     name: stage.name,
                     iconImageURL: stage.imageURL,
-                    color: stage.color
+                    color: Color(hex: stage.color)
                 )
 
                 let stageID = try Stage.insert(stageDraft)

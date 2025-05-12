@@ -59,6 +59,9 @@ struct ArtistDetailView: View {
             public let endTime: Date
 
             public let customTitle: String?
+
+            @Column(as: Color.HexRepresentation.self)
+            public let stageColor: Color
     //        public let description: String?
         }
 
@@ -66,15 +69,25 @@ struct ArtistDetailView: View {
             Performance.Artists
                 .where { $0.artistID.eq(artistID) }
                 .join(Performance.all) { $0.performanceID.eq($1.id) }
+                .join(Stage.all) { $1.stageID.eq($2.id) }
                 .select {
                     PerformanceDetail.Columns(
                         id: $1.id,
                         stageID: $1.stageID,
                         startTime: $1.startTime,
                         endTime: $1.endTime,
-                        customTitle: $1.customTitle
+                        customTitle: $1.customTitle,
+                        stageColor: $2.color
                     )
                 }
+        }
+
+        static func performanceColors(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<Color.HexRepresentation.QueryValue> {
+            Performance.Artists
+                .where { $0.artistID.eq(artistID) }
+                .join(Performance.all) { $0.performanceID.eq($1.id) }
+                .join(Stage.all) { $1.stageID.eq($2.id) }
+                .select { $2.color }
         }
     }
 

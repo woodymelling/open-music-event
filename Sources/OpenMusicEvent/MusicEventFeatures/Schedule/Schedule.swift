@@ -138,7 +138,7 @@ public struct ScheduleView: View {
             } else if let startTime = day.startTime {
                 return startTime.formatted(.dateTime.weekday(.wide))
             } else {
-                return String(day.id.rawValue)
+                return String(day.id)
             }
         }
 

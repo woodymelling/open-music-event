@@ -9,18 +9,48 @@ import SwiftUI
 import SharingGRDB
 import ImageCaching
 
+
 @Observable
 public class ArtistsList {
-    public init() {
-    }
+//    public init() {
+//    }
+
+
+
+//    static func artists() -> some StructuredQueriesCore.Statement<ArtistsListView.Row.ArtistInformation> {
+//        Current.artists
+//            .join(Performance.Artists.all) { $0.id == $1.artistID }
+////            .join(Performance.all) { $1.performanceID == $0.id }
+////            .select { artist, _, _ in
+////                ArtistsListView.Row.ArtistInformation.Columns(
+////                    id: artist.id,
+////                    name: artist.name,
+////                    imageURL: artist.imageURL,
+//////                    performanceColors: []
+////                )
+////            }
+//
+////            .join(Performance.all) { _, pa, p in pa.performanceID.eq(p.id) }
+////            .join(Stage.all) { _, _, p, s in p.stageID.eq(s.id) }
+////            .select { artist, _, _, stage in
+////                ArtistsListView.Row.ArtistInformation.Columns(
+////                    id: artist.id,
+////                    name: artist.name,
+////                    imageURL: artist.imageURL,
+////                    performanceColors: []//stage.color.jsonGroupArray()
+////                )
+////            }
+
+
+//    }
 
     // MARK: Data
-    @ObservationIgnored
-    @FetchAll(Current.artists)
-    public var artists: [Artist]
+//    @ObservationIgnored
+//    @FetchAll(ArtistsList.artists())
+    var artists: [ArtistsListView.Row.ArtistInformation] = []
 
     // MARK: State
-    public var searchText: String = ""
+    var searchText: String = ""
 
 }
 
@@ -30,7 +60,7 @@ struct ArtistsListView: View {
     var body: some View {
         List(store.artists) { artist in
             NavigationLink(value: artist.id) {
-                ArtistRow(artist: artist)
+                Row(artist: artist)
             }
         }
         .searchable(text: $store.searchText)
@@ -43,21 +73,32 @@ struct ArtistsListView: View {
         }
     }
 
-    struct ArtistRow: View {
-        init(artist: Artist) {
+    struct Row: View {
+        init(artist: ArtistInformation) {
             self.artist = artist
         }
 
-        var artist: Artist
+        @Selection
+        struct ArtistInformation: Identifiable {
+            var id: Artist.ID
+            var name: String
+            var imageURL: URL?
+//
+//            @Column(as: [Color].JSONRepresentation.self)
+//            var performanceColors: [Color]
+        }
+
+
+        var artist: ArtistInformation
 
         private var imageSize: CGFloat = 60
 
+
         var body: some View {
             HStack(spacing: 10) {
-                ArtistImage(artist: artist)
-//
-//
-//                StagesIndicatorView(stageIDs: performances.map(\.stageID))
+                ArtistImage(imageURL: artist.imageURL)
+
+//                StagesIndicatorView(colors: artist.performanceColors)
 //                    .frame(width: 5)
 
 
@@ -82,12 +123,12 @@ struct ArtistsListView: View {
 
 
         struct ArtistImage: View {
-            var artist: Artist
+            var imageURL: URL?
             var body: some View {
                 CachedAsyncImage(
                     requests: [
                         ImageRequest(
-                            url: artist.imageURL,
+                            url: imageURL,
                             processors: [
                                 .resize(size: CGSize(width: 60, height: 60))
                             ]
