@@ -124,17 +124,14 @@ func appDatabase() throws -> any DatabaseWriter {
         """).execute(db)
 
         try #sql("""
-        CREATE TABLE performance_artists (
-            "performanceID" INTEGER NOT NULL REFERENCES performances(id) ON DELETE CASCADE,
-            "artistID" INTEGER REFERENCES artists(id) ON DELETE SET NULL,
+        CREATE TABLE performanceArtists (
+            "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+            "performanceID" INTEGER NOT NULL,
+            "artistID" INTEGER REFERENCES artists(id) ON DELETE CASCADE,
             "anonymousArtistName" TEXT,
 
-            CHECK(
-                (artistID IS NOT NULL AND anonymousArtistName IS NULL) OR
-                (artistID IS NULL AND anonymousArtistName IS NOT NULL)
-            ),
-
-            PRIMARY KEY (performanceID, artistID, anonymousArtistName)
+            FOREIGN KEY("performanceID") REFERENCES "performances"("id") ON DELETE CASCADE
+            FOREIGN KEY("artistID") REFERENCES "artists"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
     }

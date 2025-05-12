@@ -169,6 +169,7 @@ public struct Schedule: Identifiable, Equatable, Sendable {
     public let customTitle: String?
 }
 
+// MARK: Performance
 @Table
 public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresentable {
     public typealias ID = OmeID<Performance>
@@ -188,19 +189,19 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
 
     // A join table for the many-to-many relationship of Performance -> Artist
     @Table("performanceArtists")
-    public struct Artists: Equatable, Sendable {
-
+    public struct Artists: Equatable, Sendable, Identifiable {
+        public let id: OmeID<Performance.Artists>
         public let performanceID: Performance.ID
         public let artistID: Artist.ID?
         public let anonymousArtistName: String?
     }
+
 }
 
 public protocol TimelineRepresentable {
     var startTime: Date { get }
     var endTime: Date { get }
 }
-
 
 extension TimeZone: @retroactive QueryBindable {
     public var queryBinding: StructuredQueriesCore.QueryBinding {
@@ -217,4 +218,13 @@ extension TimeZone: @retroactive QueryBindable {
 }
 
 private struct InvalidTimeZone: Error {}
+
+func _f() {
+
+    let artistID: Artist.ID = 0
+    Performance.Artists
+        .where { $0.artistID.eq(artistID) }
+        .join(Performance.all) { $0.performanceID.eq($1.id) }
+
+}
 

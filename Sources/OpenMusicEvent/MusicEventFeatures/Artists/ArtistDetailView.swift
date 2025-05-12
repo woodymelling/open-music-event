@@ -20,6 +20,11 @@ extension Artist {
     )
 }
 
+
+
+
+
+
 struct ArtistDetailView: View {
 
     @Observable
@@ -27,6 +32,7 @@ struct ArtistDetailView: View {
         init(artistID: Artist.ID) {
             self.artistID = artistID
             self._artist = FetchOne(wrappedValue: .placeholder, Artist.find(artistID))
+            self._performances = FetchAll(Self.performances(for: artistID))
         }
 
         let artistID: Artist.ID
@@ -34,7 +40,46 @@ struct ArtistDetailView: View {
         @ObservationIgnored
         @FetchOne
         var artist: Artist
+
+
+        @ObservationIgnored
+        @FetchAll
+        var performances: [PerformanceDetail]
+
+        @Selection
+        struct PerformanceDetail: Identifiable {
+            public typealias ID = OmeID<Performance>
+            public let id: ID
+            public let stageID: Stage.ID
+
+            @Column(as: Date.ISO8601Representation.self)
+            public let startTime: Date
+
+            @Column(as: Date.ISO8601Representation.self)
+            public let endTime: Date
+
+            public let customTitle: String?
+    //        public let description: String?
+        }
+
+        static func performances(for artistID: Artist.ID) -> some StructuredQueriesCore.Statement<PerformanceDetail> {
+            Performance.Artists
+                .where { $0.artistID.eq(artistID) }
+                .join(Performance.all) { $0.performanceID.eq($1.id) }
+                .select {
+                    PerformanceDetail.Columns(
+                        id: $1.id,
+                        stageID: $1.stageID,
+                        startTime: $1.startTime,
+                        endTime: $1.endTime,
+                        customTitle: $1.customTitle
+                    )
+                }
+        }
     }
+
+    
+
 
     let store: ViewModel
 
@@ -59,13 +104,13 @@ struct ArtistDetailView: View {
                 ArtistImage(artist: store.artist)
             },
             listContent: {
-//                ForEach(store.performances) { performance in
-//                    NavigationLinkButton {
+                ForEach(store.performances) { performance in
+                    NavigationLinkButton {
 //                        store.send(.didTapPerformance(performance.id))
-//                    } label: {
-//                        PerformanceDetailRow(for: performance)
-//                    }
-//                }
+                    } label: {
+                        PerformanceDetailRow(performance: performance)
+                    }
+                }
 
 
                 if let bio = bioMarkdown {

@@ -179,6 +179,38 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                 let scheduleID = try Schedule.insert(draft)
                     .returning(\.id)
                     .fetchOne(db)!
+
+
+                for stageSchedule in schedule.stageSchedules {
+
+                    for performance in stageSchedule.value {
+                        let draft = Performance.Draft(
+                            stageID: stageNameIDMapping[stageSchedule.key]!,
+                            scheduleID: scheduleID,
+                            startTime: performance.startTime,
+                            endTime: performance.endTime,
+                            customTitle: performance.customTitle,
+                            description: nil
+                        )
+
+                        let performanceID = try Performance.insert(draft)
+                            .returning(\.id)
+                            .fetchOne(db)!
+
+                        for artistName in performance.artistNames {
+                            let artistID = artistNameIDMapping[artistName]
+
+                            let draft = Performance.Artists.Draft(
+                                performanceID: performanceID,
+                                artistID: artistID,
+                                anonymousArtistName: artistID == nil ? artistName : nil
+                            )
+
+                            try Performance.Artists.insert(draft)
+                                .execute(db)
+                        }
+                    }
+                }
             }
         }
     }

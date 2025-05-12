@@ -21,8 +21,6 @@ struct ScheduleCardView: View {
     let isSelected: Bool
 
 
-    
-
     public var body: some View {
         ScheduleCardBackground(color: .accentColor, isSelected: isSelected) {
             HStack(alignment: .top) {
