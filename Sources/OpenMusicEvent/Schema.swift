@@ -349,6 +349,7 @@ extension ArtistsList {
                 performanceColors: $3.color.jsonGroupArray()
             )
         }
+        .order(by: \.name)
 }
 
 
@@ -361,3 +362,4 @@ struct ArtistRow: Identifiable {
     @Column(as: [Color].JSONRepresentation.self)
     var performanceColors: [Color]
 }
+

@@ -94,6 +94,17 @@ import GRDB
 private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationLoader")
 
 
+extension String {
+    var stableHash: Int {
+        var result = UInt64 (5381)
+        let buf = [UInt8](self.utf8)
+        for b in buf {
+            result = 127 * (result & 0x00ffffffffffffff) + UInt64(b)
+        }
+        return Int(result)
+    }
+}
+
 func downloadAndStoreOrganization(id: Organization.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
@@ -119,7 +130,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
         for event in organization.events {
             let eventDraft = MusicEvent.Draft(
                 // Make a stable identifier for events that don't change their name
-                id: .init((organizationURL.absoluteString + event.info.name).hashValue),
+                id: .init((organizationURL.absoluteString + event.info.name).stableHash),
                 organizationURL: organizationURL,
                 name: event.info.name,
                 timeZone: event.info.timeZone,
@@ -140,6 +151,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
             for stage in event.stages {
                 let stageDraft = Stage.Draft(
+                    id: (String(eventDraft.id!) + stage.name).stableHash,
                     musicEventID: eventID,
                     name: stage.name,
                     iconImageURL: stage.imageURL,
@@ -155,6 +167,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
             for artist in event.artists {
                 let artistDraft = Artist.Draft(
+                    id: (String(eventDraft.id!) + artist.name).stableHash,
                     musicEventID: eventID,
                     name: artist.name,
                     bio: artist.bio,
@@ -171,6 +184,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
             for schedule in event.schedule {
                 let draft = Schedule.Draft(
+                    id: (String(eventDraft.id!) + (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? "")).stableHash,
                     musicEventID: eventID,
                     startTime: schedule.metadata.startTime,
                     endTime: schedule.metadata.endTime,
