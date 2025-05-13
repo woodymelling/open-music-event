@@ -21,15 +21,17 @@ struct MusicEventViewer: View {
         Group {
             if let eventFeatures {
                 MusicEventFeaturesView(store: eventFeatures)
+                
             } else {
                 ProgressView()
             }
         }
-        .task {
+        .task(id: id) {
             @Dependency(\.defaultDatabase)
             var database
 
-            do {
+            self.eventFeatures = nil
+            await withErrorReporting {
                 @FetchOne(MusicEvent?.find(id))
                 var musicEvent: MusicEvent? = nil
 
@@ -44,8 +46,6 @@ struct MusicEventViewer: View {
                 } else {
                     dismiss()
                 }
-            } catch {
-                dismiss()
             }
         }
 

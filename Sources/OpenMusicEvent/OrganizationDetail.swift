@@ -56,6 +56,7 @@ struct OrganizationDetailView: View {
         }
 
         public func didTapEvent(id: MusicEvent.ID) {
+            logger.info("didTapEvent: \(id)")
             self.$currentEvent.withLock { $0 = id}
         }
 
@@ -64,10 +65,8 @@ struct OrganizationDetailView: View {
         var dataFetchingClient
 
         public func onPullToRefresh() async  {
-            do {
+            await withErrorReporting {
                 try await downloadAndStoreOrganization(id: self.id)
-            } catch {
-                logger.critical("\(error)")
             }
         }
     }
@@ -85,9 +84,7 @@ struct OrganizationDetailView: View {
                     listContent: {
                         Section("Events") {
                             EventsListView(events: store.events) { eventID in
-                                Task {
-                                    try await store.didTapEvent(id: eventID)
-                                }
+                                store.didTapEvent(id: eventID)
                             }
                         }
                     }
@@ -189,6 +186,9 @@ struct OrganizationDetailView: View {
                                 .lineLimit(1)
                                 .font(.caption2)
                         }
+                        Text(String(event.id))
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
                     }
 
                     Spacer()
@@ -243,8 +243,8 @@ enum Current {
     }
 
     static var artists: Where<Artist> {
-        Artist.where {
-            @Dependency(\.musicEventID) var eventID
+        @Dependency(\.musicEventID) var eventID
+        return Artist.where {
             eventID == $0.musicEventID
         }
     }

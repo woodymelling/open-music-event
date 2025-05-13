@@ -15,14 +15,40 @@ public class ArtistsList {
 
     // MARK: Data
     @ObservationIgnored
-    @FetchAll(ArtistsList.rowsQuery)
+    @FetchAll(
+        Current.artists
+        .group(by: \.id)
+        .rightJoin(Performance.Artists.all) { $1.artistID.eq($0.id) }
+        .join(Performance.all) { $1.performanceID.eq($2.id) }
+        .join(Stage.all) { $2.stageID.eq($3.id) }
+        .order(by: \.name)
+        .select {
+            ArtistRow.Columns(
+                id: $0.id,
+                name: $0.name,
+                imageURL: $0.imageURL,
+                performanceColors: $3.color.jsonGroupArray()
+            )
+        }
+    )
     var artists
-//    var artists: [ArtistsListView.Row.ArtistInformation] = []
+
+    @Selection
+    @Table
+    struct ArtistRow: Identifiable {
+        var id: Artist.ID?
+        var name: String?
+        var imageURL: URL?
+
+        @Column(as: [Color].JSONRepresentation.self)
+        var performanceColors: [Color]
+    }
 
     // MARK: State
     var searchText: String = ""
-
 }
+
+
 
 struct ArtistsListView: View {
     @Bindable var store: ArtistsList
@@ -41,17 +67,19 @@ struct ArtistsListView: View {
         .navigationDestination(for: Artist.ID.self) {
             ArtistDetailView(store: .init(artistID: $0))
         }
+        .refreshable {
+            await withErrorReporting {
+                try await store.$artists.load()
+            }
+        }
     }
 
     struct Row: View {
-        init(artist: ArtistRow) {
+        init(artist: ArtistsList.ArtistRow) {
             self.artist = artist
         }
 
-
-
-        var artist: ArtistRow
-
+        var artist: ArtistsList.ArtistRow
         var stageColors: [Color] = []
 
         private var imageSize: CGFloat = 60

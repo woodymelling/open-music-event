@@ -184,7 +184,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
             for schedule in event.schedule {
                 let draft = Schedule.Draft(
-                    id: (String(eventDraft.id!) + (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? "")).stableHash,
+                    id: (String(eventDraft.id!) + (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? UUID().uuidString)).stableHash,
                     musicEventID: eventID,
                     startTime: schedule.metadata.startTime,
                     endTime: schedule.metadata.endTime,
@@ -194,7 +194,6 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                 let scheduleID = try Schedule.insert(draft)
                     .returning(\.id)
                     .fetchOne(db)!
-
 
                 for stageSchedule in schedule.stageSchedules {
 

@@ -105,7 +105,9 @@ func appDatabase() throws -> any DatabaseWriter {
             "musicEventID" INTEGER,
             "startTime" TEXT,
             "endTime" TEXT,
-            "customTitle" TEXT
+            "customTitle" TEXT,
+        
+            FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
@@ -119,7 +121,8 @@ func appDatabase() throws -> any DatabaseWriter {
             "startTime" TEXT NOT NULL,
             "endTime" TEXT NOT NULL,
         
-            FOREIGN KEY("stageID") REFERENCES "stages"("id") ON DELETE CASCADE
+            FOREIGN KEY("stageID") REFERENCES "stages"("id") ON DELETE CASCADE,
+            FOREIGN KEY("scheduleID") REFERENCES "schedules"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 

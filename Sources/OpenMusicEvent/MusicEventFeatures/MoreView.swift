@@ -23,6 +23,7 @@ final class MoreTabFeature {
     func didTapReloadOrganization() async {
         guard let currentOrganizationID = musicEvent.organizationURL
         else { return }
+        self.errorMessage = nil
 
         self.isLoadingOrganization = true
 
@@ -31,6 +32,8 @@ final class MoreTabFeature {
             self.isLoadingOrganization = false
         } catch {
             self.errorMessage = error.localizedDescription
+            self.isLoadingOrganization = true
+
         }
     }
 }
