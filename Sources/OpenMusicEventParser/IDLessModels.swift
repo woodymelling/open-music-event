@@ -16,7 +16,8 @@ public enum StringlyTyped {
         public var stageSchedules: [String : [Performance]]
 
         public struct Performance: Equatable, Sendable {
-            public var customTitle: String?
+            public var title: String
+            public var subtitle: String?
             public var artistNames: OrderedSet<String>
             public var startTime: Date
             public var endTime: Date

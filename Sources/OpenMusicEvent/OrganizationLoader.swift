@@ -8,7 +8,7 @@
 import OpenMusicEventParser
 import Dependencies
 import DependenciesMacros
-import Zip
+import ZIPFoundation
 import SwiftUI
 
 @DependencyClient
@@ -25,14 +25,21 @@ extension DataFetchingClient: DependencyKey {
         
         logger.info("Fetching organization from: \(targetZipURL)")
 
+        let fileManager = FileManager.default
+
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
         logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
         let unzippedURL = URL.temporaryDirectory
+        
 
         logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
 
-
-        try Zip.unzipFile(downloadURL, destination: unzippedURL, customFileExtension: "tmp")
+        do {
+            try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
+            try fileManager.unzipItem(at: downloadURL, to: unzippedURL)
+        } catch {
+            reportIssue("ERROR: \(error)")
+        }
 
         let finalDestination = try getUnzippedDirectory(from: unzippedURL)
         logger.info("Parsing organization from directory: \(finalDestination)")
@@ -69,15 +76,6 @@ extension FileManager {
             let fileUrl = url.appendingPathComponent(file)
             try removeItem(atPath: fileUrl.path)
         }
-    }
-}
-
-
-extension Zip {
-    static func unzipFile(_ fileURL: URL, destination: URL, customFileExtension: String) throws {
-        Zip.addCustomFileExtension(customFileExtension)
-        try Zip.unzipFile(fileURL, destination: destination)
-        Zip.removeCustomFileExtension(customFileExtension)
     }
 }
 
@@ -203,7 +201,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                             scheduleID: scheduleID,
                             startTime: performance.startTime,
                             endTime: performance.endTime,
-                            customTitle: performance.customTitle,
+                            title: performance.title,
                             description: nil
                         )
 

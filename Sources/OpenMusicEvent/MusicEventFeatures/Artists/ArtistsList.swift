@@ -9,33 +9,20 @@ import SwiftUI
 import SharingGRDB
 import ImageCaching
 
-
-let x = Current.artists
+@MainActor
 @Observable
 public class ArtistsList {
 
     // MARK: Data
     @ObservationIgnored
-    @FetchAll(
-        Current.artists
-        .group(by: \.id)
-        .rightJoin(Performance.Artists.all) { $1.artistID.eq($0.id) }
-        .join(Performance.all) { $1.performanceID.eq($2.id) }
-        .join(Stage.all) { $2.stageID.eq($3.id) }
-        .order(by: \.name)
-        .select {
-            ArtistRow.Columns(
-                id: $0.id,
-                name: $0.name,
-                imageURL: $0.imageURL,
-                performanceColors: $3.color.jsonGroupArray()
-            )
-        }
-    )
-    var artists
+    @FetchAll
+    var artists: [ArtistRow]
+
+    @ObservationIgnored
+    @Dependency(\.musicEventID)
+    var musicEventID
 
     @Selection
-    @Table
     struct ArtistRow: Identifiable {
         var id: Artist.ID?
         var name: String?
@@ -45,8 +32,34 @@ public class ArtistsList {
         var performanceColors: [Color]
     }
 
+
     // MARK: State
     var searchText: String = ""
+
+    func searchTextDidChange() async {
+        let artistsSearchQuery = Current.artists
+            .where {
+                $0.name.collate(.nocase).contains(self.searchText)
+            }
+            .group(by: \.id)
+            .rightJoin(Performance.Artists.all) { $1.artistID.eq($0.id) }
+            .join(Performance.all) { $1.performanceID.eq($2.id) }
+            .join(Stage.all) { $2.stageID.eq($3.id) }
+            .order(by: \.name)
+            .select {
+                ArtistRow.Columns(
+                    id: $0.id,
+                    name: $0.name,
+                    imageURL: $0.imageURL,
+                    performanceColors: $3.color.jsonGroupArray()
+                )
+            }
+
+        await withErrorReporting {
+            try await $artists.load(artistsSearchQuery)
+        }
+    }
+
 }
 
 
@@ -61,6 +74,11 @@ struct ArtistsListView: View {
             }
         }
         .searchable(text: $store.searchText)
+        .task(id: store.searchText) {
+            await withDependencies(from: store) { @Sendable in
+                await store.searchTextDidChange()
+            }
+        }
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
         .navigationTitle("Artists")
@@ -68,11 +86,7 @@ struct ArtistsListView: View {
         .navigationDestination(for: Artist.ID.self) {
             ArtistDetailView(store: .init(artistID: $0))
         }
-        .refreshable {
-            await withErrorReporting {
-                try await store.$artists.load()
-            }
-        }
+
     }
 
     struct Row: View {
@@ -85,12 +99,12 @@ struct ArtistsListView: View {
 
         private var imageSize: CGFloat = 60
 
-
         var body: some View {
             HStack(spacing: 10) {
-                ArtistImage(imageURL: artist.imageURL)
+                Artist.ImageView(imageURL: artist.imageURL)
+                    .frame(square: 60)
 
-                StagesIndicatorView(colors: artist.performanceColors)
+                Stage.IndicatorView(colors: artist.performanceColors)
                     .frame(width: 5)
 
                 if let name = artist.name {
@@ -113,17 +127,31 @@ struct ArtistsListView: View {
             .frame(height: 60)
             .foregroundStyle(.primary)
         }
+    }
+}
 
 
-        struct ArtistImage: View {
-            var imageURL: URL?
-            var body: some View {
+extension Artist {
+    struct ImageView: View {
+        @FetchOne
+        var imageURL: URL?
+
+        init(imageURL: URL? = nil) {
+            self._imageURL = FetchOne(wrappedValue: imageURL)
+        }
+
+        init(artistID: Artist.ID) {
+            self._imageURL = FetchOne(wrappedValue: nil, Artist.find(artistID).select { $0.imageURL })
+        }
+
+        var body: some View {
+            GeometryReader { geo in
                 CachedAsyncImage(
                     requests: [
                         ImageRequest(
                             url: imageURL,
                             processors: [
-                                .resize(size: CGSize(width: 60, height: 60))
+                                .resize(size: geo.size)
                             ]
                         )
                         .withPipeline(.images)
@@ -136,9 +164,8 @@ struct ArtistsListView: View {
                         .resizable()
                         .frame(square: 30)
                 }
-                .frame(square: 60)
-                .clipped()
             }
+            .clipped()
         }
     }
 }

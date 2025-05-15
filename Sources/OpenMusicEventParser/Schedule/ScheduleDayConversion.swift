@@ -158,8 +158,24 @@ struct ScheduleDayConversion: Conversion {
 
             let schedule = input.data.2.mapValuesWithKeys { key, value in
                 value.map {
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: $0.customTitle,
+                    let title: String
+                    let subtitle: String?
+
+                    if let customTitle = $0.customTitle {
+                        title = customTitle
+                    } else if $0.artistNames.isEmpty {
+                        reportIssue("Artists is empty")
+                        title = ""
+                        
+                    }  else if $0.artistNames.count == 1 {
+                        title = $0.artistNames.first!
+                    } else {
+                        title = $0.artistNames.joined(separator: ", ")
+                    }
+
+                    return StringlyTyped.Schedule.Performance(
+                        title: title,
+                        subtitle: nil,
                         artistNames: $0.artistNames,
                         startTime: scheduleDate.atTime($0.startTime),
                         endTime: scheduleDate.atTime($0.endTime),
@@ -178,19 +194,20 @@ struct ScheduleDayConversion: Conversion {
         }
 
         func unapply(_ output: Output) throws -> Input {
-            FileContent(
-                fileName: output.metadata.date?.description ?? output.metadata.customTitle ?? "schedule",
-                data: (output.metadata.customTitle, output.metadata.date, output.stageSchedules.mapValues {
-                    $0.map {
-                        StagelessPerformance(
-                            customTitle: $0.customTitle,
-                            artistNames: $0.artistNames,
-                            startTime: ScheduleTime(from: $0.startTime),
-                            endTime: ScheduleTime(from: $0.endTime)
-                        )
-                    }
-                })
-            )
+            throw UnimplementedFailure(description: "FileContentToTupleScheduleDayConversion.unapply not implemented")
+//            FileContent(
+//                fileName: output.metadata.date?.description ?? output.metadata.customTitle ?? "schedule",
+//                data: (output.metadata.customTitle, output.metadata.date, output.stageSchedules.mapValues {
+//                    $0.map {
+//                        StagelessPerformance(
+//                            customTitle: $0.customTitle,
+//                            artistNames: $0.artistNames,
+//                            startTime: ScheduleTime(from: $0.startTime),
+//                            endTime: ScheduleTime(from: $0.endTime)
+//                        )
+//                    }
+//                })
+//            )
         }
     }
 }

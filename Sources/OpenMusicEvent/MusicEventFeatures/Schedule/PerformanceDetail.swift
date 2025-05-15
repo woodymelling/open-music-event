@@ -9,10 +9,20 @@ import SwiftUI
 import SharingGRDB
 
 extension Artist {
+    @Selection
     struct Simple: Codable {
         var id: Artist.ID
         var name: String
         var imageURL: URL?
+    }
+
+
+    static let simple = Artist.select {
+        Artist.Simple.Columns(
+            id: $0.id,
+            name: $0.name,
+            imageURL: $0.imageURL
+        )
     }
 }
 
@@ -29,9 +39,9 @@ struct PerformanceDetail: Identifiable {
 
     @Column(as: Date.ISO8601Representation.self)
     public let endTime: Date
-//
-//    @Column(as: [Artist.Simple].JSONRepresentation.self)
-//    public let artists: [Artist.Simple]
+
+    @Column(as: [Artist.ID].JSONRepresentation.self)
+    public let artists: [Artist.ID]
 
     public let stageColor: Color
     public let stageName: String
@@ -43,12 +53,13 @@ struct PerformanceDetail: Identifiable {
         stageID: .init(0),
         startTime: Date(),
         endTime: Date(),
-//        artists: [],
+        artists: [],
         stageColor: .gray,
         stageName: "",
         stageImageURL: nil
     )
 }
+
 
 extension Performance {
     public struct ScheduleDetailView: View {
@@ -66,10 +77,11 @@ extension Performance {
                 .select {
                     PerformanceDetail.Columns(
                         id: $0.id,
-                        title: $0.customTitle ?? "",
+                        title: $0.title,
                         stageID: $0.stageID,
                         startTime: $0.startTime,
                         endTime: $0.endTime,
+                        artists: $2.id.jsonGroupArray(),
                         stageColor: $3.color,
                         stageName: $3.name,
                         stageImageURL: $3.iconImageURL
@@ -91,34 +103,67 @@ extension Performance {
         }
 
         public var body: some View {
-            HStack(alignment: .top) {
-                // Artist Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(performance.title)
-                        .font(.title2.bold())
+            VStack {
+                Text(performance.title)
+                    .lineLimit(nil)
+                    .multilineTextAlignment(.center)
+                    .font(.largeTitle.weight(.bold))
 
-                    Label {
-                        VStack(alignment: .leading) {
-                            Text(timeIntervalLabel)
-                            Text(performance.startTime.formatted(.daySegment))
-                        }
-                    } icon: {
-                        Image(systemName: "clock")
+                HStack {
+                    // Artist Section
+    //                ArtistsListView.Row.ArtistImage(id: performance.)
+    //                 StageIconView(stageID: performance.stageID)
+    //                     .frame(square: 60)
+    //                     .offset(x: -30)Simple
+
+                    if let firstArtistID = performance.artists.first {
+                        Artist.ImageView(artistID: firstArtistID)
+                            .frame(square: 60)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
-                }
 
-                Spacer(minLength: 24)
+                    VStack(alignment: .center, spacing: 16) {
 
-                // Stage Section
-                VStack(alignment: .center, spacing: 8) {
+                        VStack {
+                            Text(performance.startTime.formatted(.daySegment))
+    //                            .font(.thin)
+                                .fontWeight(.thin)
+
+                            Label {
+                                Text(timeIntervalLabel)
+                                    .textCase(.lowercase)
+                                    .fontWeight(.bold)
+                            } icon: {
+                                Image(systemName: "clock")
+                            }
+
+
+                            Text(performance.stageName)
+                                .fontWeight(.thin)
+                        }
+
+    //                        .offset(x: 30)
+
+//                            .font(.title)
+//                            .font(.)
+//                            .fontWeight(.thin)
+                    }
+
+    //                Spacer(minLength: 24)
+
+
                     StageIconView(stageID: performance.stageID)
                         .frame(square: 60)
+                        .background {
+                            Circle()
+                                .fill(performance.stageColor)
+                                .shadow()
+                        }
+    //
 
-                    Text(performance.stageName)
-                        .font(.subheadline.bold())
-                        .multilineTextAlignment(.trailing)
                 }
             }
+
             .padding()
             .background(
                 AnimatedMeshView()
@@ -126,7 +171,7 @@ extension Performance {
                 .opacity(0.25)
             )
             .environment(\.meshBaseColors, [performance.stageColor])
-            .background(.ultraThinMaterial)
+//            .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
@@ -160,11 +205,12 @@ extension PerformanceDetail {
             id: 1,
             title: "Overgrowth",
             stageID: 1,
-            startTime: .now,
-            endTime: .now.addingTimeInterval(60 * 45),
-//            artists: [
+            startTime: Date(hour: 22, minute: 30)!,
+            endTime: Date(hour: 23, minute: 30)!,
+            artists: [
+                1
 //                .init(id: 1, name: "Overgrowth", imageURL: nil),
-//            ],
+            ],
             stageColor: .purple,
             stageName: "The Hallow",
             stageImageURL: Stage.previewValues.first?.iconImageURL

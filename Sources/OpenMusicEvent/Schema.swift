@@ -178,7 +178,9 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     @Column(as: Date.ISO8601Representation.self)
     public let endTime: Date
 
-    public let customTitle: String?
+    public let title: String
+//    public let subtitle: String?
+
     public let description: String?
 
 
@@ -335,7 +337,7 @@ extension Performance {
                 stageID: $1.id,
                 startTime: $0.startTime,
                 endTime: $0.endTime,
-                customTitle: $0.customTitle,
+                title: $0.title,
                 stageColor: $1.color
             )
         }

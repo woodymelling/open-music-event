@@ -116,7 +116,7 @@ func appDatabase() throws -> any DatabaseWriter {
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "stageID" INTEGER NOT NULL,
             "scheduleID" INTEGER,
-            "customTitle" TEXT,
+            "title" TEXT NOT NULL,
             "description" TEXT,
             "startTime" TEXT NOT NULL,
             "endTime" TEXT NOT NULL,

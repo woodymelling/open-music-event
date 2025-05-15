@@ -24,7 +24,7 @@ public struct PerformanceDetailRow: View {
         @Column(as: Date.ISO8601Representation.self)
         public let endTime: Date
 
-        public let customTitle: String?
+        public let title: String
 
         public let stageColor: Color
     }
@@ -44,28 +44,18 @@ public struct PerformanceDetailRow: View {
 
     public var body: some View {
         HStack(spacing: 10) {
-            StagesIndicatorView(colors: [performance.stageColor])
+            Stage.IndicatorView(color: performance.stageColor)
                 .frame(width: 5)
 
             StageIconView(stageID: performance.stageID)
                 .frame(square: 60)
 
-            if let title = self.performance.customTitle {
-                VStack(alignment: .leading) {
-                    Text(title)
+            VStack(alignment: .leading) {
+                Text(performance.title)
 
-                    Text(timeIntervalLabel + " " + performance.startTime.formatted(.daySegment))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            } else {
-                VStack(alignment: .leading) {
-                    Text(timeIntervalLabel)
-
-                    Text(performance.startTime, format: .daySegment)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+                Text(timeIntervalLabel + " " + performance.startTime.formatted(.daySegment))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Spacer()

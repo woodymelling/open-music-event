@@ -31,6 +31,7 @@ extension Performance {
     static let withArtists = group(by: \.id)
         .join(Performance.Artists.all) { $0.id == $1.performanceID }
         .join(Artist.all) { $1.artistID.eq($2.id) }
+    
 }
 
 @Selection
@@ -95,16 +96,15 @@ extension ScheduleView {
 
                 let performancesQuery = Performance.all
                     .for(schedule: selectedSchedule, at: self.id)
-                    .withArtists
-                    .join(Stage.all) { $0.stageID.eq($3.id) }
+                    .join(Stage.all) { $0.stageID.eq($1.id) }
                     .select {
                         PerformanceTimelineCard.Columns(
                             id: $0.id,
-                            title: $0.customTitle ?? $2.name.groupConcat(", ") ?? "Blah",
+                            title: $0.title,
                             startTime: $0.startTime,
                             endTime: $0.endTime,
                             stageID: $0.stageID,
-                            stageColor: $3.color
+                            stageColor: $1.color
                         )
                     }
 

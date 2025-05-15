@@ -53,7 +53,7 @@ class ArtistDetail {
                     stageID: $2.id,
                     startTime: $1.startTime,
                     endTime: $1.endTime,
-                    customTitle: $1.customTitle,
+                    title: $1.title,
                     stageColor: $2.color
                 )
             }

@@ -28,7 +28,7 @@ let package = Package(
         .package(url: "https://github.com/woodymelling/swift-image-caching", branch: "trunk"),
         .package(url: "https://github.com/woodymelling/swift-file-tree", from: "0.2.0"),
         .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
-        .package(url: "https://github.com/vapor-community/Zip.git", from: "2.0.0"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation", from: "0.9.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
 
         .package(url: "https://github.com/woodymelling/swiftui-customizable-tab-view", branch: "main"),
@@ -38,7 +38,7 @@ let package = Package(
             name: "OpenMusicEvent",
             dependencies: [
                 .product(name: "SharingGRDB", package: "sharing-grdb"),
-                .product(name: "Zip", package: "Zip"),
+                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
                 .product(name: "FileTree", package: "swift-file-tree"),
                 .product(name: "ImageCaching", package: "swift-image-caching"),
                 .product(name: "Yams", package: "Yams"),

@@ -8,49 +8,130 @@
 import SwiftUI
 
 
+extension EnvironmentValues {
+    @Entry
+    var scheduleCardStyle: ScheduleCardStyle = .opaque
+}
+
+enum ScheduleCardStyle {
+    case transparent
+    case opaque
+}
+
 public struct ScheduleCardBackground<Content: View>: View {
     var isSelected: Bool
     var color: Color
-    var content: () -> Content
+    var content: Content
 
-    public init(color: Color, isSelected: Bool = false, @ViewBuilder content: @escaping () -> Content) {
+    public init(color: Color, isSelected: Bool = false, @ViewBuilder content: () -> Content) {
         self.isSelected = isSelected
         self.color = color
-        self.content = content
+        self.content = content()
     }
 
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.scheduleCardStyle) var cardColorStyle
 
     public var body: some View {
-        HStack(alignment: .top) {
-            Rectangle()
-                .fill(color)
-                .frame(width: 5)
+        switch cardColorStyle {
+        case .transparent:
+            TransparentScheduleCardBackground(color: color, isSelected: isSelected, content: content)
+        case .opaque:
+            OpaqueScheduleCardBackground(color: color, isSelected: isSelected, content: content)
+        }
+    }
 
-            GeometryReader { _ in
-                content()
-                    .brightness(colorScheme == .light ? -0.2 : 0)
+
+    struct TransparentScheduleCardBackground: View {
+        var isSelected: Bool
+        var color: Color
+        var content: Content
+
+        public init(color: Color, isSelected: Bool = false, content: Content) {
+            self.isSelected = isSelected
+            self.color = color
+            self.content = content
+        }
+
+        @Environment(\.colorScheme) var colorScheme
+
+        public var body: some View {
+            HStack(alignment: .top) {
+                Rectangle()
+                    .fill(color)
+                    .frame(width: 5)
+
+                GeometryReader { _ in
+                    content
+                        .brightness(colorScheme == .light ? -0.2 : 0)
+                }
+            }
+            .background {
+                /*
+                 We have a few goals for this color:
+                    1. We want to derive a few different colors from a single color
+                    2. The text color needs to be readable on top of the background color
+                    3. The background color should be slightly transparent, allowing the hour lines on the schedule to be visible through the card
+                 */
+                Rectangle()
+                    .fill(color.opacity(isSelected ? 1 : 0.3))
+                    .background { Color(.systemBackground).opacity(0.8)}
+
+            }
+            .foregroundStyle(isSelected ? .white : color)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .animation(.easeInOut(duration: 0.2), value: isSelected)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            // This is to give a little bit of space between cards that bump against each other,
+            // It makes it easier to differentiate between the
+            .padding(.bottom, 0.2)
+        }
+    }
+
+
+    struct OpaqueScheduleCardBackground: View {
+        var isSelected: Bool
+        var color: Color
+        var content: Content
+
+        public init(color: Color, isSelected: Bool = false, content: Content) {
+            self.isSelected = isSelected
+            self.color = color
+            self.content = content
+        }
+
+        public var body: some View {
+            VStack(alignment: .leading, spacing: 0) {
+                Rectangle()
+                    .fill(.white)
+                    .frame(height: 1)
+                    .opacity(0.25)
+
+                HStack(alignment: .top) {
+                    Rectangle()
+                        .fill(.white)
+                        .frame(width: 5)
+                        .opacity(0.25)
+
+                    content
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    //                        .glow(color: isSelected ? .white : .clear, radius: 1)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            }
+            .clipped()
+            .frame(maxWidth: .infinity)
+            .background(color)
+            .overlay {
+                if isSelected {
+                    Rectangle()
+                        .stroke(.white, lineWidth: 1)
+                    //                        .glow(color: .white, radius: 2)
+                }
             }
         }
-        .background {
-            /*
-             We have a few goals for this color:
-                1. We want to derive a few different colors from a single color
-                2. The text color needs to be readable on top of the background color
-                3. The background color should be slightly transparent, allowing the hour lines on the schedule to be visible through the card
-             */
-            Rectangle()
-                .fill(color.opacity(isSelected ? 1 : 0.3))
-                .background { Color(.systemBackground).opacity(0.8)}
-
-        }
-        .foregroundStyle(isSelected ? .white : color)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        // This is to give a little bit of space between cards that bump against each other,
-        // It makes it easier to differentiate between the 
-        .padding(.bottom, 0.2)
     }
 }
 

@@ -44,6 +44,7 @@ extension Stage {
         )
     }
 }
+
 public struct StageIconView: View {
     public init(stageID: Stage.ID) {
         _stage = FetchOne(wrappedValue: .placeholder, Stage.find(stageID))
@@ -104,9 +105,13 @@ public struct CachedAsyncIcon<Content: View>: View {
     @State var hasTransparency = true
 
     public var body: some View {
-        CachedAsyncImage(url: url) {
-            $0.resizable()
-                .renderingMode(hasTransparency ? .template : .original)
+        // TODO: Needs
+        CachedAsyncImage(url: url) { @MainActor in
+            $0
+                .resizable()
+                .renderingMode(.template)
+                .resizable()
+//                .renderingMode(hasTransparency ? .template : .original)
                 .aspectRatio(contentMode: .fit)
                 .frame(alignment: .center)
 

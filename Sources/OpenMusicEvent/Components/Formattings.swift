@@ -18,7 +18,7 @@ struct PerformanceTimeStyle: FormatStyle {
     typealias FormatOutput = String
 
     func format(_ value: Range<Date>) -> String {
-        var timeFormat = Date.FormatStyle.dateTime.hour().minute()
+        var timeFormat = Date.FormatStyle.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute()
         timeFormat.timeZone = NSTimeZone.default
 
         return "\(value.lowerBound.formatted(timeFormat)) - \(value.upperBound.formatted(timeFormat))"

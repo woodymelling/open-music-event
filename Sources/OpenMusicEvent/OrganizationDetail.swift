@@ -8,7 +8,6 @@
 import Foundation
 import Observation
 import SwiftUI
-import Zip
 import Dependencies
 import OSLog
 import ImageCaching
