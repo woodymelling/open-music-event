@@ -330,7 +330,7 @@ extension Performance {
     static let performanceDetails = Performance
         .withStage
         .select {
-            ArtistDetail.ArtistPerformance.Columns(
+            PerformanceDetailRow.ArtistPerformance.Columns(
                 id: $0.id,
                 stageID: $1.id,
                 startTime: $0.startTime,

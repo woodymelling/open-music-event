@@ -10,6 +10,7 @@ import SharingGRDB
 import ImageCaching
 
 
+let x = Current.artists
 @Observable
 public class ArtistsList {
 
@@ -90,7 +91,7 @@ struct ArtistsListView: View {
                 ArtistImage(imageURL: artist.imageURL)
 
                 StagesIndicatorView(colors: artist.performanceColors)
-                    .frame(width: 6)
+                    .frame(width: 5)
 
                 if let name = artist.name {
                     Text(name)

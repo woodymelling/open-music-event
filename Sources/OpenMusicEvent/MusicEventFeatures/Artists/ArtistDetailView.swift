@@ -40,27 +40,7 @@ class ArtistDetail {
 
     @ObservationIgnored
     @FetchAll
-    var performances: [ArtistPerformance]
-
-
-    @Selection
-    @Table
-    struct ArtistPerformance: Identifiable {
-        public typealias ID = OmeID<Performance>
-        public let id: ID
-        public let stageID: Stage.ID
-
-        @Column(as: Date.ISO8601Representation.self)
-        public let startTime: Date
-
-        @Column(as: Date.ISO8601Representation.self)
-        public let endTime: Date
-
-        public let customTitle: String?
-
-        public let stageColor: Color
-    }
-
+    var performances: [PerformanceDetailRow.ArtistPerformance]
 
     static let performancesQuery = { @Sendable (artistID: Artist.ID) in
         Performance.Artists
@@ -68,7 +48,7 @@ class ArtistDetail {
             .join(Performance.all) { $0.performanceID.eq($1.id) }
             .join(Stage.all) { $1.stageID.eq($2.id) }
             .select {
-                ArtistPerformance.Columns(
+                PerformanceDetailRow.ArtistPerformance.Columns(
                     id: $1.id,
                     stageID: $2.id,
                     startTime: $1.startTime,

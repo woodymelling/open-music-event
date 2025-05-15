@@ -128,6 +128,8 @@ extension ScheduleView {
                         Button("Favorite", systemImage: "heart") {
                             unimplemented()
                         }
+                    } preview: {
+                        Performance.ScheduleDetailView(id: performance.id)
                     }
 //                            .onTapGesture { store.send(.didTapCard(performance.id)) }
 //                            .id(performance.id)
