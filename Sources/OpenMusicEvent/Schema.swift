@@ -312,6 +312,7 @@ extension Color {
 
 // MARK: Queries
 
+
 extension Performance {
     static let withStage = Self.all.join(Stage.all) { $0.stageID.eq($1.id) }
     static let withColor = Self.withStage.select { ($0, $1.color) }
@@ -323,6 +324,8 @@ extension Performance {
             .join(Performance.all) { $0.performanceID == $1.id }
             .select { $1 }
     }
+
+    
 
     static let performanceDetails = Performance
         .withStage

@@ -7,22 +7,13 @@
 
 import SwiftUI
 
-struct PerformanceCard: Equatable {
-    var id: Performance.ID
-    var title: String
-    var startTime: Date
-    var endTime: Date
-    var isFavorite: Bool
-}
-
 
 struct ScheduleCardView: View {
-    let performance: PerformanceCard
+    let performance: PerformanceTimelineCard
     let isSelected: Bool
 
-
     public var body: some View {
-        ScheduleCardBackground(color: .accentColor, isSelected: isSelected) {
+        ScheduleCardBackground(color: performance.stageColor, isSelected: isSelected) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     Text(performance.title)

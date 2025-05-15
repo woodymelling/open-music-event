@@ -52,10 +52,6 @@ public struct StageIconView: View {
     @FetchOne
     var stage: Stage
 
-    var stageColor: Color {
-        .accentColor
-    }
-
     @Environment(\.colorScheme) var colorScheme
 
     public var body: some View {
@@ -64,7 +60,6 @@ public struct StageIconView: View {
             placeholder: {
                 DefaultStageIcon(stage: stage)
         })
-        .foregroundStyle(colorScheme == .light ? stageColor : .white)
     }
 }
 
@@ -122,7 +117,6 @@ public struct CachedAsyncIcon<Content: View>: View {
 }
 
 extension URLCache {
-
     static let iconCache = URLCache(memoryCapacity: 512_000_000, diskCapacity: 10_000_000_000)
 }
 

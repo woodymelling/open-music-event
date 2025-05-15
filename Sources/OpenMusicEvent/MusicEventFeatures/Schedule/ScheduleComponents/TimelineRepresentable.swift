@@ -16,6 +16,10 @@ public protocol TimelineCard: Equatable, Identifiable, DateIntervalRepresentable
     var groupWidth: Range<Int> { get }
 }
 
+public extension TimelineCard {
+    var groupWidth: Range<Int> { 1..<1 }
+}
+
 public struct TimelineWrapper<Value: Identifiable & Equatable & DateIntervalRepresentable>: TimelineCard, Equatable, Identifiable {
     public var groupWidth: Range<Int>
     public var item: Value

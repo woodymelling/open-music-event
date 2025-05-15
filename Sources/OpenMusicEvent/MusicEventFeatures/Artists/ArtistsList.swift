@@ -90,7 +90,7 @@ struct ArtistsListView: View {
                 ArtistImage(imageURL: artist.imageURL)
 
                 StagesIndicatorView(colors: artist.performanceColors)
-                    .frame(width: 5)
+                    .frame(width: 6)
 
                 if let name = artist.name {
                     Text(name)

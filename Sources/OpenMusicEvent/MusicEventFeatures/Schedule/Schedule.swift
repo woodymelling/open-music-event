@@ -18,6 +18,18 @@ import SwiftUI
 import Dependencies
 import SharingGRDB
 
+
+extension SharedKey where Self == InMemoryKey<Stage.ID?> {
+    static var selectedStage: Self {
+        .inMemory("selectedStage")
+    }
+}
+
+extension SharedKey where Self == InMemoryKey<Schedule.ID?> {
+    static var selectedSchedule: Self {
+        .inMemory("selectedSchedule")
+    }
+}
 @MainActor
 @Observable
 public class ScheduleFeature {
@@ -25,12 +37,15 @@ public class ScheduleFeature {
         
     }
 
+
+    var singleStageAtOnceFeature = ScheduleView.SingleStageAtOnceView.ViewModel()
+
     @ObservationIgnored
-    @Shared(.inMemory("selectedStage"))
+    @Shared(.selectedStage)
     public var selectedStage: Stage.ID?
 
     @ObservationIgnored
-    @Shared(.inMemory("selectedSchedule"))
+    @Shared(.selectedSchedule)
     public var selectedSchedule: Schedule.ID?
 
 
@@ -83,7 +98,7 @@ public struct ScheduleView: View {
     public var body: some View {
         Group {
             if interfaceOrientation.isPortrait {
-                SingleStageAtOnceView(store: store)
+                SingleStageAtOnceView(store: store.singleStageAtOnceFeature)
             } else {
                 AllStagesAtOnceView(store: store)
             }
