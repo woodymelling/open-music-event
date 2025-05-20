@@ -40,12 +40,15 @@ struct PerformanceDetail: Identifiable {
     @Column(as: Date.ISO8601Representation.self)
     public let endTime: Date
 
-    @Column(as: [Artist.ID].JSONRepresentation.self)
-    public let artists: [Artist.ID]
-
     public let stageColor: Color
     public let stageName: String
     public let stageImageURL: URL?
+
+    @Selection
+    struct SimpleArtist: Codable {
+        var id: Artist.ID
+        var name: String
+    }
 
     static let empty: Self = .init(
         id: .init(0),
@@ -53,49 +56,56 @@ struct PerformanceDetail: Identifiable {
         stageID: .init(0),
         startTime: Date(),
         endTime: Date(),
-        artists: [],
         stageColor: .gray,
         stageName: "",
         stageImageURL: nil
     )
+
+
+    static let find = { @Sendable (id: Performance.ID) in
+        Performance
+            .find(id)
+            .join(Stage.all) { $0.stageID.eq($1.id) }
+            .select {
+                PerformanceDetail.Columns(
+                    id: $0.id,
+                    title: $0.title,
+                    stageID: $0.stageID,
+                    startTime: $0.startTime,
+                    endTime: $0.endTime,
+                    stageColor: $1.color,
+                    stageName: $1.name,
+                    stageImageURL: $1.iconImageURL
+                )
+            }
+    }
 }
 
 
 extension Performance {
     public struct ScheduleDetailView: View {
 
-        init(performance: PerformanceDetail) {
+        init(performance: PerformanceDetail, performingArtists: [Artist]) {
             self._performance = FetchOne(wrappedValue: performance)
+            self._performingArtists = FetchAll(wrappedValue: performingArtists)
         }
 
         init(id: Performance.ID) {
-
-            let query = Performance
-                .find(id)
-                .withArtists
-                .join(Stage.all) { $0.stageID.eq($3.id) }
-                .select {
-                    PerformanceDetail.Columns(
-                        id: $0.id,
-                        title: $0.title,
-                        stageID: $0.stageID,
-                        startTime: $0.startTime,
-                        endTime: $0.endTime,
-                        artists: $2.id.jsonGroupArray(),
-                        stageColor: $3.color,
-                        stageName: $3.name,
-                        stageImageURL: $3.iconImageURL
-                    )
-                }
-
-            self._performance = FetchOne(
-                wrappedValue: .empty,
-                query
+            self._performance = FetchOne(wrappedValue: .empty, PerformanceDetail.find(id))
+            self._performingArtists = FetchAll(
+                Performance.find(id)
+                    .join(Performance.Artists.all) { $0.id == $1.performanceID }
+                    .join(Artist.all) { $1.artistID.eq($2.id) }
+                    .select { $2 }
             )
         }
 
         @FetchOne
         var performance: PerformanceDetail
+
+
+        @FetchAll
+        var performingArtists: [Artist]
 
         var timeIntervalLabel: String {
             (performance.startTime..<performance.endTime)
@@ -105,19 +115,17 @@ extension Performance {
         public var body: some View {
             VStack {
                 Text(performance.title)
+                    .scaledToFill()
+                    .minimumScaleFactor(0.5)
+                    .frame(maxWidth: .infinity)
                     .lineLimit(nil)
                     .multilineTextAlignment(.center)
                     .font(.largeTitle.weight(.bold))
 
                 HStack {
-                    // Artist Section
-    //                ArtistsListView.Row.ArtistImage(id: performance.)
-    //                 StageIconView(stageID: performance.stageID)
-    //                     .frame(square: 60)
-    //                     .offset(x: -30)Simple
 
-                    if let firstArtistID = performance.artists.first {
-                        Artist.ImageView(artistID: firstArtistID)
+                    if performingArtists.count == 1, let firstArtist = performingArtists.first {
+                        Artist.ImageView(artistID: firstArtist.id)
                             .frame(square: 60)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
@@ -136,7 +144,6 @@ extension Performance {
                             } icon: {
                                 Image(systemName: "clock")
                             }
-
 
                             Text(performance.stageName)
                                 .fontWeight(.thin)
@@ -159,11 +166,8 @@ extension Performance {
                                 .fill(performance.stageColor)
                                 .shadow()
                         }
-    //
-
                 }
             }
-
             .padding()
             .background(
                 AnimatedMeshView()
@@ -182,17 +186,20 @@ extension Performance {
         $0.defaultDatabase = try appDatabase()
     }
 
-    return Performance.ScheduleDetailView(performance: .preview)
-        .contextMenu {
-            Button("Add to Favorites") {}
-        }
-        .padding()
+    return Performance.ScheduleDetailView(
+        performance: .preview,
+        performingArtists: []
+    )
+        
 }
 
 #Preview("Material Popover") {
     ZStack {
         Color.black.opacity(0.2).ignoresSafeArea()
-        Performance.ScheduleDetailView(performance: .preview)
+        Performance.ScheduleDetailView(
+            performance: .preview,
+            performingArtists: []
+        )
             .padding()
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .padding()
@@ -207,10 +214,6 @@ extension PerformanceDetail {
             stageID: 1,
             startTime: Date(hour: 22, minute: 30)!,
             endTime: Date(hour: 23, minute: 30)!,
-            artists: [
-                1
-//                .init(id: 1, name: "Overgrowth", imageURL: nil),
-            ],
             stageColor: .purple,
             stageName: "The Hallow",
             stageImageURL: Stage.previewValues.first?.iconImageURL

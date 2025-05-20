@@ -119,7 +119,6 @@ struct PressAndReleaseModifier: ViewModifier {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged{ state in
-
                         if let animation = animation {
                             withAnimation(animation) {
                                 pressing = true

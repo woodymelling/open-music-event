@@ -30,7 +30,7 @@ struct OrganizationListView: View {
         var destination: Destination?
 
         func didTapOrganization(id: Organization.ID) {
-            self.destination = .organizationDetail(.init(id: id))
+            self.destination = .organizationDetail(.init(url: id))
         }
 
         func didTapAddOrganizationButton() {

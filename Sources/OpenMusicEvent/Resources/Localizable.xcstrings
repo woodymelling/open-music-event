@@ -207,6 +207,7 @@
     },
     "Favorite" : {
       "comment" : "Item editor title label for marking the item as a favorite",
+      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -401,9 +402,6 @@
           }
         }
       }
-    },
-    "Notify Me" : {
-
     },
     "offset: %lf" : {
 

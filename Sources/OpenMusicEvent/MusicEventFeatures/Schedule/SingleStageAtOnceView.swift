@@ -26,37 +26,6 @@ extension Where<Performance> {
     }
 }
 
-
-extension Performance {
-    static let withArtists = group(by: \.id)
-        .join(Performance.Artists.all) { $0.id == $1.performanceID }
-        .join(Artist.all) { $1.artistID.eq($2.id) }
-    
-}
-
-@Selection
-struct PerformanceTimelineCard: Identifiable, TimelineCard, Codable {
-    var id: Performance.ID
-
-    var title: String
-
-    @Column(as: Date.ISO8601Representation.self)
-    var startTime: Date
-
-    @Column(as: Date.ISO8601Representation.self)
-    var endTime: Date
-
-    var stageID: Stage.ID
-    var stageColor: Color
-
-
-    var dateInterval: DateInterval {
-        DateInterval(start: startTime, end: endTime)
-    }
-}
-
-
-
 extension ScheduleView {
     public struct SingleStageAtOnceView: View {
         @Observable @MainActor
@@ -90,21 +59,33 @@ extension ScheduleView {
             @FetchAll
             var performances: [PerformanceTimelineCard]
 
+            @Selection
+            struct PerformanceTimelineCard: Identifiable, TimelineCard, Codable {
+                var id: Performance.ID
+
+                @Column(as: Date.ISO8601Representation.self)
+                var startTime: Date
+
+                @Column(as: Date.ISO8601Representation.self)
+                var endTime: Date
+
+                var dateInterval: DateInterval {
+                    DateInterval(start: startTime, end: endTime)
+                }
+            }
+
+
             func loadPerformances() async throws {
                 guard let selectedSchedule
                 else { return }
 
                 let performancesQuery = Performance.all
                     .for(schedule: selectedSchedule, at: self.id)
-                    .join(Stage.all) { $0.stageID.eq($1.id) }
                     .select {
                         PerformanceTimelineCard.Columns(
                             id: $0.id,
-                            title: $0.title,
                             startTime: $0.startTime,
                             endTime: $0.endTime,
-                            stageID: $0.stageID,
-                            stageColor: $1.color
                         )
                     }
 
@@ -114,25 +95,7 @@ extension ScheduleView {
 
             var body: some View {
                 SchedulePageView(performances) { performance in
-                    ScheduleCardView(
-                        performance: performance,
-                        isSelected: false,
-//                                isFavorite: false
-                    )
-                    .contextMenu {
-
-                        Button("Notify Me", systemImage: "bell") {
-                            unimplemented()
-                        }
-
-                        Button("Favorite", systemImage: "heart") {
-                            unimplemented()
-                        }
-                    } preview: {
-                        Performance.ScheduleDetailView(id: performance.id)
-                    }
-//                            .onTapGesture { store.send(.didTapCard(performance.id)) }
-//                            .id(performance.id)
+                    Performance.ScheduleCardView(id: performance.id)
                 }
                 .tag(id)
                 .task(id: selectedSchedule) {

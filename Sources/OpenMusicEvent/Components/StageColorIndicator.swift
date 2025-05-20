@@ -8,7 +8,7 @@
 import SwiftUI
 
 public extension Stage {
-    public struct IndicatorView: View {
+    struct IndicatorView: View {
         public init(colors: [Color]) {
             self.colors = colors
         }

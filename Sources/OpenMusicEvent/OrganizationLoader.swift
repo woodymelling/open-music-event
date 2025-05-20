@@ -156,7 +156,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     color: Color(hex: stage.color)
                 )
 
-                let stageID = try Stage.insert(stageDraft)
+                let stageID = try Stage.upsert(stageDraft)
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -173,7 +173,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     links: artist.links.map { $0.draft }
                 )
 
-                let artistID = try Artist.insert(artistDraft)
+                let artistID = try Artist.upsert(artistDraft)
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -189,7 +189,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                     customTitle: schedule.metadata.customTitle
                 )
 
-                let scheduleID = try Schedule.insert(draft)
+                let scheduleID = try Schedule.upsert(draft)
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -197,6 +197,9 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
 
                     for performance in stageSchedule.value {
                         let draft = Performance.Draft(
+                            // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
+                            // Maybe we increment a counter if there are multiple?
+                            id: (String(scheduleID) + stageSchedule.key + performance.title).stableHash,
                             stageID: stageNameIDMapping[stageSchedule.key]!,
                             scheduleID: scheduleID,
                             startTime: performance.startTime,
@@ -205,7 +208,7 @@ func downloadAndStoreOrganization(id: Organization.ID) async throws {
                             description: nil
                         )
 
-                        let performanceID = try Performance.insert(draft)
+                        let performanceID = try Performance.upsert(draft)
                             .returning(\.id)
                             .fetchOne(db)!
 

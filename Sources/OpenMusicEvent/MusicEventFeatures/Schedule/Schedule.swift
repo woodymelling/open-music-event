@@ -54,7 +54,7 @@ public class ScheduleFeature {
     public var stages: [Stage]
 
     @ObservationIgnored
-    @FetchAll(Current.schedules)
+    @FetchAll(Current.schedules.order(by: \.startTime))
     public var schedules
 
     public var filteringFavorites: Bool = false

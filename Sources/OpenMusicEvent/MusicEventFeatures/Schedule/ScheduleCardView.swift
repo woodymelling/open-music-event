@@ -6,27 +6,60 @@
 //
 
 import SwiftUI
+import SharingGRDB
 
-
-struct ScheduleCardView: View {
-    let performance: PerformanceTimelineCard
-    let isSelected: Bool
-
-    public var body: some View {
-        ScheduleCardBackground(color: performance.stageColor, isSelected: isSelected) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading) {
-                    Text(performance.title)
-                    Text(performance.startTime..<performance.endTime, format: .performanceTime)
-                        .font(.caption)
-                }
-
-                Spacer()
-            }
-            .padding(.top, 2)
-
+extension Performance {
+    struct ScheduleCardView: View {
+        init(performance: PerformanceDetail, performingArtists: [Artist]) {
+            self._performance = FetchOne(wrappedValue: performance)
+            self._performingArtists = FetchAll(wrappedValue: performingArtists)
         }
-        .id(performance.id)
-        .tag(performance.id)
+
+        init(id: Performance.ID) {
+            self._performance = FetchOne(wrappedValue: .empty, PerformanceDetail.find(id))
+            self._performingArtists = FetchAll(
+                Performance.find(id)
+                    .join(Performance.Artists.all) { $0.id == $1.performanceID }
+                    .join(Artist.all) { $1.artistID.eq($2.id) }
+                    .select { $2 }
+            )
+        }
+
+        @FetchOne
+        var performance: PerformanceDetail
+
+        @FetchAll
+        var performingArtists: [Artist]
+
+        let isSelected: Bool = false
+
+        public var body: some View {
+            ScheduleCardBackground(color: performance.stageColor, isSelected: isSelected) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
+                        Text(performance.title)
+                        Text(performance.startTime..<performance.endTime, format: .performanceTime)
+                            .font(.caption)
+                    }
+
+                    Spacer()
+                }
+                .padding(.top, 2)
+            }
+            .contextMenu {
+                ForEach(performingArtists) { artist in
+                    Section {
+                        Button("\(artist.name)", systemImage: "person") {
+
+                        }
+                    }
+                }
+            } preview: {
+                Performance.ScheduleDetailView(performance: performance, performingArtists: performingArtists)
+            }
+            .id(performance.id)
+            .tag(performance.id)
+        }
     }
 }
+

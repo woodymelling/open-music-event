@@ -13,14 +13,22 @@ import OSLog
 import ImageCaching
 import SharingGRDB
 
-struct OrganizationDetailView: View {
+public struct OrganizationDetailView: View {
+    public init(url: Organization.ID) {
+        self.store = ViewModel(url: url)
+    }
+
+    public init(store: ViewModel) {
+        self.store = store
+    }
+    
     @Observable
     @MainActor
     public class ViewModel {
         let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationDetails")
 
-        public init(id: Organization.ID) {
-            self.id = id
+        public init(url: Organization.ID) {
+            self.id = url
 
             _organization = FetchOne(wrappedValue: nil, Organization?.find(id))
             _events = FetchAll(
@@ -44,26 +52,19 @@ struct OrganizationDetailView: View {
         @Shared(Current.musicEventID)
         public var currentEvent
 
-        public func onAppear() async {
-//            logger.log("Fetching: \(String(describing: self.url))")
-//
-//            do {
-//                try await loadAndStoreOrganizationInfo(from: url)
-//            } catch {
-//                logger.error("Error: \(error.localizedDescription)")
-//            }
-        }
 
         public func didTapEvent(id: MusicEvent.ID) {
             logger.info("didTapEvent: \(id)")
             self.$currentEvent.withLock { $0 = id}
         }
 
-        @ObservationIgnored
-        @Dependency(DataFetchingClient.self)
-        var dataFetchingClient
-
         public func onPullToRefresh() async  {
+            await withErrorReporting {
+                try await downloadAndStoreOrganization(id: self.id)
+            }
+        }
+
+        public func onAppear() async {
             await withErrorReporting {
                 try await downloadAndStoreOrganization(id: self.id)
             }
@@ -72,13 +73,13 @@ struct OrganizationDetailView: View {
 
     @Bindable var store: ViewModel
 
-    var body: some View {
+    public var body: some View {
         Group {
             if let organization = store.organization {
                 StretchyHeaderList(
                     title: Text(organization.name),
                     stretchyContent: {
-                        OrganizationImage(organization: organization)
+                        Organization.ImageView(organization: organization)
                     },
                     listContent: {
                         Section("Events") {
@@ -96,6 +97,7 @@ struct OrganizationDetailView: View {
                 ProgressView("Loading Organization...")
             }
         }
+        .task { await store.onAppear() }
 
     }
 
@@ -110,37 +112,11 @@ struct OrganizationDetailView: View {
                 Button(action: { onTapEvent(event.id) }) {
                     EventRowView(event: event)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.navigationLink)
             }
         }
     }
 
-    struct OrganizationImage: View {
-        let organization: Organization
-
-        var body: some View {
-            CachedAsyncImage(
-                requests: [
-                    ImageRequest(
-                        url: organization.imageURL,
-                        processors: [.resize(width: 440)]
-                    ).withPipeline(.images)
-                ]
-            ) {
-                $0.resizable()
-            } placeholder: {
-                #if !SKIP
-                AnimatedMeshView()
-                    .overlay(Material.thinMaterial)
-                    .opacity(0.25)
-                #else
-                ProgressView().frame(square: 440)
-                #endif
-
-            }
-            .frame(maxWidth: .infinity)
-        }
-    }
 
     struct EventRowView: View {
         var event: MusicEvent
@@ -169,59 +145,30 @@ struct OrganizationDetailView: View {
         }
 
         var body: some View {
-            ZStack {
-                NavigationLink(destination: { EmptyView() }, label: { EmptyView() })
-                HStack(spacing: 10) {
+            HStack(spacing: 10) {
 
-                    EventImageView(event: event)
-                        .frame(width: 60, height: 60)
+                MusicEvent.ImageView(event: event)
+                    .frame(width: 60, height: 60)
 //                    .foregroundColor(.label)
-    //                .invertForLightMode()
+//                .invertForLightMode()
 
-                    VStack(alignment: .leading) {
-                        Text(event.name)
-                        if let eventDateString {
-                            Text(eventDateString)
-                                .lineLimit(1)
-                                .font(.caption2)
-                        }
-                        Text(String(event.id))
+                VStack(alignment: .leading) {
+                    Text(event.name)
+                    if let eventDateString {
+                        Text(eventDateString)
+                            .lineLimit(1)
                             .font(.caption2)
-                            .foregroundStyle(.tertiary)
                     }
-
-                    Spacer()
+                    Text(String(event.id))
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 }
-            }
-        }
 
-        struct EventImageView: View {
-            var event: MusicEvent
-
-            var body: some View {
-                CachedAsyncImage(
-                    requests: [
-                        ImageRequest(
-                            url: event.imageURL,
-                            processors: [
-                                .resize(size: CGSize(width: 60, height: 60))
-                            ]
-                        )
-                        .withPipeline(.images)
-                    ]
-                ) {
-                    $0.resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    ProgressView()
-                }
-                .frame(width: 60, height: 60)
-                .clipped()
+                Spacer()
             }
         }
     }
 }
-
 
 import Sharing
 extension SharedKey where Self == AppStorageKey<MusicEvent.ID?> {

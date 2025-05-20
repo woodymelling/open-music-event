@@ -29,6 +29,31 @@ public struct OpenMusicEventAppEntryPoint: View {
     }
 }
 
+public struct WhiteLabeledOrganizationEntryPoint: View {
+    public init(url: Organization.ID) {
+        self.url = url
+    }
+
+    @ObservationIgnored
+    @Shared(.eventID) var eventID
+
+    var url: Organization.ID
+
+    public var body: some View {
+        Group {
+            if let eventID {
+                MusicEventViewer(id: eventID)
+                    .environment(\.exitEvent) {
+                        $eventID.withLock { $0 = nil }
+                    }
+                    .transition(.slide.animation(.snappy))
+            } else {
+                OrganizationDetailView(url: self.url)
+            }
+        }
+    }
+}
+
 extension EnvironmentValues {
     @Entry var exitEvent: () -> Void = { unimplemented() }
 }

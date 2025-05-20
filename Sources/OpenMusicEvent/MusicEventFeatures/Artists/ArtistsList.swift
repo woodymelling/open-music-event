@@ -130,46 +130,6 @@ struct ArtistsListView: View {
     }
 }
 
-
-extension Artist {
-    struct ImageView: View {
-        @FetchOne
-        var imageURL: URL?
-
-        init(imageURL: URL? = nil) {
-            self._imageURL = FetchOne(wrappedValue: imageURL)
-        }
-
-        init(artistID: Artist.ID) {
-            self._imageURL = FetchOne(wrappedValue: nil, Artist.find(artistID).select { $0.imageURL })
-        }
-
-        var body: some View {
-            GeometryReader { geo in
-                CachedAsyncImage(
-                    requests: [
-                        ImageRequest(
-                            url: imageURL,
-                            processors: [
-                                .resize(size: geo.size)
-                            ]
-                        )
-                        .withPipeline(.images)
-                    ]
-                ) {
-                    $0.resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Image(systemName: "person.fill")
-                        .resizable()
-                        .frame(square: 30)
-                }
-            }
-            .clipped()
-        }
-    }
-}
-
 extension View {
     func frame(square: CGFloat, alignment: Alignment = .center) -> some View {
         self.frame(width: square, height: square, alignment: alignment)

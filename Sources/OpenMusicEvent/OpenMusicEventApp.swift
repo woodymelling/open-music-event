@@ -11,9 +11,7 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
 /* SKIP @bridge */public struct OpenMusicEventRootView : View {
     // SKIP @bridge
     public init() {
-        try! prepareDependencies {
-            $0.defaultDatabase = try appDatabase()
-        }
+        OpenMusicEvent.prepareDependencies()
     }
 
     public var body: some View {
@@ -55,5 +53,14 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
 
     /* SKIP @bridge */public func onLowMemory() {
         logger.debug("onLowMemory")
+    }
+}
+
+
+public enum OpenMusicEvent {
+    public static func prepareDependencies() {
+        try! Dependencies.prepareDependencies {
+            $0.defaultDatabase = try appDatabase()
+        }
     }
 }
