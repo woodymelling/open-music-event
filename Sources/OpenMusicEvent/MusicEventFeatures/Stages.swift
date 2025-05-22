@@ -106,7 +106,15 @@ public struct CachedAsyncIcon<Content: View>: View {
 
     public var body: some View {
         // TODO: Needs
-        CachedAsyncImage(url: url) { @MainActor in
+        CachedAsyncImage(requests: [
+            ImageRequest(
+                url: url,
+                processors: [
+                    .resize(size: CGSize(width: 60, height: 60))
+                ]
+            )
+            .withPipeline(.images)
+        ]) { @MainActor in
             $0
                 .resizable()
                 .renderingMode(.template)

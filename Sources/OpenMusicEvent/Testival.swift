@@ -6,8 +6,8 @@
 //
 import Foundation
 
-public extension Organization {
-    static let wickedWoods = Organization(
+public extension Organizer {
+    static let wickedWoods = Organizer(
         url: URL(string: "https://github.com/woodymelling/wicked-woods")!,
         name: "Wicked Woods",
         imageURL: URL(string: "https://images.squarespace-cdn.com/content/v1/66eb917b86dbd460ad209478/5be5a6e6-c5ca-4271-acc3-55767c498061/WW-off_white.png?format=1500w")
@@ -17,7 +17,7 @@ public extension Organization {
 public extension MusicEvent {
     static let placeholder = MusicEvent(
         id: -1,
-        organizationURL: nil,
+        organizerURL: nil,
         name: "",
         timeZone: .current,
         startTime: nil,
@@ -32,7 +32,7 @@ public extension MusicEvent {
 public extension MusicEvent {
     static let testival = MusicEvent(
         id: 0,
-        organizationURL: Organization.wickedWoods.url,
+        organizerURL: Organizer.wickedWoods.url,
         name: "Testival",
         timeZone: .current,
         imageURL: nil,

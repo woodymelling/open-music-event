@@ -11,48 +11,63 @@ import SharingGRDB
 import ImageCaching
 import CasePaths
 
-public struct OpenMusicEventAppEntryPoint: View {
-    @ObservationIgnored
-    @Shared(.eventID) var eventID
 
-    public var body: some View {
-        if let eventID {
-            MusicEventViewer(id: eventID)
-                .environment(\.exitEvent) {
-                    $eventID.withLock { $0 = nil }
-                }
-        } else {
-            NavigationStack {
-                 OrganizationListView()
-            }
+public enum OpenMusicEvent {
+    public static func prepareDependencies() {
+        try! Dependencies.prepareDependencies {
+            $0.defaultDatabase = try appDatabase()
         }
     }
-}
 
-public struct WhiteLabeledOrganizationEntryPoint: View {
-    public init(url: Organization.ID) {
-        self.url = url
-    }
+    public struct AppEntryPoint: View {
+        @ObservationIgnored
+        @Shared(.eventID) var eventID
 
-    @ObservationIgnored
-    @Shared(.eventID) var eventID
-
-    var url: Organization.ID
-
-    public var body: some View {
-        Group {
+        public var body: some View {
             if let eventID {
                 MusicEventViewer(id: eventID)
                     .environment(\.exitEvent) {
                         $eventID.withLock { $0 = nil }
                     }
-                    .transition(.slide.animation(.snappy))
             } else {
-                OrganizationDetailView(url: self.url)
+                NavigationStack {
+                     OrganizerListView()
+                }
             }
         }
     }
+
+    public struct WhiteLabeledEntryPoint: View {
+        public init(url: Organizer.ID) {
+            self.url = url
+        }
+
+        @ObservationIgnored
+        @Shared(.eventID) var eventID
+
+        var url: Organizer.ID
+
+        public var body: some View {
+            Group {
+                if eventID == nil {
+                    OrganizerDetailView(url: self.url)
+                }
+
+                if let eventID {
+                    MusicEventViewer(id: eventID)
+                        .environment(\.exitEvent) {
+                            $eventID.withLock { $0 = nil }
+                        }
+                }
+
+            }
+            .animation(.default, value: eventID)
+        }
+    }
+
 }
+
+
 
 extension EnvironmentValues {
     @Entry var exitEvent: () -> Void = { unimplemented() }
@@ -64,5 +79,5 @@ extension EnvironmentValues {
       $0.defaultDatabase = try appDatabase()
     }
 
-    OpenMusicEventAppEntryPoint()
+    OpenMusicEvent.AppEntryPoint()
 }

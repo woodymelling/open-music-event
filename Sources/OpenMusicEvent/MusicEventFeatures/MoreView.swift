@@ -8,31 +8,31 @@ final class MoreTabFeature {
     @ObservationIgnored
     @FetchOne(
         Current.musicEvent
-             .join(Organization.select(\.name)) { $0.organizationURL.eq($1.url) }
+             .join(Organizer.select(\.name)) { $0.organizerURL.eq($1.url) }
     )
-    var organizationName: String = ""
+    var organizerName: String = ""
 
     @ObservationIgnored
     @FetchOne(Current.musicEvent)
     var musicEvent: MusicEvent = .testival
 
-    var isLoadingOrganization = false
+    var isLoadingOrganizer = false
 
     var errorMessage: String?
 
-    func didTapReloadOrganization() async {
-        guard let currentOrganizationID = musicEvent.organizationURL
+    func didTapReloadOrganizer() async {
+        guard let currentOrganizerID = musicEvent.organizerURL
         else { return }
         self.errorMessage = nil
 
-        self.isLoadingOrganization = true
+        self.isLoadingOrganizer = true
 
         do {
-            try await downloadAndStoreOrganization(id: currentOrganizationID)
-            self.isLoadingOrganization = false
+            try await downloadAndStoreOrganizer(id: currentOrganizerID)
+            self.isLoadingOrganizer = false
         } catch {
             self.errorMessage = error.localizedDescription
-            self.isLoadingOrganization = true
+            self.isLoadingOrganizer = true
 
         }
     }
@@ -45,14 +45,14 @@ struct MoreView: View {
         List {
             Button {
                 Task {
-                    await store.didTapReloadOrganization()
+                    await store.didTapReloadOrganizer()
                 }
             } label: {
                 VStack {
                     HStack {
-                        Text("Reload \(store.organizationName)")
+                        Text("Reload \(store.organizerName)")
                         Spacer()
-                        if store.isLoadingOrganization {
+                        if store.isLoadingOrganizer {
                             ProgressView()
                         }
                     }

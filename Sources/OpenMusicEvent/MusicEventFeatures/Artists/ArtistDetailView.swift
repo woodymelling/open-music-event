@@ -98,6 +98,10 @@ struct ArtistDetailView: View {
         #endif
     }
 
+    var meshColors: [Color] {
+        store.performances.map(\.stageColor)
+    }
+
     var body: some View {
         StretchyHeaderList(
             title: Text(store.artist.name),
@@ -106,13 +110,9 @@ struct ArtistDetailView: View {
             },
             listContent: {
                 ForEach(store.performances) { performance in
-                    NavigationLinkButton {
-//                        store.send(.didTapPerformance(performance.id))
-                    } label: {
-                        PerformanceDetailRow(performance: performance)
-                    }
+                    PerformanceDetailRow(performance: performance)
+                        .environment(\.meshBaseColors, [performance.stageColor])
                 }
-
 
                 if let bio = bioMarkdown {
                     Text(bio)
@@ -140,7 +140,7 @@ struct ArtistDetailView: View {
         )
         .listStyle(.plain)
         #if !Skip
-//        .environment(\.meshBaseColors, meshColors)
+        .environment(\.meshBaseColors, meshColors)
         #endif
 //        .toolbar {
 //            Toggle("Favorite", isOn: $store.favoriteArtists[store.artist.id])

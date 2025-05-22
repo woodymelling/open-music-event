@@ -57,6 +57,20 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     var headerContentWidth: CGFloat = UIScreen.main.bounds.width
 
     var body: some View {
+        if #available(iOS 18.0, *) {
+            bodyContent
+                .onScrollGeometryChange(for: CGFloat.self) {
+                    $0.contentOffset.y + $0.contentInsets.top
+                } action: { _, newValue in
+                    offset = newValue
+                }
+        } else {
+            bodyContent
+        }
+    }
+
+    @ViewBuilder
+    var bodyContent: some View {
         List {
             self.stretchyContent
                 .scaledToFill()
@@ -88,11 +102,7 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
         .navigationTitle(showNavigationBar ? self.titleContent : Text(""))
         .toolbarBackground(showNavigationBar ? .visible : .hidden)
         .animation(.default, value: self.showNavigationBar)
-        .onScrollGeometryChange(for: CGFloat.self) {
-            $0.contentOffset.y + $0.contentInsets.top
-        } action: { _, newValue in
-            offset = newValue
-        }
+        .background(.background)
     }
 
     private var topDimOverlay: some View {
@@ -180,8 +190,12 @@ struct StretchyHeaderListTitleView: View {
 
 #Preview {
     StretchyHeaderList(title: Text("Blobs Your Uncle")) {
-        AnimatedMeshView()
-            .frame(width: 500)
+        if #available(iOS 18.0, *) {
+            AnimatedMeshView()
+                .frame(width: 500)
+        } else {
+            // Fallback on earlier versions
+        }
     } listContent: {
         Text("Hello, World!")
     }
@@ -190,8 +204,12 @@ struct StretchyHeaderListTitleView: View {
 
 #Preview {
     StretchyHeaderList(title: Text("Blobs Your Uncle")) {
-        AnimatedMeshView()
-            .frame(height: 1000)
+        if #available(iOS 18.0, *) {
+            AnimatedMeshView()
+                .frame(height: 1000)
+        } else {
+            // Fallback on earlier versions
+        }
     } listContent: {
         Text("Hello, World!")
     }

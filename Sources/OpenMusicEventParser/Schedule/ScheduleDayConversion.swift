@@ -159,7 +159,6 @@ struct ScheduleDayConversion: Conversion {
             let schedule = input.data.2.mapValuesWithKeys { key, value in
                 value.map {
                     let title: String
-                    let subtitle: String?
 
                     if let customTitle = $0.customTitle {
                         title = customTitle

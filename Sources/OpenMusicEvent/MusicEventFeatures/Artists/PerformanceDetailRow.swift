@@ -8,7 +8,6 @@
 import SwiftUI
 import SharingGRDB
 
-
 public struct PerformanceDetailRow: View {
 
     @Selection
@@ -29,7 +28,6 @@ public struct PerformanceDetailRow: View {
         public let stageColor: Color
     }
 
-
     init(performance: ArtistPerformance) {
         self.performance = performance
     }
@@ -40,7 +38,6 @@ public struct PerformanceDetailRow: View {
         (performance.startTime..<performance.endTime)
             .formatted(.performanceTime)
     }
-
 
     public var body: some View {
         HStack(spacing: 10) {
@@ -58,10 +55,20 @@ public struct PerformanceDetailRow: View {
                     .foregroundColor(.secondary)
             }
 
+
             Spacer()
         }
+        .listRowBackground(
+            AnimatedMeshView()
+                .foregroundStyle(.regularMaterial)
+            
+
+        )
         .padding(.horizontal, 5)
         .frame(height: 60)
+        .contextMenu {
+            Button("View in Schedule", systemImage: "calendar") { }
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 //
-//  OrganizationDetails.swift
+//  OrganizerDetails.swift
 //  event-viewer
 //
 //  Created by Woodrow Melling on 3/25/25.
@@ -13,8 +13,8 @@ import OSLog
 import ImageCaching
 import SharingGRDB
 
-public struct OrganizationDetailView: View {
-    public init(url: Organization.ID) {
+public struct OrganizerDetailView: View {
+    public init(url: Organizer.ID) {
         self.store = ViewModel(url: url)
     }
 
@@ -25,24 +25,24 @@ public struct OrganizationDetailView: View {
     @Observable
     @MainActor
     public class ViewModel {
-        let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationDetails")
+        let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerDetails")
 
-        public init(url: Organization.ID) {
+        public init(url: Organizer.ID) {
             self.id = url
 
-            _organization = FetchOne(wrappedValue: nil, Organization?.find(id))
+            _organizer = FetchOne(wrappedValue: nil, Organizer?.find(id))
             _events = FetchAll(
                 MusicEvent
-                    .where { $0.organizationURL == id }
+                    .where { $0.organizerURL == id }
                     .order { $0.startTime.desc(nulls: .last)  }
             )
         }
 
-        public let id: Organization.ID
+        public let id: Organizer.ID
 
         @ObservationIgnored
         @FetchOne
-        public var organization: Organization?
+        public var organizer: Organizer?
 
         @ObservationIgnored
         @FetchAll
@@ -52,6 +52,7 @@ public struct OrganizationDetailView: View {
         @Shared(Current.musicEventID)
         public var currentEvent
 
+        public var showingLoadingScreen: Bool = false
 
         public func didTapEvent(id: MusicEvent.ID) {
             logger.info("didTapEvent: \(id)")
@@ -60,59 +61,97 @@ public struct OrganizationDetailView: View {
 
         public func onPullToRefresh() async  {
             await withErrorReporting {
-                try await downloadAndStoreOrganization(id: self.id)
+                try await downloadAndStoreOrganizer(id: self.id)
             }
         }
 
         public func onAppear() async {
-            await withErrorReporting {
-                try await downloadAndStoreOrganization(id: self.id)
+            if organizer == nil {
+                await withErrorReporting {
+                    self.showingLoadingScreen = true
+                    try await downloadAndStoreOrganizer(id: self.id)
+
+                    try await withThrowingTaskGroup {
+                        if let orgImageURL = organizer?.imageURL {
+                            $0.addTask {
+                                _ = try await ImagePipeline.images.image(for: orgImageURL)
+                            }
+                        }
+
+                        for event in events {
+                            if let imageURL = event.imageURL {
+                                $0.addTask {
+                                    _ = try await ImagePipeline.images.image(for: imageURL)
+                                }
+                            }
+                        }
+
+                        try await $0.waitForAll()
+                    }
+
+                    self.showingLoadingScreen = false
+                }
             }
         }
     }
 
     @Bindable var store: ViewModel
+    @Environment(\.loadingScreenImage) var loadingScreenImage
 
     public var body: some View {
         Group {
-            if let organization = store.organization {
-                StretchyHeaderList(
-                    title: Text(organization.name),
-                    stretchyContent: {
-                        Organization.ImageView(organization: organization)
-                    },
-                    listContent: {
-                        Section("Events") {
-                            EventsListView(events: store.events) { eventID in
-                                store.didTapEvent(id: eventID)
+            ZStack {
+                if let organizer = store.organizer, !store.showingLoadingScreen {
+                    StretchyHeaderList(
+                        title: Text(organizer.name),
+                        stretchyContent: {
+                            Organizer.ImageView(organizer: organizer)
+                        },
+                        listContent: {
+                            Section("Events") {
+                                EventsListView(events: store.events) { eventID in
+                                    store.didTapEvent(id: eventID)
+                                }
                             }
                         }
-                    }
-                )
-                .refreshable { await store.onPullToRefresh() }
-                .listStyle(.plain)
-            } else if let error = store.$organization.loadError {
-                Text("Error: \(error)").foregroundStyle(.red)
-            } else {
-                ProgressView("Loading Organization...")
+                    )
+                    .refreshable { await store.onPullToRefresh() }
+                    .listStyle(.plain)
+                }
+
+                if store.showingLoadingScreen {
+                    AnimatedMeshView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Material.ultraThin)
+                        .ignoresSafeArea()
+                }
+
+                if let image = loadingScreenImage, store.showingLoadingScreen {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(80)
+                        .transition(Twirl())
+                }
             }
         }
         .task { await store.onAppear() }
-
+        .animation(.default, value: store.organizer == nil)
+        .animation(.default, value: store.showingLoadingScreen)
     }
 
     struct EventsListView: View {
-
         var events: [MusicEvent]
-
         var onTapEvent: (MusicEvent.ID) -> Void
 
         var body: some View {
             ForEach(events) { event in
-                Button(action: { onTapEvent(event.id) }) {
+                NavigationLinkButton {
+                    onTapEvent(event.id)
+                } label: {
                     EventRowView(event: event)
                 }
-                .buttonStyle(.navigationLink)
             }
         }
     }
@@ -146,7 +185,6 @@ public struct OrganizationDetailView: View {
 
         var body: some View {
             HStack(spacing: 10) {
-
                 MusicEvent.ImageView(event: event)
                     .frame(width: 60, height: 60)
 //                    .foregroundColor(.label)
@@ -168,6 +206,41 @@ public struct OrganizationDetailView: View {
             }
         }
     }
+
+//    struct LoadingView: View {
+//        @State var isShowingImage = false
+//
+//
+//        var body: some View {
+//            ZStack {
+//                AnimatedMeshView()
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .background(Material.ultraThin)
+//                    .ignoresSafeArea()
+//
+//                if let image = loadingScreenImage, isShowingImage {
+//                    image
+//                        .resizable()
+//                        .aspectRatio(contentMode: .fit)
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                        .padding(80)
+//                        .transition(Twirl())
+//                }
+//            }
+//            .onAppear {
+//                withAnimation(.spring) {
+//                    isShowingImage = true
+//                }
+//            }
+//        }
+//
+//
+//    }
+
+}
+
+public extension EnvironmentValues {
+    @Entry var loadingScreenImage: Image?
 }
 
 import Sharing
@@ -233,3 +306,28 @@ extension ImagePipeline {
 let intervalFormatter = DateIntervalFormatter()
 
 
+
+#Preview {
+    prepareDependencies {
+        try! $0.defaultDatabase = appDatabase()
+    }
+
+    return OrganizerDetailView(url: .documentsDirectory)
+        .environment(\.loadingScreenImage, Image("WWVector", bundle: .module))
+}
+
+struct Twirl: Transition {
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content
+            .scaleEffect(phase.isIdentity ? 1 : 0.5)
+            .opacity(phase.isIdentity ? 1 : 0)
+            .blur(radius: phase.isIdentity ? 0 : 10)
+            .rotationEffect(
+                .degrees(
+                    phase == .willAppear ? 360 :
+                        phase == .didDisappear ? -360 : .zero
+                )
+            )
+            .brightness(phase == .willAppear ? 1 : 0)
+    }
+}

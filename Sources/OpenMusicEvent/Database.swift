@@ -49,7 +49,7 @@ func appDatabase() throws -> any DatabaseWriter {
     #endif
     migrator.registerMigration("Create tables") { db in
         try #sql("""
-        CREATE TABLE organizations (
+        CREATE TABLE organizers (
             "url" TEXT PRIMARY KEY NOT NULL,
             "name" TEXT NOT NULL,
             "imageURL" TEXT
@@ -59,7 +59,7 @@ func appDatabase() throws -> any DatabaseWriter {
         try #sql("""
         CREATE TABLE musicEvents(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-            "organizationURL" TEXT,
+            "organizerURL" TEXT,
             "name" TEXT NOT NULL,
             "startTime" TEXT,
             "endTime" TEXT,
@@ -69,7 +69,7 @@ func appDatabase() throws -> any DatabaseWriter {
             "location" TEXT,
             "contactNumbers" TEXT,
         
-            FOREIGN KEY("organizationURL") REFERENCES "organizations"("url") ON DELETE CASCADE
+            FOREIGN KEY("organizerURL") REFERENCES "organizers"("url") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)
 
@@ -140,7 +140,7 @@ func appDatabase() throws -> any DatabaseWriter {
     }
 
     #if DEBUG
-    if context != .test {
+    if context == .preview {
         migrator.registerMigration("Seed sample data") { db in
             try db.seedSampleData()
         }
@@ -159,7 +159,7 @@ extension Database {
         logger.log("Seeding sample data...")
         try seed {
             
-            Organization.wickedWoods
+            Organizer.wickedWoods
             MusicEvent.testival
             
             for artist in Artist.previewValues {

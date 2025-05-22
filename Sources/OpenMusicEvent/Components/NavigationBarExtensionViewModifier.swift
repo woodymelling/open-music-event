@@ -33,26 +33,35 @@ struct NavigationBarExtensionViewModifier<ExtensionContent: View>: ViewModifier 
     @State var yPosition: CGFloat = 0
 
     func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            bodyContent(content)
+                .onScrollGeometryChange(
+                    for: CGFloat.self,
+                    of: { geo in
+                        let trueOffset = geo.contentOffset.y + geo.contentInsets.top
+                        return if dragsWithScroll {
+                            min(1, trueOffset)
+                        } else {
+                            min(1, max(0, trueOffset))
+                        }
+                    },
+                    action: { oldValue, newValue in
+                        yPosition = newValue
+                    }
+                )
+        } else {
+            bodyContent(content)
+            // Fallback on earlier versions
+        }
+    }
+
+    func bodyContent(_ content: Content) -> some View {
         content.safeAreaInset(edge: .top) {
             extensionContent
                 .frame(maxWidth: .infinity)
                 .background(Material.bar.opacity(min(1, max(0, yPosition))))
                 .offset(dragsWithScroll ? CGSize(width: 0, height: max(0, -yPosition)) : .zero)
         }
-        .onScrollGeometryChange(
-            for: CGFloat.self,
-            of: { geo in
-                let trueOffset = geo.contentOffset.y + geo.contentInsets.top
-                return if dragsWithScroll {
-                    min(1, trueOffset)
-                } else {
-                    min(1, max(0, trueOffset))
-                }
-            },
-            action: { oldValue, newValue in
-                yPosition = newValue
-            }
-        )
         .toolbarBackground(.hidden, for: .navigationBar)
     }
 }

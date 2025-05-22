@@ -7,12 +7,14 @@
 
 import SwiftUI
 
+@available(iOS 18.0, *)
 extension View {
     func scrollPosition<ID: Equatable>(_ id: Binding<ID?>, compute: @escaping (ID, CGSize) -> CGPoint?) -> some View {
         self.modifier(ScrollPositionFromIDViewModifier(id: id, computeScrollDestination: compute))
     }
 }
 
+@available(iOS 18.0, *)
 struct ScrollPositionFromIDViewModifier<ID: Equatable>: ViewModifier {
 
     @Binding var id: ID?

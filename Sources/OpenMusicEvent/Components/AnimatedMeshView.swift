@@ -40,12 +40,17 @@ struct AnimatedMeshView: View {
 
     var body: some View {
         TimelineView(.animation) {
-            MeshGradient(
-                width: width,
-                height: height,
-                locations: .points(points),
-                colors: .colors(colors.shifted(for: $0.date, colorShiftAmount: colorShiftAmount))
-            )
+
+            if #available(iOS 18.0, *) {
+                MeshGradient(
+                    width: width,
+                    height: height,
+                    locations: .points(points),
+                    colors: .colors(colors.shifted(for: $0.date, colorShiftAmount: colorShiftAmount))
+                )
+            } else {
+                // Fallback on earlier versions
+            }
         }
         .onReceive(timer) { _ in
             withAnimation(.easeInOut.speed(0.1)) {

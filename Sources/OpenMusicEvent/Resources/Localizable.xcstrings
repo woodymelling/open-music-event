@@ -70,7 +70,7 @@
         }
       }
     },
-    "Add Organization" : {
+    "Add Organizer" : {
 
     },
     "Appearance" : {
@@ -334,9 +334,6 @@
     "Links" : {
 
     },
-    "Loading Organization..." : {
-
-    },
     "Location" : {
 
     },
@@ -406,7 +403,7 @@
     "offset: %lf" : {
 
     },
-    "Organizations" : {
+    "Organizers" : {
 
     },
     "Powered by [Skip](https://skip.tools)" : {
@@ -485,6 +482,9 @@
 
     },
     "See other Wicked Wood events" : {
+
+    },
+    "Select an Artist" : {
 
     },
     "Settings" : {
@@ -612,6 +612,9 @@
           }
         }
       }
+    },
+    "View in Schedule" : {
+
     },
     "Welcome" : {
       "comment" : "Tab bar item title for the Welcome tab",

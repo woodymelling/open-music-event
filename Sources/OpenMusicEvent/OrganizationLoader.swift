@@ -1,5 +1,5 @@
 //
-//  OrganizationLoader.swift
+//  OrganizerLoader.swift
 //  open-music-event
 //
 //  Created by Woodrow Melling on 5/7/25.
@@ -13,25 +13,23 @@ import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
-    var fetchOrganization: @Sendable (_ id: Organization.ID) async throws -> OpenMusicEventParser.Organization
+    var fetchOrganizer: @Sendable (_ id: Organizer.ID) async throws -> OpenMusicEventParser.Organizer
 }
 
-struct FailedToLoadOrganizationError: Error {}
+struct FailedToLoadOrganizerError: Error {}
 
 extension DataFetchingClient: DependencyKey {
     static let liveValue = DataFetchingClient { baseURL in
+        let unzippedURL = URL.temporaryDirectory
 
         let targetZipURL = getZipURLForRemoteURL(baseURL)
-        
-        logger.info("Fetching organization from: \(targetZipURL)")
+        logger.info("Fetching organizer from: \(targetZipURL)")
 
         let fileManager = FileManager.default
 
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
         logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
-        let unzippedURL = URL.temporaryDirectory
         
-
         logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
 
         do {
@@ -42,14 +40,14 @@ extension DataFetchingClient: DependencyKey {
         }
 
         let finalDestination = try getUnzippedDirectory(from: unzippedURL)
-        logger.info("Parsing organization from directory: \(finalDestination)")
+        logger.info("Parsing organizer from directory: \(finalDestination)")
 
-        let organizationData = try OpenMusicEventParser.read(from: finalDestination)
+        let organizerData = try OpenMusicEventParser.read(from: finalDestination)
 
         logger.info("Clearing temporary directory")
         try FileManager.default.clearDirectory(unzippedURL)
 
-        return organizationData
+        return organizerData
     }
 }
 
@@ -89,7 +87,7 @@ private func getZipURLForRemoteURL(_ remoteURL: URL) -> URL {
 import OSLog
 import GRDB
 
-private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizationLoader")
+private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerLoader")
 
 
 extension String {
@@ -103,33 +101,33 @@ extension String {
     }
 }
 
-func downloadAndStoreOrganization(id: Organization.ID) async throws {
+func downloadAndStoreOrganizer(id: Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
 
-    let organization = try await dataFetchingClient.fetchOrganization(id: id)
+    let organizer = try await dataFetchingClient.fetchOrganizer(id: id)
 
-    let organizationDraft = Organization.Draft(
+    let organizerDraft = Organizer.Draft(
         url: id,
-        name: organization.info.name,
-        imageURL: organization.info.imageURL
+        name: organizer.info.name,
+        imageURL: organizer.info.imageURL
     )
 
-    let organizationURL: URL = id
+    let organizerURL: URL = id
 
     try await database.write { db in
-        try Organization.find(organizationURL)
+        try Organizer.find(organizerURL)
             .delete()
             .execute(db)
 
-        try Organization.upsert(organizationDraft)
+        try Organizer.upsert(organizerDraft)
             .execute(db)
 
-        for event in organization.events {
+        for event in organizer.events {
             let eventDraft = MusicEvent.Draft(
                 // Make a stable identifier for events that don't change their name
-                id: .init((organizationURL.absoluteString + event.info.name).stableHash),
-                organizationURL: organizationURL,
+                id: .init((organizerURL.absoluteString + event.info.name).stableHash),
+                organizerURL: organizerURL,
                 name: event.info.name,
                 timeZone: event.info.timeZone,
                 startTime: event.info.startTime,

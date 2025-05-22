@@ -11,7 +11,7 @@ import Foundation
 enum DTOs {}
 
 extension DTOs {
-    struct Organization {
+    struct Organizer {
         struct Info: Codable, Equatable {
             var name: String
             var imageURL: URL?

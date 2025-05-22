@@ -13,10 +13,10 @@
 //
 //
 //public extension URL {
-//    static var organizations: URL {
+//    static var organizers: URL {
 //        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 //
-//        return documentsDirectory.appendingPathComponent("openfestival-organizations")
+//        return documentsDirectory.appendingPathComponent("openfestival-organizers")
 //    }
 //
 //    func relativePath(from base: URL) -> String? {
@@ -33,9 +33,9 @@
 //    }
 //}
 //
-//public struct OrganizationReference {
+//public struct OrganizerReference {
 //    public var url: URL
-//    public var info: Organization.Info
+//    public var info: Organizer.Info
 //    public var events: [Event]
 //
 //    public struct Event: Codable {
@@ -46,42 +46,42 @@
 //
 //@DependencyClient
 //public struct OpenFestivalClient: Sendable {
-//    public var fetchMyOrganizationURLs: @Sendable () async throws -> [URL]
-//    public var fetchOrganizationsFromDisk: @Sendable () async throws -> [OrganizationReference]
-//    public var loadOrganizationFromGithub: @Sendable (URL) async throws -> Void
-//    public var refreshOrganization: @Sendable (URL) async throws -> Void
+//    public var fetchMyOrganizerURLs: @Sendable () async throws -> [URL]
+//    public var fetchOrganizersFromDisk: @Sendable () async throws -> [OrganizerReference]
+//    public var loadOrganizerFromGithub: @Sendable (URL) async throws -> Void
+//    public var refreshOrganizer: @Sendable (URL) async throws -> Void
 //
-//    public func refreshOrganizations() async throws -> Void {
-//        for orgDirectory in try getOrganizationDirectories() {
-//            try await self._refreshOrganization(orgDirectory)
+//    public func refreshOrganizers() async throws -> Void {
+//        for orgDirectory in try getOrganizerDirectories() {
+//            try await self._refreshOrganizer(orgDirectory)
 //        }
 //    }
 //
 //}
 //
-//private func getOrganizationDirectories() throws -> [URL] {
+//private func getOrganizerDirectories() throws -> [URL] {
 //    let fileManager = FileManager.default
-//    let organizationsDirectory = URL.organizations
+//    let organizersDirectory = URL.organizers
 //
-//    try fileManager.ensureDirectoryExists(at: organizationsDirectory)
+//    try fileManager.ensureDirectoryExists(at: organizersDirectory)
 //
-//    let organizationDirectories = try fileManager.contentsOfDirectory(at: organizationsDirectory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+//    let organizerDirectories = try fileManager.contentsOfDirectory(at: organizersDirectory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
 //
-//    return organizationDirectories
+//    return organizerDirectories
 //}
 //
 //extension OpenFestivalClient: DependencyKey {
 //    public static let liveValue = OpenFestivalClient(
-//        fetchMyOrganizationURLs: {
-//            try getOrganizationDirectories()
+//        fetchMyOrganizerURLs: {
+//            try getOrganizerDirectories()
 //        },
-//        fetchOrganizationsFromDisk: {
+//        fetchOrganizersFromDisk: {
 //            let fileManager = FileManager.default
 //
-//            var organizations: [OrganizationReference] = []
+//            var organizers: [OrganizerReference] = []
 //
-//            for directory in try getOrganizationDirectories() {
-//                let infoFile = directory.appendingPathComponent("organization-info.yaml")
+//            for directory in try getOrganizerDirectories() {
+//                let infoFile = directory.appendingPathComponent("organizer-info.yaml")
 //
 //                guard fileManager.fileExists(atPath: infoFile.path) else {
 //                    continue
@@ -89,9 +89,9 @@
 //
 //                let yamlContent = try String(contentsOf: infoFile, encoding: .utf8)
 //                if let data = yamlContent.data(using: .utf8) {
-//                    let organization = try YAMLDecoder().decode(Organization.Info.self, from: data)
+//                    let organizer = try YAMLDecoder().decode(Organizer.Info.self, from: data)
 //
-//                    var events: [OrganizationReference.Event] = []
+//                    var events: [OrganizerReference.Event] = []
 //                    let eventDirectories = try fileManager.contentsOfDirectory(
 //                        at: directory,
 //                        includingPropertiesForKeys: nil,
@@ -105,19 +105,19 @@
 //                            )
 //                        )
 //                    }
-//                    organizations.append(
-//                        OrganizationReference(
+//                    organizers.append(
+//                        OrganizerReference(
 //                            url: directory,
-//                            info: organization,
+//                            info: organizer,
 //                            events: events
 //                        )
 //                    )
 //                }
 //            }
 //
-//            return organizations
+//            return organizers
 //        },
-//        loadOrganizationFromGithub: { url in
+//        loadOrganizerFromGithub: { url in
 ////            let fileManager = FileManager.default
 ////            let temporaryDirectory = URL.temporaryDirectory.appendingPathComponent(UUID().uuidString)
 ////
@@ -135,17 +135,17 @@
 ////            )
 ////
 ////            @Dependency(OpenFestivalParser.self) var parser
-////            let organization = try await parser.parse(from: temporaryDirectory)
+////            let organizer = try await parser.parse(from: temporaryDirectory)
 ////
-////            try fileManager.ensureDirectoryExists(at: .organizations)
+////            try fileManager.ensureDirectoryExists(at: .organizers)
 ////
-////            let newDirectoryPath = URL.organizations.appendingPathComponent(organization.info.name)
+////            let newDirectoryPath = URL.organizers.appendingPathComponent(organizer.info.name)
 ////
 ////            print("Moving directory from \(temporaryDirectory) to \(newDirectoryPath.absoluteString)")
 ////            // Move the directory to the new path
 ////            try fileManager.moveItem(at: temporaryDirectory, to: newDirectoryPath)
 //        },
-//        refreshOrganization: {
+//        refreshOrganizer: {
 //            @Dependency(GitClient.self) var gitClient
 //            try await gitClient.pull(at: $0)
 //        }

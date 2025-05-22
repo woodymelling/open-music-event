@@ -6,7 +6,7 @@
 //
 
 //
-//  OrganizationDetails.swift
+//  OrganizerDetails.swift
 //  event-viewer
 //
 //  Created by Woodrow Melling on 3/25/25.
@@ -21,15 +21,15 @@ import ImageCaching
 import SharingGRDB
 
 
-extension Organization {
+extension Organizer {
     struct ImageView: View {
-        let organization: Organization
+        let organizer: Organizer
 
         var body: some View {
             CachedAsyncImage(
                 requests: [
                     ImageRequest(
-                        url: organization.imageURL,
+                        url: organizer.imageURL,
                         processors: [.resize(width: 440)]
                     ).withPipeline(.images)
                 ]

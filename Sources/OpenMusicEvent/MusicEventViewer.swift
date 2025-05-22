@@ -12,20 +12,24 @@ struct MusicEventViewer: View {
     @State
     var eventFeatures: MusicEventFeatures?
 
+    var isLoading: Bool { eventFeatures == nil }
+
     @State
     var error: LocalizedStringKey?
 
     @Environment(\.exitEvent) var dismiss
 
     var body: some View {
-        Group {
+        ZStack {
+            AnimatedMeshView()
+                .ignoresSafeArea()
+
             if let eventFeatures {
                 MusicEventFeaturesView(store: eventFeatures)
-                
-            } else {
-                ProgressView()
+                    .transition(.opacity)
             }
         }
+        .animation(.default, value: isLoading)
         .task(id: id) {
             @Dependency(\.defaultDatabase)
             var database
@@ -36,9 +40,12 @@ struct MusicEventViewer: View {
                 var musicEvent: MusicEvent? = nil
 
                 try await $musicEvent.sharedReader.load()
+//                try await Task.sleep(for: .seconds(1))
 
                 if let event = musicEvent {
-                    withDependencies {
+                    try await withDependencies {
+                        try await loadStageImages()
+
                         $0.musicEventID = self.id
                     } operation: {
                         self.eventFeatures = MusicEventFeatures(event)
@@ -49,6 +56,26 @@ struct MusicEventViewer: View {
             }
         }
 
+    }
+}
+
+
+import ImageCaching
+private func loadStageImages() async throws {
+    @FetchAll(Current.stages) var stages
+
+    try await $stages.sharedReader.load()
+
+    try await withThrowingTaskGroup {
+        for stage in stages {
+            if let imageURL = stage.iconImageURL {
+                $0.addTask {
+                    _ = try await ImagePipeline.images.image(for: imageURL)
+                }
+            }
+        }
+
+        try await $0.waitForAll()
     }
 }
 
@@ -68,7 +95,7 @@ extension DependencyValues {
 @MainActor
 @Observable
 public class MusicEventFeatures: Identifiable {
-    public enum Feature: String, Hashable, Codable {
+    public enum Feature: String, Hashable, Codable, Sendable {
         case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications, more
     }
 
@@ -96,8 +123,9 @@ public class MusicEventFeatures: Identifiable {
     @FetchOne
     var event: MusicEvent
 
-//    public var orgLoader = OrganizationLoader()
+//    public var orgLoader = OrganizerLoader()
 
+//    @SharedReader(.appStorage("selectedFeature"))
     public var selectedFeature: Feature = .schedule
 
     public var schedule: ScheduleFeature
@@ -147,7 +175,7 @@ public struct MusicEventFeaturesView: View {
     }
 
     @Bindable var store: MusicEventFeatures
-    
+
 
     public var body: some View {
         TabView(selection: $store.selectedFeature) {
@@ -157,8 +185,10 @@ public struct MusicEventFeaturesView: View {
             .tabItem { Label("Schedule", systemImage: "calendar") }
             .tag(MusicEventFeatures.Feature.schedule)
 
-            NavigationStack {
+            NavigationSplitView {
                 ArtistsListView(store: store.artists)
+            } detail: {
+                Text("Select an Artist")
             }
             .tabItem { Label("Artists", systemImage: "person.3") }
             .tag(MusicEventFeatures.Feature.artists)

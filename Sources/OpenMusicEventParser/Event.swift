@@ -12,7 +12,7 @@ import Collections
 
 public typealias OpenFestivalIDType = UUID
 
-public struct Organization: Equatable, Identifiable, Sendable {
+public struct Organizer: Equatable, Identifiable, Sendable {
     public var id: Tagged<Self, OpenFestivalIDType>
 
     public struct Info: Decodable, Equatable, Sendable {

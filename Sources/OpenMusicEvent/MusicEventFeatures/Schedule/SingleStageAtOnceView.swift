@@ -114,7 +114,6 @@ extension ScheduleView {
                         StageSchedulePage(id: stage.id)
                     }
                 }
-                .animation(.default, value: store.selectedStage)
                 .frame(height: 1500)
                 .scrollClipDisabled()
                 .scrollTargetLayout()

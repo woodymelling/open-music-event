@@ -14,15 +14,15 @@ import Conversions
 import Foundation
 
 
-public func read(from url: URL) throws -> Organization {
-    try Organization.fileTree.read(from: url)
+public func read(from url: URL) throws -> Organizer {
+    try Organizer.fileTree.read(from: url)
 }
 
 
-extension Organization {
-    static var fileTree: some FileTreeViewable<Organization> {
+extension Organizer {
+    static var fileTree: some FileTreeViewable<Organizer> {
         FileTree {
-            Organization.Info.file
+            Organizer.Info.file
 
             Directory.Many {
                 EventFileTree()
@@ -31,9 +31,9 @@ extension Organization {
         .convert(fileConversion)
     }
 
-    static var fileConversion: some Conversion<(Organization.Info, [DirectoryContent<Event>]), Organization> {
+    static var fileConversion: some Conversion<(Organizer.Info, [DirectoryContent<Event>]), Organizer> {
         Convert {
-            Organization.init(
+            Organizer.init(
                 id: .init(),
                 info: $0.0,
                 events: $0.1.map(\.components)
@@ -48,15 +48,15 @@ extension Organization {
     }
 }
 
-// MARK: Organization
-extension Organization.Info {
-    static var file: some FileTreeViewable<Organization.Info> {
-        File("organization-info", .yaml)
+// MARK: Organizer
+extension Organizer.Info {
+    static var file: some FileTreeViewable<Organizer.Info> {
+        File("organizer-info", .yaml)
             .convert {
                 Conversions.YamlConversion<Self.YamlRepresentation>()
 
                 Convert {
-                    Organization.Info(
+                    Organizer.Info(
                         name: $0.name,
                         imageURL: $0.imageURL
                     )

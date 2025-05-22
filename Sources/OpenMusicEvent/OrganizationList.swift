@@ -1,5 +1,5 @@
 //
-//  OrganizationListView.swift
+//  OrganizerListView.swift
 //  open-music-event
 //
 //  Created by Woodrow Melling on 5/7/25.
@@ -11,29 +11,29 @@ import SwiftUINavigation
 import ImageCaching
 
 
-struct OrganizationListView: View {
+struct OrganizerListView: View {
     @MainActor
     @Observable
     class ViewModel {
         public init() {}
 
         @ObservationIgnored
-        @FetchAll(Organization.all.order(by: \.name))
-        var organizations
+        @FetchAll(Organizer.all.order(by: \.name))
+        var organizers
 
 
         @CasePathable
         enum Destination {
-            case organizationDetail(OrganizationDetailView.ViewModel)
+            case organizerDetail(OrganizerDetailView.ViewModel)
         }
 
         var destination: Destination?
 
-        func didTapOrganization(id: Organization.ID) {
-            self.destination = .organizationDetail(.init(url: id))
+        func didTapOrganizer(id: Organizer.ID) {
+            self.destination = .organizerDetail(.init(url: id))
         }
 
-        func didTapAddOrganizationButton() {
+        func didTapAddOrganizerButton() {
             unimplemented()
         }
     }
@@ -41,23 +41,23 @@ struct OrganizationListView: View {
     @State var store = ViewModel()
 
     public var body: some View {
-        List(store.organizations, id: \.url) { org in
+        List(store.organizers, id: \.url) { org in
             
             NavigationLinkButton {
-                store.didTapOrganization(id: org.id)
+                store.didTapOrganizer(id: org.id)
             } label: {
                 Row(org: org)
             }
         }
         .listStyle(.plain)
-        .navigationTitle("Organizations")
+        .navigationTitle("Organizers")
         .toolbar {
-            Button("Add Organization", systemImage: "plus") {
-                store.didTapAddOrganizationButton()
+            Button("Add Organizer", systemImage: "plus") {
+                store.didTapAddOrganizerButton()
             }
         }
-        .navigationDestination(item: $store.destination.organizationDetail) { store in
-            OrganizationDetailView(store: store)
+        .navigationDestination(item: $store.destination.organizerDetail) { store in
+            OrganizerDetailView(store: store)
         }
 //        .navigationDestination(item: <#T##Binding<Optional<Hashable>>#>, destination: <#T##(Hashable) -> View#>)
 //        .sheet(
@@ -69,30 +69,23 @@ struct OrganizationListView: View {
 //        )
 //        .navigationDestination(
 //            item: $store.scope(
-//                state: \.destination?.organizationDetail,
-//                action: \.destination.organizationDetail
+//                state: \.destination?.organizerDetail,
+//                action: \.destination.organizerDetail
 //            ),
-//            destination: OrganizationDetailView.init(store:)
+//            destination: OrganizerDetailView.init(store:)
 //        )
     }
 
     struct Row: View {
-        var org: Organization
+        var org: Organizer
 
         var body: some View {
             HStack {
-                CachedAsyncImage(
-                    url: org.imageURL,
-                    content: { $0.resizable() },
-                    placeholder: {
-                        Image(systemName: "photo.artframe")
-                            .resizable()
-                    }
-                )
-                .frame(width: 60, height: 60)
-                .aspectRatio(contentMode: .fit)
+                Organizer.ImageView(organizer: org)
+                    .frame(width: 60, height: 60)
+                    .aspectRatio(contentMode: .fit)
 
-                Text(org.name)
+                    Text(org.name)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

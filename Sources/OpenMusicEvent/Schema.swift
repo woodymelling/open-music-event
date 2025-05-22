@@ -42,9 +42,9 @@ public typealias OmeID<T> = Int
 //  }
 //}
 
-// MARK: Organization
+// MARK: Organizer
 @Table
-public struct Organization: Equatable, Identifiable, Sendable {
+public struct Organizer: Equatable, Identifiable, Sendable {
     @Column(primaryKey: true)
     public var url: URL
 
@@ -56,8 +56,8 @@ public struct Organization: Equatable, Identifiable, Sendable {
     public var imageURL: URL?
 }
 
-extension Organization.Draft: Equatable {}
-extension Organization.Draft: Sendable {}
+extension Organizer.Draft: Equatable {}
+extension Organizer.Draft: Sendable {}
 
 // MARK: Music Event
 @Table
@@ -65,7 +65,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
     
     public let id: MusicEvent.ID
-    public let organizationURL: Organization.ID?
+    public let organizerURL: Organizer.ID?
     
     public let name: String  //
     
