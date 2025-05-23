@@ -202,9 +202,6 @@
     "Directions" : {
 
     },
-    "Events" : {
-
-    },
     "Favorite" : {
       "comment" : "Item editor title label for marking the item as a favorite",
       "extractionState" : "stale",
@@ -435,6 +432,9 @@
           }
         }
       }
+    },
+    "Previous Events" : {
+
     },
     "Reload %@" : {
 

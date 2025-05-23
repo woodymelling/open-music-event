@@ -25,6 +25,8 @@ extension DataFetchingClient: DependencyKey {
         let targetZipURL = getZipURLForRemoteURL(baseURL)
         logger.info("Fetching organizer from: \(targetZipURL)")
 
+        try FileManager.default.clearDirectory(URL.temporaryDirectory)
+
         let fileManager = FileManager.default
 
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)

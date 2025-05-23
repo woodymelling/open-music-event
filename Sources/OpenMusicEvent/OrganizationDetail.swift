@@ -108,7 +108,7 @@ public struct OrganizerDetailView: View {
                             Organizer.ImageView(organizer: organizer)
                         },
                         listContent: {
-                            Section("Events") {
+                            Section("Previous Events") {
                                 EventsListView(events: store.events) { eventID in
                                     store.didTapEvent(id: eventID)
                                 }
@@ -183,6 +183,8 @@ public struct OrganizerDetailView: View {
             }
         }
 
+        @Environment(\.databaseDebugInformation) var databaseDebugInfo
+
         var body: some View {
             HStack(spacing: 10) {
                 MusicEvent.ImageView(event: event)
@@ -195,52 +197,34 @@ public struct OrganizerDetailView: View {
                     if let eventDateString {
                         Text(eventDateString)
                             .lineLimit(1)
+                        
                             .font(.caption2)
                     }
-                    Text(String(event.id))
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                    if databaseDebugInfo.isEnabled {
+                        Text(String(event.id))
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
 
                 Spacer()
             }
         }
     }
-
-//    struct LoadingView: View {
-//        @State var isShowingImage = false
-//
-//
-//        var body: some View {
-//            ZStack {
-//                AnimatedMeshView()
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    .background(Material.ultraThin)
-//                    .ignoresSafeArea()
-//
-//                if let image = loadingScreenImage, isShowingImage {
-//                    image
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fit)
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                        .padding(80)
-//                        .transition(Twirl())
-//                }
-//            }
-//            .onAppear {
-//                withAnimation(.spring) {
-//                    isShowingImage = true
-//                }
-//            }
-//        }
-//
-//
-//    }
-
 }
 
 public extension EnvironmentValues {
+    @Entry var databaseDebugInformation = DatabaseDebugStatus.disabled
     @Entry var loadingScreenImage: Image?
+}
+
+public enum DatabaseDebugStatus {
+    case enabled
+    case disabled
+
+    var isEnabled: Bool {
+        self == .enabled
+    }
 }
 
 import Sharing
