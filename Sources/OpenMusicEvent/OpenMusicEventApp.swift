@@ -11,11 +11,11 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
 /* SKIP @bridge */public struct OpenMusicEventRootView : View {
     // SKIP @bridge
     public init() {
-        OpenMusicEvent.prepareDependencies()
+        OME.prepareDependencies()
     }
 
     public var body: some View {
-        OpenMusicEvent.AppEntryPoint()
+        OME.AppEntryPoint()
             .task {
                 logger.info("Skip app logs are viewable in the Xcode console for iOS; Android logs can be viewed in Studio or using adb logcat")
             }

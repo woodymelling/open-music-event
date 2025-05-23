@@ -12,7 +12,7 @@ import ImageCaching
 import CasePaths
 
 
-public enum OpenMusicEvent {
+public enum OME {
     public static func prepareDependencies() {
         try! Dependencies.prepareDependencies {
             $0.defaultDatabase = try appDatabase()
@@ -79,5 +79,5 @@ extension EnvironmentValues {
       $0.defaultDatabase = try appDatabase()
     }
 
-    OpenMusicEvent.AppEntryPoint()
+    OME.AppEntryPoint()
 }
