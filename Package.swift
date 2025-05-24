@@ -7,7 +7,7 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [.iOS(.v17)],
     products: [
-        .library(name: "OpenMusicEvent", type: .dynamic, targets: ["OpenMusicEvent"]),
+        .library(name: "OpenMusicEvent", targets: ["OpenMusicEvent"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
@@ -19,7 +19,6 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/sharing-grdb", from: "0.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-navigation", from: "2.3.0"),
         .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
-
 
         .package(url: "https://github.com/woodymelling/skip-image-caching", branch: "main"),
         .package(url: "https://github.com/woodymelling/swift-file-tree", from: "0.2.0"),
