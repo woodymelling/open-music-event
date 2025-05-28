@@ -5,6 +5,8 @@ import CustomDump
 import Dependencies
 import FileTree
 
+import InlineSnapshotTesting
+
 struct PerformanceConversionTests {
 
     let conversion = ScheduleDayConversion.TimelessStagelessPerformanceConversion()
@@ -17,16 +19,23 @@ struct PerformanceConversionTests {
             time: "10:00 PM"
         )
 
-        let expectedResult = TimelessStagelessPerformance(
-            startTime: ScheduleTime(hour: 22)!,
-            endTime: nil,
-            artistNames: ["Prism Sound"]
-        )
-
         let result = try conversion.apply(dto)
 
-        expectNoDifference(result, expectedResult)
-        try expect(result, toRoundtripUsing: conversion.inverted())
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            TimelessStagelessPerformance(
+              startTime: ScheduleTime(
+                hour: 22,
+                minute: 0
+              ),
+              endTime: nil,
+              customTitle: nil,
+              artistNames: Set([
+                "Prism Sound"
+              ])
+            )
+            """
+        }
     }
 
     @Test
@@ -37,16 +46,26 @@ struct PerformanceConversionTests {
             endTime: "11:00 PM"
         )
 
-        let expectedResult = TimelessStagelessPerformance(
-            startTime: ScheduleTime(hour: 22)!,
-            endTime: ScheduleTime(hour: 23)!,
-            artistNames: ["Prism Sound"]
-        )
-
         let result = try conversion.apply(dto)
 
-        expectNoDifference(result, expectedResult)
-        try expect(result, toRoundtripUsing: conversion.inverted())
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            TimelessStagelessPerformance(
+              startTime: ScheduleTime(
+                hour: 22,
+                minute: 0
+              ),
+              endTime: ScheduleTime(
+                hour: 23,
+                minute: 0
+              ),
+              customTitle: nil,
+              artistNames: Set([
+                "Prism Sound"
+              ])
+            )
+            """
+        }
     }
 
 
@@ -58,20 +77,24 @@ struct PerformanceConversionTests {
             time: "11:30 PM"
         )
 
-        let expectedResult = TimelessStagelessPerformance(
-            startTime: ScheduleTime(hour: 23, minute: 30)!,
-            endTime: nil,
-            customTitle: "Subsonic B2B Sylvan",
-            artistNames: [
-                "Subsonic",
-                "Sylvan Beats"
-            ]
-        )
-
         let result = try conversion.apply(dto)
 
-        expectNoDifference(result, expectedResult)
-        try expect(result, toRoundtripUsing: conversion.inverted())
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            TimelessStagelessPerformance(
+              startTime: ScheduleTime(
+                hour: 23,
+                minute: 30
+              ),
+              endTime: nil,
+              customTitle: "Subsonic B2B Sylvan",
+              artistNames: Set([
+                "Subsonic",
+                "Sylvan Beats"
+              ])
+            )
+            """
+        }
     }
 
     struct ConversionErrors {
@@ -82,7 +105,7 @@ struct PerformanceConversionTests {
         func invalidStartTime() throws {
             let dto = PerformanceDTO(time: "Night PM")
 
-            #expect(throws: ScheduleTimeDecodingError.invalidDateString) {
+            #expect(throws: ScheduleTimeDecodingError.invalidDateString("Night PM")) {
                 try conversion.apply(dto)
             }
         }
@@ -95,7 +118,7 @@ struct PerformanceConversionTests {
                 endTime: "Dawnish"
             )
 
-            #expect(throws: ScheduleTimeDecodingError.invalidDateString) {
+            #expect(throws: ScheduleTimeDecodingError.invalidDateString("Dawnish")) {
                 try conversion.apply(dto)
             }
         }

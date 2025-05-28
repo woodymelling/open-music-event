@@ -12,17 +12,13 @@ import IssueReporting
 import Collections
 import Conversions
 import Foundation
+import CoreModels
 
 
-public func read(from url: URL) throws -> Organizer {
-    try Organizer.fileTree.read(from: url)
-}
-
-
-extension Organizer {
-    static var fileTree: some FileTreeViewable<Organizer> {
+extension OrganizerConfiguration {
+    static var fileTree: some FileTreeViewable<OrganizerConfiguration> {
         FileTree {
-            Organizer.Info.file
+            CoreModels.Organizer.file
 
             Directory.Many {
                 EventFileTree()
@@ -31,9 +27,9 @@ extension Organizer {
         .convert(fileConversion)
     }
 
-    static var fileConversion: some Conversion<(Organizer.Info, [DirectoryContent<Event>]), Organizer> {
+    static var fileConversion: some Conversion<(CoreModels.Organizer, [DirectoryContent<Event>]), OrganizerConfiguration> {
         Convert {
-            Organizer.init(
+            OrganizerConfiguration.init(
                 id: .init(),
                 info: $0.0,
                 events: $0.1.map(\.components)
@@ -49,46 +45,22 @@ extension Organizer {
 }
 
 // MARK: Organizer
-extension Organizer.Info {
-    static var file: some FileTreeViewable<Organizer.Info> {
-        File("organizer-info", .yaml)
+extension CoreModels.Organizer {
+    static var file: some FileTreeViewable<CoreModels.Organizer> {
+        File("organizer-info", "yml")
             .convert {
-                Conversions.YamlConversion<Self.YamlRepresentation>()
-
-                Convert {
-                    Organizer.Info(
-                        name: $0.name,
-                        imageURL: $0.imageURL
-                    )
-                } unapply: { 
-                    YamlRepresentation(
-                        name: $0.name,
-                        imageURL: $0.imageURL,
-                        address: nil,
-                        timeZone: nil,
-                        siteMapImageURL: nil,
-                        colorScheme: nil
-                    )
-                }
+                Conversions.YamlConversion<CoreModels.Organizer>()
             }
-    }
-
-    struct YamlRepresentation: Codable, Equatable {
-        var name: String
-        var imageURL: URL?
-        var address: String?
-        var timeZone: String?
-        var siteMapImageURL: URL?
-        var colorScheme: ColorScheme?
     }
 }
 
 extension Event.Info {
     static var file: some FileTreeViewable<Event.Info.YamlRepresentation> {
-        File("event-info", .yaml)
+        File("event-info", "yml")
             .convert(Conversions.YamlConversion(Event.Info.YamlRepresentation.self))
     }
 }
+
 
 typealias Convert = AnyConversion
 
@@ -97,7 +69,7 @@ typealias Convert = AnyConversion
 public struct EventFileTree: FileTreeViewable {
     public init() {}
 
-    public var body: some FileTreeComponent<Event> & FileTreeViewable {
+    public var body: some FileTreeReader<Event> & FileTreeViewable {
         FileTree {
             Event.Info.file
 
@@ -285,16 +257,17 @@ struct ArtistConversion: Conversion {
         }
 
         func unapply(_ output: Output) throws -> Input {
-            FileContent(
-                fileName: output.name,
-                data: MarkdownWithFrontMatter(
-                    frontMatter: ArtistInfoFrontMatter(
-                        imageURL: output.imageURL,
-                        links: output.links.map { .init(url: $0.url, label: $0.label )}
-                    ).nilIfEmpty,
-                    body: output.bio?.nilIfEmpty
-                )
-            )
+            throw UnimplementedFailure(description: "FileToArtistConversion.unapply")
+            //            FileContent(
+//                fileName: output.name,
+//                data: MarkdownWithFrontMatter(
+//                    frontMatter: ArtistInfoFrontMatter(
+//                        imageURL: output.imageURL,
+//                        links: output.links.map { .init(url: $0.url, label: $0.label )}
+//                    ).nilIfEmpty,
+//                    body: output.bio?.nilIfEmpty
+//                )
+//            )
         }
     }
 }

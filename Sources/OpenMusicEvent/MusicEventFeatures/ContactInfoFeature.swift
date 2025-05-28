@@ -15,6 +15,7 @@
 
 import SwiftUI
 import SharingGRDB
+import CoreModels
 
 extension Optional where Wrapped == MusicEvent {
     static var current: Where<Self> {

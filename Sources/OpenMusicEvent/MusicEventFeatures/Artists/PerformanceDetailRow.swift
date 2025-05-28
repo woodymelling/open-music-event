@@ -17,10 +17,7 @@ public struct PerformanceDetailRow: View {
         public let id: ID
         public let stageID: Stage.ID
 
-        @Column(as: Date.ISO8601Representation.self)
         public let startTime: Date
-
-        @Column(as: Date.ISO8601Representation.self)
         public let endTime: Date
 
         public let title: String

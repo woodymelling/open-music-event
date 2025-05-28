@@ -19,6 +19,7 @@ import Dependencies
 import OSLog
 import ImageCaching
 import SharingGRDB
+import CoreModels
 
 
 extension Organizer {
@@ -171,7 +172,6 @@ public extension Stage {
                 )
                 .withPipeline(.images)
 
-
             ]) { @MainActor image in
                 image
                     .resizable()
@@ -184,7 +184,6 @@ public extension Stage {
                 Placeholder(stageName: stage.name)
             }
         }
-
 
         struct Placeholder: View {
             var stageName: String
@@ -206,11 +205,9 @@ public extension Stage {
                 }
             }
         }
-
     }
 
-    
-    public struct Legend: View {
+    struct Legend: View {
         @FetchAll(Current.stages.select{ $0.id } )
         var stages: [Stage.ID]
 

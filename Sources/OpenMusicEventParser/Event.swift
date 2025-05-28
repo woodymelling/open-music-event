@@ -9,23 +9,14 @@ import Foundation
 import Tagged
 import IdentifiedCollections
 import Collections
+import CoreModels
 
 public typealias OpenFestivalIDType = UUID
 
-public struct Organizer: Equatable, Identifiable, Sendable {
+public struct OrganizerConfiguration: Equatable, Identifiable, Sendable {
     public var id: Tagged<Self, OpenFestivalIDType>
 
-    public struct Info: Decodable, Equatable, Sendable {
-        public init(name: String, imageURL: URL? = nil) {
-            self.name = name
-            self.imageURL = imageURL
-        }
-
-        public var name: String
-        public var imageURL: URL?
-    }
-
-    public var info: Info
+    public var info: CoreModels.Organizer
     public var events: [Event]
 }
 

@@ -17,6 +17,7 @@ import CoreGraphics
 import SwiftUI
 import Dependencies
 import SharingGRDB
+import CoreModels
 
 
 extension SharedKey where Self == InMemoryKey<Stage.ID?> {

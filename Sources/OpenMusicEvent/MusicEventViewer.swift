@@ -1,10 +1,10 @@
 import SwiftUI
 import SharingGRDB
+import CoreModels
 
 enum ContentTab: String, Hashable {
     case welcome, home, settings
 }
-
 
 struct MusicEventViewer: View {
     var id: MusicEvent.ID

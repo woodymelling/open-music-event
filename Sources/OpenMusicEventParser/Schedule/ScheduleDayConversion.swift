@@ -19,11 +19,19 @@ struct ScheduleDayConversion: Conversion {
         FileContentConversion {
             DTOs.Event.DaySchedule.TupleConversion()
 
-            Conversions.Tuple(
-                Identity<String?>(),
-                Identity<CalendarDate?>(),
-                ScheduleDictionaryConversion()
+            AnyConversion<(String?, CalendarDate?, ScheduleDictionaryConversion.Input), (String?, CalendarDate?, ScheduleDictionaryConversion.Output)>(
+                apply: {
+                    try ($0.0, $0.1, ScheduleDictionaryConversion().apply($0.2))
+                },
+                unapply: { _ in
+                    fatalError()
+                }
             )
+//            Conversions.Tuple(
+//                Identity<String?>(),
+//                Identity<CalendarDate?>(),
+//                ScheduleDictionaryConversion()
+//            )
         }
 
         FileContentToTupleScheduleDayConversion()

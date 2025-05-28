@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreModels
 
 public extension Stage {
     struct IndicatorView: View {

@@ -27,7 +27,7 @@ struct ScheduleTimeConversion: Conversion {
             }
         }
 
-        throw ScheduleTimeDecodingError.invalidDateString
+        throw ScheduleTimeDecodingError.invalidDateString(input)
     }
 
     func unapply(_ output: ScheduleTime) throws  -> String {
@@ -36,43 +36,58 @@ struct ScheduleTimeConversion: Conversion {
 }
 
 
-struct ScheduleTimeDecodingError: LocalizedError, Equatable {
+struct ScheduleTimeDecodingError: LocalizedError, Equatable, Sendable {
+    let rawText: String
     let errorDescription: String
     let failureReason: String
     let recoverySuggestion: String
 
     private init(
+        raw: String,
         description: String,
         reason: String,
         suggestion: String
     ) {
+        self.rawText = raw
         self.errorDescription = description
         self.failureReason = reason
         self.recoverySuggestion = suggestion
     }
 
-    static let hourExceeds24Hours = ScheduleTimeDecodingError(
-        description: "Invalid 24-hour time format",
-        reason: "The provided hour value exceeds 24 hours",
-        suggestion: "Please provide a time between 00:00 and 23:59"
-    )
+    static let hourExceeds24Hours = { @Sendable (raw: String) in
+        ScheduleTimeDecodingError(
+            raw: raw,
+            description: "Invalid 24-hour time format",
+            reason: "The provided hour value exceeds 24 hours",
+            suggestion: "Please provide a time between 00:00 and 23:59"
+        )
+    }
 
-    static let hourExceeds12HourTimeFormat = ScheduleTimeDecodingError(
-        description: "Invalid 12-hour time format",
-        reason: "The provided hour value exceeds 12 hours in 12-hour format",
-        suggestion: "Please provide a time between 1:00 and 12:59, followed by AM/PM"
-    )
+    static let hourExceeds12HourTimeFormat = { @Sendable (raw: String) in
+        ScheduleTimeDecodingError(
+            raw: raw,
 
-    static let minutesExceeds60Minutes = ScheduleTimeDecodingError(
-        description: "Invalid minutes value",
-        reason: "The provided minutes value exceeds 60 minutes",
-        suggestion: "Please provide a minutes value between 0 and 59"
-    )
+            description: "Invalid 12-hour time format",
+            reason: "The provided hour value exceeds 12 hours in 12-hour format",
+            suggestion: "Please provide a time between 1:00 and 12:59, followed by AM/PM"
+        )
+    }
 
-    static let invalidDateString = ScheduleTimeDecodingError(
-        description: "Invalid time string format",
-        reason: "The provided time string could not be parsed",
-        suggestion: """
+    static let minutesExceeds60Minutes = { @Sendable (raw: String) in
+        ScheduleTimeDecodingError(
+            raw: raw,
+            description: "Invalid minutes value",
+            reason: "The provided minutes value exceeds 60 minutes",
+            suggestion: "Please provide a minutes value between 0 and 59"
+        )
+    }
+
+    static let invalidDateString = { @Sendable (raw: String) in
+        ScheduleTimeDecodingError(
+            raw: raw,
+            description: "Invalid time string format",
+            reason: "The provided time string could not be parsed",
+            suggestion: """
             Please provide time in one of the following formats:
             • HH:mm (24-hour format, e.g. "14:30")
             • h:mm a (12-hour format, e.g. "2:30 PM")
@@ -80,7 +95,8 @@ struct ScheduleTimeDecodingError: LocalizedError, Equatable {
             • h:mm (hour and minutes, e.g. "2:30")
             • h (hour only, e.g. "2")
             """
-    )
+        )
+    }
 
     // Helper method to provide debug description
     var debugDescription: String {
@@ -97,11 +113,13 @@ struct ScheduleTimeDecodingError: LocalizedError, Equatable {
 extension ScheduleTimeDecodingError {
     // Helper to create custom instances with the same structure
     static func custom(
+        raw: String,
         description: String,
         reason: String,
         suggestion: String
     ) -> ScheduleTimeDecodingError {
         ScheduleTimeDecodingError(
+            raw: raw,
             description: description,
             reason: reason,
             suggestion: suggestion

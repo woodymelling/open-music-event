@@ -8,7 +8,6 @@
 
 import Foundation
 import StructuredQueries
-import Dependencies
 
 #if canImport(SwiftUI)
 import SwiftUI
@@ -44,9 +43,9 @@ public typealias OmeID<T> = Int
 
 // MARK: Organizer
 @Table
-public struct Organizer: Equatable, Identifiable, Sendable {
+public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     @Column(primaryKey: true)
-    public var url: URL
+    public let url: URL
 
     public var id: URL {
         self.url
@@ -54,6 +53,12 @@ public struct Organizer: Equatable, Identifiable, Sendable {
 
     public var name: String
     public var imageURL: URL?
+
+    public init(url: URL, name: String, imageURL: URL? = nil) {
+        self.url = url
+        self.name = name
+        self.imageURL = imageURL
+    }
 }
 
 extension Organizer.Draft: Equatable {}
@@ -71,10 +76,8 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     
     public var timeZone: TimeZone
     
-    @Column(as: Date?.ISO8601Representation.self)
     public var startTime: Date?
     
-    @Column(as: Date?.ISO8601Representation.self)
     public var endTime: Date?
     
     public let imageURL: URL?
@@ -90,18 +93,49 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
         public let phoneNumber: String
         public let title: String
         public let description: String?
+
+        public init(phoneNumber: String, title: String, description: String?) {
+            self.phoneNumber = phoneNumber
+            self.title = title
+            self.description = description
+        }
     }
     
     public struct Location: Equatable, Sendable, Codable {
         public let address: String?
         public let directions: String?
         public let coordinates: Coordinates?
-        
+
         public struct Coordinates: Equatable, Sendable, Codable {
             public let latitude: Double
             public let longitude: Double
+
+            public init(latitude: Double, longitude: Double) {
+                self.latitude = latitude
+                self.longitude = longitude
+            }
+        }
+
+        public init(address: String?, directions: String?, coordinates: Coordinates?) {
+            self.address = address
+            self.directions = directions
+            self.coordinates = coordinates
         }
     }
+
+    public init(id: MusicEvent.ID, organizerURL: Organizer.ID?, name: String, timeZone: TimeZone, startTime: Date? = nil, endTime: Date? = nil, imageURL: URL?, siteMapImageURL: URL?, location: Location?, contactNumbers: [ContactNumber]) {
+        self.id = id
+        self.organizerURL = organizerURL
+        self.name = name
+        self.timeZone = timeZone
+        self.startTime = startTime
+        self.endTime = endTime
+        self.imageURL = imageURL
+        self.siteMapImageURL = siteMapImageURL
+        self.location = location
+        self.contactNumbers = contactNumbers
+    }
+
 }
 
 extension MusicEvent.Draft: Codable {}
@@ -129,6 +163,15 @@ public struct Artist: Identifiable, Equatable, Sendable {
             self.label = label
         }
     }
+
+    public init(id: Int, musicEventID: MusicEvent.ID?, name: String, bio: String?, imageURL: URL?, links: [Link]) {
+        self.id = id
+        self.musicEventID = musicEventID
+        self.name = name
+        self.bio = bio
+        self.imageURL = imageURL
+        self.links = links
+    }
 }
 
 // MARK: Stage
@@ -141,6 +184,14 @@ public struct Stage: Identifiable, Equatable, Sendable {
     public var iconImageURL: URL?
 
     public var color: Color
+
+    public init(id: ID, musicEventID: MusicEvent.ID? = nil, name: String, iconImageURL: URL? = nil, color: Color) {
+        self.id = id
+        self.musicEventID = musicEventID
+        self.name = name
+        self.iconImageURL = iconImageURL
+        self.color = color
+    }
 }
 
 
@@ -149,17 +200,20 @@ public struct Stage: Identifiable, Equatable, Sendable {
 public struct Schedule: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Schedule>
     public let id: ID
-
-
     public let musicEventID: MusicEvent.ID?
 
-    @Column(as: Date.ISO8601Representation?.self)
     public let startTime: Date?
-
-    @Column(as: Date.ISO8601Representation?.self)
     public let endTime: Date?
 
     public let customTitle: String?
+
+    public init(id: ID, musicEventID: MusicEvent.ID?, startTime: Date?, endTime: Date?, customTitle: String?) {
+        self.id = id
+        self.musicEventID = musicEventID
+        self.startTime = startTime
+        self.endTime = endTime
+        self.customTitle = customTitle
+    }
 }
 
 // MARK: Performance
@@ -170,17 +224,13 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     public let stageID: Stage.ID
     public let scheduleID: Schedule.ID?
 
-    @Column(as: Date.ISO8601Representation.self)
     public let startTime: Date
-
-    @Column(as: Date.ISO8601Representation.self)
     public let endTime: Date
 
     public let title: String
 //    public let subtitle: String?
 
     public let description: String?
-
 
     // A join table for the many-to-many relationship of Performance -> Artist
     @Table("performanceArtists")
@@ -189,6 +239,23 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
         public let performanceID: Performance.ID
         public let artistID: Artist.ID?
         public let anonymousArtistName: String?
+
+        public init(id: OmeID<Performance.Artists>, performanceID: Performance.ID, artistID: Artist.ID?, anonymousArtistName: String?) {
+            self.id = id
+            self.performanceID = performanceID
+            self.artistID = artistID
+            self.anonymousArtistName = anonymousArtistName
+        }
+    }
+
+    public init(id: ID, stageID: Stage.ID, scheduleID: Schedule.ID?, startTime: Date, endTime: Date, title: String, description: String?) {
+        self.id = id
+        self.stageID = stageID
+        self.scheduleID = scheduleID
+        self.startTime = startTime
+        self.endTime = endTime
+        self.title = title
+        self.description = description
     }
 
 }
@@ -283,7 +350,7 @@ extension Color: Codable {
 extension Color.HexRepresentation: Codable { }
 
 
-extension Color {
+public extension Color {
     init(hex: Int, opacity: Double = 1.0) {
         self.init(
             red: Double((hex >> 16) & 0xFF) / 255.0,
@@ -311,33 +378,4 @@ extension Color {
 #endif
 
 // MARK: Queries
-
-
-extension Performance {
-    static let withStage = Self.all.join(Stage.all) { $0.stageID.eq($1.id) }
-    static let withColor = Self.withStage.select { ($0, $1.color) }
-
-
-    static let performances = { @Sendable (artistID: Artist.ID) in
-        Performance.Artists
-            .where { $0.artistID == artistID }
-            .join(Performance.all) { $0.performanceID == $1.id }
-            .select { $1 }
-    }
-
-    
-
-    static let performanceDetails = Performance
-        .withStage
-        .select {
-            PerformanceDetailRow.ArtistPerformance.Columns(
-                id: $0.id,
-                stageID: $1.id,
-                startTime: $0.startTime,
-                endTime: $0.endTime,
-                title: $0.title,
-                stageColor: $1.color
-            )
-        }
-}
 

@@ -10,6 +10,7 @@ import Sharing
 import SharingGRDB
 import ImageCaching
 import CasePaths
+import CoreModels
 
 
 public enum OME {

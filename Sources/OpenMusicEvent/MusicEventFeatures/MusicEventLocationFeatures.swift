@@ -11,8 +11,7 @@ import SwiftUI
 import MapKit
 extension MusicEvent.Location.Coordinates {
     public init(from coordinates: CLLocationCoordinate2D) {
-        self.latitude = coordinates.latitude
-        self.longitude = coordinates.longitude
+        self.init(latitude: coordinates.latitude, longitude: coordinates.longitude)
     }
 
     public var clLocationCoordinates: CLLocationCoordinate2D {

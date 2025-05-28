@@ -8,6 +8,8 @@
 import SwiftUI
 import SharingGRDB
 import ImageCaching
+import CoreModels
+
 
 extension Artist {
     static let placeholder = Artist(

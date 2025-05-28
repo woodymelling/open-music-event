@@ -12,6 +12,7 @@ import Dependencies
 import OSLog
 import ImageCaching
 import SharingGRDB
+import CoreModels
 
 public struct OrganizerDetailView: View {
     public init(url: Organizer.ID) {

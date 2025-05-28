@@ -10,17 +10,14 @@ import Foundation
 import Testing
 import Parsing
 import CustomDump
-
-
+import InlineSnapshotTesting
 
 typealias ScheduleError = Validation.ScheduleError.StageDayScheduleError
-
 
 struct StageScheduleDayMappingTests {
     let conversion = ScheduleDayConversion.ScheduleDictionaryConversion.StagelessPerformanceConversion()
 
     // MARK: - Success Cases
-
     @Test("Simple schedule before midnight converts successfully")
     func simpleBeforeMidnight() throws {
         let dtos = [
@@ -43,32 +40,69 @@ struct StageScheduleDayMappingTests {
             )
         ]
 
-        let expected = [
-            StagelessPerformance(
-                artistNames: ["Sunspear"],
-                startTime: ScheduleTime(hour: 16, minute: 30)!,
-                endTime: ScheduleTime(hour: 18, minute: 30)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Phantom Groove"],
-                startTime: ScheduleTime(hour: 18, minute: 30)!,
-                endTime: ScheduleTime(hour: 20)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Oaktrail"],
-                startTime: ScheduleTime(hour: 20)!,
-                endTime: ScheduleTime(hour: 22)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 22)!,
-                endTime: ScheduleTime(hour: 23, minute: 30)!
-            )
-        ]
-
         let result = try conversion.apply(dtos)
-        expectNoDifference(result, expected)
-        try expect(expected, toRoundtripUsing: conversion.inverted())
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            [
+              [0]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Sunspear"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 16,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 18,
+                  minute: 30
+                )
+              ),
+              [1]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Phantom Groove"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 18,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 20,
+                  minute: 0
+                )
+              ),
+              [2]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Oaktrail"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 20,
+                  minute: 0
+                ),
+                endTime: ScheduleTime(
+                  hour: 22,
+                  minute: 0
+                )
+              ),
+              [3]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Rhythmbox"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 22,
+                  minute: 0
+                ),
+                endTime: ScheduleTime(
+                  hour: 23,
+                  minute: 30
+                )
+              )
+            ]
+            """
+        }
     }
 
     @Test("Schedule through midnight converts successfully")
@@ -93,32 +127,69 @@ struct StageScheduleDayMappingTests {
             )
         ]
 
-        let expected = [
-            StagelessPerformance(
-                artistNames: ["Sunspear"],
-                startTime: ScheduleTime(hour: 22, minute: 30)!,
-                endTime: ScheduleTime(hour: 24, minute: 30)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Phantom Groove"],
-                startTime: ScheduleTime(hour: 24, minute: 30)!,
-                endTime: ScheduleTime(hour: 26)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Oaktrail"],
-                startTime: ScheduleTime(hour: 26)!,
-                endTime: ScheduleTime(hour: 28)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 28)!,
-                endTime: ScheduleTime(hour: 29, minute: 30)!
-            )
-        ]
-
         let result = try conversion.apply(dtos)
-        expectNoDifference(result, expected)
-        try expect(expected, toRoundtripUsing: conversion.inverted())
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            [
+              [0]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Sunspear"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 22,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 24,
+                  minute: 30
+                )
+              ),
+              [1]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Phantom Groove"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 24,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 26,
+                  minute: 0
+                )
+              ),
+              [2]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Oaktrail"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 26,
+                  minute: 0
+                ),
+                endTime: ScheduleTime(
+                  hour: 28,
+                  minute: 0
+                )
+              ),
+              [3]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Rhythmbox"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 28,
+                  minute: 0
+                ),
+                endTime: ScheduleTime(
+                  hour: 29,
+                  minute: 30
+                )
+              )
+            ]
+            """
+        }
     }
 
     @Test("Back to back performances convert successfully")
@@ -136,28 +207,52 @@ struct StageScheduleDayMappingTests {
             )
         ]
 
-        let expected = [
-            StagelessPerformance(
-                artistNames: ["Sunspear"],
-                startTime: ScheduleTime(hour: 16, minute: 30)!,
-                endTime: ScheduleTime(hour: 17, minute: 30)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Phantom Groove"],
-                startTime: ScheduleTime(hour: 17, minute: 30)!,
-                endTime: ScheduleTime(hour: 18, minute: 30)!
-            )
-        ]
-
         let result = try conversion.apply(dtos)
-        expectNoDifference(result, expected)
-        try expect(expected, toRoundtripUsing: conversion.inverted())
+
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            [
+              [0]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Sunspear"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 16,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 17,
+                  minute: 30
+                )
+              ),
+              [1]: StagelessPerformance(
+                customTitle: nil,
+                artistNames: Set([
+                  "Phantom Groove"
+                ]),
+                startTime: ScheduleTime(
+                  hour: 17,
+                  minute: 30
+                ),
+                endTime: ScheduleTime(
+                  hour: 18,
+                  minute: 30
+                )
+              )
+            ]
+            """
+        }
     }
 
     @Test("Empty schedule converts successfully")
     func emptySchedule() throws {
         let result = try conversion.apply([])
-        expectNoDifference(result, [])
+        assertInlineSnapshot(of: result, as: .customDump) {
+            """
+            []
+            """
+        }
     }
 
     // MARK: - Error Cases
@@ -177,21 +272,43 @@ struct StageScheduleDayMappingTests {
             )
         ]
 
-        let expectedError = ScheduleError.overlappingPerformances(
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 4, minute: 0)!,
-                endTime: ScheduleTime(hour: 5, minute: 30)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 5, minute: 0)!,
-                endTime: ScheduleTime(hour: 6, minute: 30)!
-            )
-        )
-
-        #expect(throws: expectedError) {
-            try conversion.apply(dtos)
+        do {
+            _ = try conversion.apply(dtos)
+        } catch {
+            assertInlineSnapshot(of: error, as: .customDump) {
+                """
+                Validation.ScheduleError.StageDayScheduleError.overlappingPerformances(
+                  StagelessPerformance(
+                    customTitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: ScheduleTime(
+                      hour: 4,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 5,
+                      minute: 30
+                    )
+                  ),
+                  StagelessPerformance(
+                    customTitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: ScheduleTime(
+                      hour: 5,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 6,
+                      minute: 30
+                    )
+                  )
+                )
+                """
+            }
         }
     }
 
@@ -222,9 +339,44 @@ struct StageScheduleDayMappingTests {
                 endTime: ScheduleTime(hour: 25, minute: 30)!
             )
         )
-
-        #expect(throws: expectedError) {
-            try conversion.apply(dtos)
+        
+        do {
+            _ = try conversion.apply(dtos)
+        } catch {
+            assertInlineSnapshot(of: error, as: .customDump) {
+                """
+                Validation.ScheduleError.StageDayScheduleError.overlappingPerformances(
+                  StagelessPerformance(
+                    customTitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: ScheduleTime(
+                      hour: 23,
+                      minute: 30
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 24,
+                      minute: 30
+                    )
+                  ),
+                  StagelessPerformance(
+                    customTitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: ScheduleTime(
+                      hour: 23,
+                      minute: 45
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 25,
+                      minute: 30
+                    )
+                  )
+                )
+                """
+            }
         }
     }
 
@@ -252,8 +404,27 @@ struct StageScheduleDayMappingTests {
             )
         )
 
-        #expect(throws: expectedError) {
-            try conversion.apply(dtos)
+        do {
+            _ = try conversion.apply(dtos)
+        } catch {
+            assertInlineSnapshot(of: error, as: .customDump) {
+                """
+                Validation.ScheduleError.StageDayScheduleError.cannotDetermineEndTimeForPerformance(
+                  TimelessStagelessPerformance(
+                    startTime: ScheduleTime(
+                      hour: 20,
+                      minute: 0
+                    ),
+                    endTime: nil,
+                    customTitle: nil,
+                    artistNames: Set([
+                      "Oaktrail"
+                    ])
+                  )
+                )
+                """
+            }
         }
+
     }
 }

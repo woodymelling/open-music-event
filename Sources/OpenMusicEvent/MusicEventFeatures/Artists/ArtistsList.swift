@@ -8,6 +8,7 @@
 import SwiftUI
 import SharingGRDB
 import ImageCaching
+import CoreModels
 
 @MainActor
 @Observable

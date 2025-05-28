@@ -13,7 +13,7 @@ import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
-    var fetchOrganizer: @Sendable (_ id: Organizer.ID) async throws -> OpenMusicEventParser.Organizer
+    var fetchOrganizer: @Sendable (_ id: CoreModels.Organizer.ID) async throws -> OpenMusicEventParser.Organizer
 }
 
 struct FailedToLoadOrganizerError: Error {}
@@ -103,7 +103,7 @@ extension String {
     }
 }
 
-func downloadAndStoreOrganizer(id: Organizer.ID) async throws {
+func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
 

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SharingGRDB
+import CoreModels
 
 extension Artist {
     @Selection
@@ -34,10 +35,7 @@ struct PerformanceDetail: Identifiable {
     public let title: String
     public let stageID: Stage.ID
 
-    @Column(as: Date.ISO8601Representation.self)
     public let startTime: Date
-
-    @Column(as: Date.ISO8601Representation.self)
     public let endTime: Date
 
     public let stageColor: Color

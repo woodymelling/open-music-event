@@ -8,7 +8,7 @@
 import SwiftUI
 import OrderedCollections
 import SharingGRDB
-
+@_exported import CoreModels
 
 extension Performance: DateIntervalRepresentable {
     public var dateInterval: DateInterval {
@@ -63,10 +63,7 @@ extension ScheduleView {
             struct PerformanceTimelineCard: Identifiable, TimelineCard, Codable {
                 var id: Performance.ID
 
-                @Column(as: Date.ISO8601Representation.self)
                 var startTime: Date
-
-                @Column(as: Date.ISO8601Representation.self)
                 var endTime: Date
 
                 var dateInterval: DateInterval {

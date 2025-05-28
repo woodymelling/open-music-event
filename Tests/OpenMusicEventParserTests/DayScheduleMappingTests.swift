@@ -13,6 +13,8 @@ import Dependencies
 import FileTree
 import DependenciesTestSupport
 import CustomDump
+import SnapshotTestingCustomDump
+import InlineSnapshotTesting
 
 fileprivate let day = CalendarDate(year: 2024, month: 6, day: 12)
 
@@ -21,7 +23,7 @@ struct DayScheduleConversionTests {
 
     @Test
     func multiStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", data: DTOs.Event.DaySchedule(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: DTOs.Event.DaySchedule(
             customTitle: nil,
             date: CalendarDate(year: 2024, month: 6, day: 12),
             performances: [
@@ -53,66 +55,79 @@ struct DayScheduleConversionTests {
                 ]
             ]
         ))
-        let schedule = StringlyTyped.Schedule(
-            metadata: .init(
-                date: day,
+
+        try assertInlineSnapshot(of: ScheduleDayConversion().apply(dto), as: .customDump) {
+            """
+            StringlyTyped.Schedule(
+              metadata: StringlyTyped.Metadata(
+                date: 6/12/2024,
                 customTitle: nil
-            ),
-            stageSchedules: [
+              ),
+              stageSchedules: [
                 "Bass Haven": [
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Sunspear"],
-                        startTime: day.atTime(ScheduleTime(hour: 16, minute: 30)!),
-                        endTime: day.atTime(ScheduleTime(hour: 18, minute: 30)!),
-                        stageName: "Bass Haven"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Phantom Groove"],
-                        startTime: day.atTime(ScheduleTime(hour: 18, minute: 30)!),
-                        endTime: day.atTime(ScheduleTime(hour: 20)!),
-                        stageName: "Bass Haven"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Caribou State"],
-                        startTime: day.atTime(ScheduleTime(hour: 20)!),
-                        endTime: day.atTime(ScheduleTime(hour: 21, minute: 30)!),
-                        stageName: "Bass Haven"
-                    )
+                  [0]: StringlyTyped.Schedule.Performance(
+                    title: "Sunspear",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Sunspear"
+                    ]),
+                    startTime: Date(2024-06-12T23:30:00.000Z),
+                    endTime: Date(2024-06-13T01:30:00.000Z),
+                    stageName: "Bass Haven"
+                  ),
+                  [1]: StringlyTyped.Schedule.Performance(
+                    title: "Phantom Groove",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Phantom Groove"
+                    ]),
+                    startTime: Date(2024-06-13T01:30:00.000Z),
+                    endTime: Date(2024-06-13T03:00:00.000Z),
+                    stageName: "Bass Haven"
+                  ),
+                  [2]: StringlyTyped.Schedule.Performance(
+                    title: "Caribou State",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Caribou State"
+                    ]),
+                    startTime: Date(2024-06-13T03:00:00.000Z),
+                    endTime: Date(2024-06-13T04:30:00.000Z),
+                    stageName: "Bass Haven"
+                  )
                 ],
                 "Main Stage": [
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Oaktrail"],
-                        startTime: day.atTime(ScheduleTime(hour: 20)!),
-                        endTime: day.atTime(ScheduleTime(hour: 22)!),
-                        stageName: "Main Stage"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Rhythmbox"],
-                        startTime: day.atTime(ScheduleTime(hour: 22)!),
-                        endTime: day.atTime(ScheduleTime(hour: 23, minute: 30)!),
-                        stageName: "Main Stage"
-                    )
+                  [0]: StringlyTyped.Schedule.Performance(
+                    title: "Oaktrail",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Oaktrail"
+                    ]),
+                    startTime: Date(2024-06-13T03:00:00.000Z),
+                    endTime: Date(2024-06-13T05:00:00.000Z),
+                    stageName: "Main Stage"
+                  ),
+                  [1]: StringlyTyped.Schedule.Performance(
+                    title: "Rhythmbox",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: Date(2024-06-13T05:00:00.000Z),
+                    endTime: Date(2024-06-13T06:30:00.000Z),
+                    stageName: "Main Stage"
+                  )
                 ]
-            ]
-        )
-        let result = try await ScheduleDayConversion().apply(dto)
+              ]
+            )
+            """
+        }
 
-
-        expectNoDifference(result, schedule)
-
-        let roundTrip = try await ScheduleDayConversion().unapply(result)
-        expectNoDifference(roundTrip, dto)
     }
-
 
     @Test
     func testSingleStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", data: DTOs.Event.DaySchedule(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: DTOs.Event.DaySchedule(
             customTitle: nil,
             date: day,
             performances: [
@@ -137,51 +152,60 @@ struct DayScheduleConversionTests {
                 ]
             ]
         ))
-        let schedule = StringlyTyped.Schedule(
-            metadata: .init(
-                date: CalendarDate(year: 2024, month: 6, day: 12),
+
+        try assertInlineSnapshot(of: ScheduleDayConversion().apply(dto), as: .customDump) {
+            """
+            StringlyTyped.Schedule(
+              metadata: StringlyTyped.Metadata(
+                date: 6/12/2024,
                 customTitle: nil
-            ),
-            stageSchedules: [
+              ),
+              stageSchedules: [
                 "Bass Haven": [
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Sunspear"],
-                        startTime: day.atTime(ScheduleTime(hour: 18, minute: 30)!),
-                        endTime: day.atTime(ScheduleTime(hour: 22, minute: 30)!),
-                        stageName: "Bass Haven"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Phantom Groove"],
-                        startTime: day.atTime(ScheduleTime(hour: 22, minute: 30)!),
-                        endTime: day.atTime(ScheduleTime(hour: 24, minute: 30)!),
-                        stageName: "Bass Haven"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Oaktrail"],
-                        startTime: day.atTime(ScheduleTime(hour: 24, minute: 30)!),
-                        endTime: day.atTime(ScheduleTime(hour: 28)!),
-                        stageName: "Bass Haven"
-                    ),
-                    StringlyTyped.Schedule.Performance(
-                        customTitle: nil,
-                        artistNames: ["Rhythmbox"],
-                        startTime: day.atTime(ScheduleTime(hour: 28)!),
-                        endTime: day.atTime(ScheduleTime(hour: 31, minute: 30)!),
-                        stageName: "Bass Haven"
-                    )
+                  [0]: StringlyTyped.Schedule.Performance(
+                    title: "Sunspear",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Sunspear"
+                    ]),
+                    startTime: Date(2024-06-13T01:30:00.000Z),
+                    endTime: Date(2024-06-13T05:30:00.000Z),
+                    stageName: "Bass Haven"
+                  ),
+                  [1]: StringlyTyped.Schedule.Performance(
+                    title: "Phantom Groove",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Phantom Groove"
+                    ]),
+                    startTime: Date(2024-06-13T05:30:00.000Z),
+                    endTime: Date(2024-06-13T07:30:00.000Z),
+                    stageName: "Bass Haven"
+                  ),
+                  [2]: StringlyTyped.Schedule.Performance(
+                    title: "Oaktrail",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Oaktrail"
+                    ]),
+                    startTime: Date(2024-06-13T07:30:00.000Z),
+                    endTime: Date(2024-06-13T11:00:00.000Z),
+                    stageName: "Bass Haven"
+                  ),
+                  [3]: StringlyTyped.Schedule.Performance(
+                    title: "Rhythmbox",
+                    subtitle: nil,
+                    artistNames: Set([
+                      "Rhythmbox"
+                    ]),
+                    startTime: Date(2024-06-13T11:00:00.000Z),
+                    endTime: Date(2024-06-13T14:30:00.000Z),
+                    stageName: "Bass Haven"
+                  )
                 ]
-            ]
-        )
-
-        let result = try await ScheduleDayConversion().apply(dto)
-
-
-        expectNoDifference(result, schedule)
-
-        let roundTrip = try await ScheduleDayConversion().unapply(result)
-        expectNoDifference(roundTrip, dto)
+              ]
+            )
+            """
+        }
     }
 }
