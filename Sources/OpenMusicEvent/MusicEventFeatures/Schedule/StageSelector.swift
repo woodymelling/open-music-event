@@ -63,7 +63,7 @@ struct ScheduleHeaderButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        StageIconView(stageID: stage.id)
+        Stage.IconView(stageID: stage.id)
             .foregroundStyle(isSelected ? .white : stage.color)
             .frame(idealWidth: 60, idealHeight: 60)
             .frame(maxWidth: 60, maxHeight: 60)

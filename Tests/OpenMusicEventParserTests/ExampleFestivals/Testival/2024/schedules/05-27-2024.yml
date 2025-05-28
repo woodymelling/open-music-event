@@ -1,44 +1,56 @@
+The Portal:
+  - title: Opening Ceremony # A performance must have a title
+    time: 4:30 PM
 
-Bass Haven:
-  - time: "10:00 PM"
-    artist: "Prism Sound"
 
-  - time: "11:30 PM"
-    title: "Subsonic B2B Sylvan"
+  - artist: Kerz # or at least one artist associated with it
+    time: 5:30 PM
+
+    # > [!NOTE] The name of the artist must match the name of the included artist file (case sensitive)
+    # > A mismatch will not show this performance on the artists bio, and users will not be able to see artists details from the schedule.
+  - title: "Overgrown Sunset" # optionally override the title for a set.
+    artist: Overgrowth
+    startTime: 6:30 PM
+    endTime: 7:45 PM # A performance may have an explicit end time.
+
+  - artist: Duskee
+    time: 7:30 PM # If the endTime is omitted, this performance will end at the startTime of the next performance.
+
+  - artists:
+    - Ghillie
+    - Skbr
+    time: 8:30 PM
+
+  - title: Sub Chakra Takeover
     artists:
-       - "Subsonic"
-       - "Sylvan Beats"
+        - Secret Headliner
+        - Metafloor
 
-  - time: "12:30 AM"
-    endTime: "2:00 AM"
-    artist: "Space Chunk"
+    startTime: 9:30 PM
+    endTime: 11:30 PM # The last performance of a schedule is required to have an endTime
 
-Mystic Grove:
-  - time: "4:30 PM"
-    artist: "Sunspear"
 
-  - time: "6:30 PM"
-    artist: "Phantom Groove"
 
-  - time: "10:30 PM"
-    artist: "Oaktrail"
+# This is a simple, and striaghtforward schedule. Many schedules just need this information.
+  Ursus:
+  - artist: Woofax
+    time: 3:00 PM
 
-  - time: "12:00 AM"
-    endTime: "4:00 AM"
-    artist: "Boids"
+  - artist: Tube Screamer
+    time: 4:30 PM
 
-Tranquil Meadow:
-  - time: "3:00 PM"
-    artist: "Float On"
+  - artist: Skreid
+    time: 5:30 PM
 
-  - time: "4:00 PM"
-    artist: "Floods"
+  - title: Rabbit Hole Records Crew
+    artists:
+        - The Mad Hatter
+        - Alice in Chainz
+        - Queen of your Heart
+    time: 6:30 PM
 
-  - time: "5:00 PM"
-    endTime: "6:00 PM"
-    artist: "Overgrowth"
+  - artist: Dragon Fli Empire
+    time: 8:00 PM
 
-  - time: "1:00 AM"
-    endTime: "2:00 AM"
-    artist: "The Sleepies"
-    title: "The Wind Down"
+  - artist: Def3
+    time: 9:00 PM

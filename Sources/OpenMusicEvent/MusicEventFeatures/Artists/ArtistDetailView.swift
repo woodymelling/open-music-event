@@ -157,7 +157,8 @@ struct ArtistDetailView: View {
                 requests: [
                     ImageRequest(
                         url: artist.imageURL,
-                        processors: [.resize(width: 440)]
+                        processors: [.resize(width: 440)],
+                        priority: .veryHigh // Detail screen should have high priority
                     )
                     .withPipeline(.images)
                 ]

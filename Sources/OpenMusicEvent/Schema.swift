@@ -144,8 +144,6 @@ public struct Stage: Identifiable, Equatable, Sendable {
 }
 
 
-
-
 // MARK: Schedule
 @Table
 public struct Schedule: Identifiable, Equatable, Sendable {

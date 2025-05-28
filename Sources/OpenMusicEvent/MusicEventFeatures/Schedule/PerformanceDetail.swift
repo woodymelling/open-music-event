@@ -159,7 +159,7 @@ extension Performance {
     //                Spacer(minLength: 24)
 
 
-                    StageIconView(stageID: performance.stageID)
+                    Stage.IconView(stageID: performance.stageID)
                         .frame(square: 60)
                         .background {
                             Circle()
