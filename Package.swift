@@ -70,11 +70,8 @@ let package = Package(
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),
-                .product(name: "Validated", package: "swift-validated"),
                 .product(name: "Parsing", package: "swift-parsing"),
                 .product(name: "Conversions", package: "swift-parsing"),
-
-                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Tagged", package: "swift-tagged"),
 

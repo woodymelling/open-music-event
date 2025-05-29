@@ -13,33 +13,34 @@ import StructuredQueries
 import SwiftUI
 #endif
 
-public typealias OmeID<T> = Int
-//public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
-//    public let rawValue: Int
-//    public init(_ intValue: Int) {
-//        self.rawValue = intValue
-//    }
-//
-//    public init(rawValue: Int) {
-//        self.rawValue = rawValue
-//    }
-//
-//    public init(integerLiteral value: IntegerLiteralType) {
-//        self.rawValue = value
-//    }
-//}
-//
-//import Tagged
-//
-//extension OmeID: _OptionalPromotable {}
-//extension OmeID: QueryDecodable {}
-//extension OmeID: QueryExpression {}
-//extension OmeID: QueryRepresentable {}
-//extension OmeID: SQLiteType {
-//  public static var typeAffinity: SQLiteTypeAffinity {
-//      .integer
-//  }
-//}
+//public typealias OmeID<T> = Int
+
+public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
+    public let rawValue: Int
+    public init(_ intValue: Int) {
+        self.rawValue = intValue
+    }
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public init(integerLiteral value: IntegerLiteralType) {
+        self.rawValue = value
+    }
+}
+
+import Tagged
+
+extension OmeID: _OptionalPromotable {}
+extension OmeID: QueryDecodable {}
+extension OmeID: QueryExpression {}
+extension OmeID: QueryRepresentable {}
+extension OmeID: SQLiteType {
+  public static var typeAffinity: SQLiteTypeAffinity {
+      .integer
+  }
+}
 
 // MARK: Organizer
 @Table
@@ -61,8 +62,7 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     }
 }
 
-extension Organizer.Draft: Equatable {}
-extension Organizer.Draft: Sendable {}
+extension Organizer.Draft: Equatable, Codable, Sendable {}
 
 // MARK: Music Event
 @Table
@@ -138,13 +138,13 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
 
 }
 
-extension MusicEvent.Draft: Codable {}
-extension MusicEvent.Draft: Equatable {}
+extension MusicEvent.Draft: Codable, Equatable, Sendable {}
 
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
-    public let id: Int
+    public typealias ID = OmeID<Artist>
+    public let id: ID
     public let musicEventID: MusicEvent.ID?
 
     public let name: String
@@ -164,7 +164,7 @@ public struct Artist: Identifiable, Equatable, Sendable {
         }
     }
 
-    public init(id: Int, musicEventID: MusicEvent.ID?, name: String, bio: String?, imageURL: URL?, links: [Link]) {
+    public init(id: OmeID<Artist>, musicEventID: MusicEvent.ID?, name: String, bio: String?, imageURL: URL?, links: [Link]) {
         self.id = id
         self.musicEventID = musicEventID
         self.name = name
@@ -174,16 +174,17 @@ public struct Artist: Identifiable, Equatable, Sendable {
     }
 }
 
+extension Artist.Draft: Equatable, Sendable, Codable {}
+
 // MARK: Stage
 @Table
-public struct Stage: Identifiable, Equatable, Sendable {
+public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public typealias ID = OmeID<Stage>
     public let id: ID
-    public var musicEventID: MusicEvent.ID?
-    public var name: String
-    public var iconImageURL: URL?
-
-    public var color: Color
+    public let musicEventID: MusicEvent.ID?
+    public let name: String
+    public let iconImageURL: URL?
+    public let color: Color
 
     public init(id: ID, musicEventID: MusicEvent.ID? = nil, name: String, iconImageURL: URL? = nil, color: Color) {
         self.id = id
@@ -193,6 +194,8 @@ public struct Stage: Identifiable, Equatable, Sendable {
         self.color = color
     }
 }
+
+extension Stage.Draft: Codable, Sendable, Equatable {}
 
 
 // MARK: Schedule

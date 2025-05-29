@@ -11,29 +11,30 @@ import Testing
 import Parsing
 import CustomDump
 import InlineSnapshotTesting
+import CoreModels
 
 typealias ScheduleError = Validation.ScheduleError.StageDayScheduleError
 
 struct StageScheduleDayMappingTests {
-    let conversion = ScheduleDayConversion.ScheduleDictionaryConversion.StagelessPerformanceConversion()
+    let conversion = ScheduleConversion.DetermineFullSetTimesConversion()
 
     // MARK: - Success Cases
     @Test("Simple schedule before midnight converts successfully")
     func simpleBeforeMidnight() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Sunspear",
                 time: "4:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Phantom Groove",
                 time: "6:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Oaktrail",
                 time: "8:00 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "10 PM",
                 endTime: "11:30 PM"
@@ -44,56 +45,67 @@ struct StageScheduleDayMappingTests {
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
-              [0]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Sunspear"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 16,
-                  minute: 30
+              [0]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Sunspear",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 16,
+                    minute: 30
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 18,
                   minute: 30
                 )
               ),
-              [1]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Phantom Groove"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 18,
-                  minute: 30
+              [1]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Phantom Groove",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 18,
+                    minute: 30
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 20,
                   minute: 0
                 )
               ),
-              [2]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Oaktrail"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 20,
-                  minute: 0
+              [2]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Oaktrail",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 20,
+                    minute: 0
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 22,
                   minute: 0
                 )
               ),
-              [3]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Rhythmbox"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 22,
-                  minute: 0
+              [3]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Rhythmbox",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 22,
+                    minute: 0
+                  ),
+                  endTime: ScheduleTime(
+                    hour: 23,
+                    minute: 30
+                  )
                 ),
                 endTime: ScheduleTime(
                   hour: 23,
@@ -108,19 +120,19 @@ struct StageScheduleDayMappingTests {
     @Test("Schedule through midnight converts successfully")
     func throughMidnight() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Sunspear",
                 time: "10:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Phantom Groove",
                 time: "12:30 AM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Oaktrail",
                 time: "2:00 AM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "4 AM",
                 endTime: "5:30 AM"
@@ -131,56 +143,67 @@ struct StageScheduleDayMappingTests {
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
-              [0]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Sunspear"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 22,
-                  minute: 30
+              [0]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Sunspear",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 22,
+                    minute: 30
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 24,
                   minute: 30
                 )
               ),
-              [1]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Phantom Groove"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 24,
-                  minute: 30
+              [1]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Phantom Groove",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 24,
+                    minute: 30
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 26,
                   minute: 0
                 )
               ),
-              [2]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Oaktrail"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 26,
-                  minute: 0
+              [2]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Oaktrail",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 26,
+                    minute: 0
+                  ),
+                  endTime: nil
                 ),
                 endTime: ScheduleTime(
                   hour: 28,
                   minute: 0
                 )
               ),
-              [3]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Rhythmbox"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 28,
-                  minute: 0
+              [3]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Rhythmbox",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 28,
+                    minute: 0
+                  ),
+                  endTime: ScheduleTime(
+                    hour: 5,
+                    minute: 30
+                  )
                 ),
                 endTime: ScheduleTime(
                   hour: 29,
@@ -195,12 +218,12 @@ struct StageScheduleDayMappingTests {
     @Test("Back to back performances convert successfully")
     func backToBackPerformances() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Sunspear",
                 time: "4:30 PM",
                 endTime: "5:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Phantom Groove",
                 time: "5:30 PM",
                 endTime: "6:30 PM"
@@ -212,28 +235,38 @@ struct StageScheduleDayMappingTests {
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
-              [0]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Sunspear"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 16,
-                  minute: 30
+              [0]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Sunspear",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 16,
+                    minute: 30
+                  ),
+                  endTime: ScheduleTime(
+                    hour: 17,
+                    minute: 30
+                  )
                 ),
                 endTime: ScheduleTime(
                   hour: 17,
                   minute: 30
                 )
               ),
-              [1]: StagelessPerformance(
-                customTitle: nil,
-                artistNames: Set([
-                  "Phantom Groove"
-                ]),
-                startTime: ScheduleTime(
-                  hour: 17,
-                  minute: 30
+              [1]: (
+                (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                  title: nil,
+                  artist: "Phantom Groove",
+                  artists: nil,
+                  time: ScheduleTime(
+                    hour: 17,
+                    minute: 30
+                  ),
+                  endTime: ScheduleTime(
+                    hour: 18,
+                    minute: 30
+                  )
                 ),
                 endTime: ScheduleTime(
                   hour: 18,
@@ -260,12 +293,12 @@ struct StageScheduleDayMappingTests {
     @Test("Overlapping performances throw error")
     func overlappingPerformances() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "4 AM",
                 endTime: "5:30 AM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "5:00 AM",
                 endTime: "6:30 AM"
@@ -278,12 +311,11 @@ struct StageScheduleDayMappingTests {
             assertInlineSnapshot(of: error, as: .customDump) {
                 """
                 Validation.ScheduleError.StageDayScheduleError.overlappingPerformances(
-                  StagelessPerformance(
-                    customTitle: nil,
-                    artistNames: Set([
-                      "Rhythmbox"
-                    ]),
-                    startTime: ScheduleTime(
+                  (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                    title: nil,
+                    artist: "Rhythmbox",
+                    artists: nil,
+                    time: ScheduleTime(
                       hour: 4,
                       minute: 0
                     ),
@@ -292,12 +324,11 @@ struct StageScheduleDayMappingTests {
                       minute: 30
                     )
                   ),
-                  StagelessPerformance(
-                    customTitle: nil,
-                    artistNames: Set([
-                      "Rhythmbox"
-                    ]),
-                    startTime: ScheduleTime(
+                  (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                    title: nil,
+                    artist: "Rhythmbox",
+                    artists: nil,
+                    time: ScheduleTime(
                       hour: 5,
                       minute: 0
                     ),
@@ -315,62 +346,47 @@ struct StageScheduleDayMappingTests {
     @Test("Overlapping performances at midnight throw error")
     func overlappingAtMidnight() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "11:30 PM",
                 endTime: "12:30 AM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Rhythmbox",
                 time: "11:45 PM",
                 endTime: "1:30 AM"
             )
         ]
 
-        let expectedError = ScheduleError.overlappingPerformances(
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 23, minute: 30)!,
-                endTime: ScheduleTime(hour: 24, minute: 30)!
-            ),
-            StagelessPerformance(
-                artistNames: ["Rhythmbox"],
-                startTime: ScheduleTime(hour: 23, minute: 45)!,
-                endTime: ScheduleTime(hour: 25, minute: 30)!
-            )
-        )
-        
         do {
             _ = try conversion.apply(dtos)
         } catch {
             assertInlineSnapshot(of: error, as: .customDump) {
                 """
                 Validation.ScheduleError.StageDayScheduleError.overlappingPerformances(
-                  StagelessPerformance(
-                    customTitle: nil,
-                    artistNames: Set([
-                      "Rhythmbox"
-                    ]),
-                    startTime: ScheduleTime(
+                  (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                    title: nil,
+                    artist: "Rhythmbox",
+                    artists: nil,
+                    time: ScheduleTime(
                       hour: 23,
                       minute: 30
                     ),
                     endTime: ScheduleTime(
-                      hour: 24,
+                      hour: 0,
                       minute: 30
                     )
                   ),
-                  StagelessPerformance(
-                    customTitle: nil,
-                    artistNames: Set([
-                      "Rhythmbox"
-                    ]),
-                    startTime: ScheduleTime(
+                  (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                    title: nil,
+                    artist: "Rhythmbox",
+                    artists: nil,
+                    time: ScheduleTime(
                       hour: 23,
                       minute: 45
                     ),
                     endTime: ScheduleTime(
-                      hour: 25,
+                      hour: 1,
                       minute: 30
                     )
                   )
@@ -383,26 +399,19 @@ struct StageScheduleDayMappingTests {
     @Test("Missing end time throws error")
     func missingEndTime() throws {
         let dtos = [
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Sunspear",
                 time: "4:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Phantom Groove",
                 time: "6:30 PM"
             ),
-            PerformanceDTO(
+            Performance.YamlRepresentation(
                 artist: "Oaktrail",
                 time: "8:00 PM"
             )
         ]
-
-        let expectedError = ScheduleError.cannotDetermineEndTimeForPerformance(
-            TimelessStagelessPerformance(
-                startTime: ScheduleTime(hour: 20)!,
-                artistNames: ["Oaktrail"]
-            )
-        )
 
         do {
             _ = try conversion.apply(dtos)
@@ -410,16 +419,15 @@ struct StageScheduleDayMappingTests {
             assertInlineSnapshot(of: error, as: .customDump) {
                 """
                 Validation.ScheduleError.StageDayScheduleError.cannotDetermineEndTimeForPerformance(
-                  TimelessStagelessPerformance(
-                    startTime: ScheduleTime(
+                  (extension in OpenMusicEventParser):Performance.YamlRepresentation(
+                    title: nil,
+                    artist: "Oaktrail",
+                    artists: nil,
+                    time: ScheduleTime(
                       hour: 20,
                       minute: 0
                     ),
-                    endTime: nil,
-                    customTitle: nil,
-                    artistNames: Set([
-                      "Oaktrail"
-                    ])
+                    endTime: nil
                   )
                 )
                 """

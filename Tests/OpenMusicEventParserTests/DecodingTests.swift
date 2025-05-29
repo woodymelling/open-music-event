@@ -7,7 +7,7 @@ import Parsing
 import CustomDump
 import SnapshotTestingCustomDump
 import InlineSnapshotTesting
-
+import CoreModels
 
 func expect<C: Conversion>(
     _ data: C.Input,
@@ -37,10 +37,10 @@ struct YamlCodingTests {
         imageURL: "http://example.com/event-image.jpg"
         siteMapImageURL: "http://example.com/site-map.jpg"
         """.utf8)
-        let result = try Conversions.YamlConversion(Event.Info.YamlRepresentation.self).apply(yaml)
+        let result = try Conversions.YamlConversion(EventConfiguration.EventInfoYaml.self).apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
-            Event.Info.YamlRepresentation(
+            EventConfiguration.EventInfoYaml(
               name: "Testival",
               address: "123 Festival Road, Music City",
               timeZone: "America/Seattle",
@@ -48,7 +48,6 @@ struct YamlCodingTests {
               siteMapImageURL: URL(http://example.com/site-map.jpg),
               startDate: nil,
               endDate: nil,
-              colorScheme: nil,
               contactNumbers: nil,
               stages: nil
             )
@@ -71,24 +70,63 @@ struct YamlCodingTests {
         - name: "Tranquil Meadow"
           color: 0x4287f5
         """.utf8)
-        let result = try Conversions.YamlConversion([StageDTO].self).apply(yaml)
+        let result = try Conversions.YamlConversion([CoreModels.Stage.Draft].self).apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
-              [0]: StageDTO(
+              [0]: Stage.Draft(
+                id: nil,
+                musicEventID: nil,
                 name: "Mystic Grove",
-                color: 1947988,
-                imageURL: URL(http://example.com/mystic-grove.jpg)
+                iconImageURL: nil,
+                color: Color(
+                  provider: ColorBox(
+                    base: ResolvedColorProvider(
+                      color: Color.Resolved(
+                        linearRed: 0.012286487,
+                        linearGreen: 0.48515007,
+                        linearBlue: 0.08865559,
+                        opacity: 1.0
+                      )
+                    )
+                  )
+                )
               ),
-              [1]: StageDTO(
+              [1]: Stage.Draft(
+                id: nil,
+                musicEventID: nil,
                 name: "Bass Haven",
-                color: 16734003,
-                imageURL: URL(http://example.com/bass-haven.jpg)
+                iconImageURL: nil,
+                color: Color(
+                  provider: #1 ColorBox(
+                    base: ResolvedColorProvider(
+                      color: Color.Resolved(
+                        linearRed: 1.0,
+                        linearGreen: 0.09530746,
+                        linearBlue: 0.033104762,
+                        opacity: 1.0
+                      )
+                    )
+                  )
+                )
               ),
-              [2]: StageDTO(
+              [2]: Stage.Draft(
+                id: nil,
+                musicEventID: nil,
                 name: "Tranquil Meadow",
-                color: 4360181,
-                imageURL: nil
+                iconImageURL: nil,
+                color: Color(
+                  provider: #2 ColorBox(
+                    base: ResolvedColorProvider(
+                      color: Color.Resolved(
+                        linearRed: 0.05448028,
+                        linearGreen: 0.2422812,
+                        linearBlue: 0.9130988,
+                        opacity: 1.0
+                      )
+                    )
+                  )
+                )
               )
             ]
             """
@@ -105,16 +143,16 @@ struct YamlCodingTests {
           title: "Emergency"
           description: "For emergencies only"
         """.utf8)
-        let result = try Conversions.YamlConversion([ContactInfoDTO].self).apply(yaml)
+        let result = try Conversions.YamlConversion([CoreModels.MusicEvent.ContactNumber].self).apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
-              [0]: ContactInfoDTO(
+              [0]: MusicEvent.ContactNumber(
                 phoneNumber: "+1234567890",
                 title: "General Info",
                 description: nil
               ),
-              [1]: ContactInfoDTO(
+              [1]: MusicEvent.ContactNumber(
                 phoneNumber: "+0987654321",
                 title: "Emergency",
                 description: "For emergencies only"
@@ -129,10 +167,10 @@ struct YamlCodingTests {
     func decodeSimpleSchedule() throws {
         let yaml = Data("""
         Bass Haven:
-          - time: "10:00 PM"
+          - time: 10:00 PM
             artist: "Prism Sound"
 
-          - time: "11:30 PM"
+          - time: 11:30 PM
             title: "Subsonic B2B Sylvan"
             artists:
                - "Subsonic"
@@ -173,104 +211,169 @@ struct YamlCodingTests {
             title: "The Wind Down"
         """.utf8)
 
-        let result = try Conversions.YamlConversion<DTOs.Event.DaySchedule>().apply(yaml)
+        let result = try Conversions.YamlConversion<Schedule.YamlRepresentation>().apply(yaml)
 
         assertInlineSnapshot(of: result, as: .customDump) {
             """
-            DTOs.Event.DaySchedule(
+            (extension in OpenMusicEventParser):Schedule.YamlRepresentation(
               customTitle: nil,
               date: nil,
               performances: [
                 "Bass Haven": [
-                  [0]: PerformanceDTO(
+                  [0]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Prism Sound",
                     artists: nil,
-                    time: "10:00 PM",
+                    time: ScheduleTime(
+                      hour: 22,
+                      minute: 0
+                    ),
                     endTime: nil
                   ),
-                  [1]: PerformanceDTO(
+                  [1]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: "Subsonic B2B Sylvan",
                     artist: nil,
                     artists: [
                       [0]: "Subsonic",
                       [1]: "Sylvan Beats"
                     ],
-                    time: "11:30 PM",
+                    time: ScheduleTime(
+                      hour: 23,
+                      minute: 30
+                    ),
                     endTime: nil
                   ),
-                  [2]: PerformanceDTO(
+                  [2]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Space Chunk",
                     artists: nil,
-                    time: "12:30 AM",
-                    endTime: "2:00 AM"
+                    time: ScheduleTime(
+                      hour: 0,
+                      minute: 30
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 2,
+                      minute: 0
+                    )
                   )
                 ],
                 "Mystic Grove": [
-                  [0]: PerformanceDTO(
+                  [0]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Sunspear",
                     artists: nil,
-                    time: "4:30 PM",
+                    time: ScheduleTime(
+                      hour: 16,
+                      minute: 30
+                    ),
                     endTime: nil
                   ),
-                  [1]: PerformanceDTO(
+                  [1]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Phantom Groove",
                     artists: nil,
-                    time: "6:30 PM",
+                    time: ScheduleTime(
+                      hour: 18,
+                      minute: 30
+                    ),
                     endTime: nil
                   ),
-                  [2]: PerformanceDTO(
+                  [2]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Oaktrail",
                     artists: nil,
-                    time: "10:30 PM",
+                    time: ScheduleTime(
+                      hour: 22,
+                      minute: 30
+                    ),
                     endTime: nil
                   ),
-                  [3]: PerformanceDTO(
+                  [3]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Rhythmbox",
                     artists: nil,
-                    time: "12:00 AM",
-                    endTime: "4:00 AM"
+                    time: ScheduleTime(
+                      hour: 0,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 4,
+                      minute: 0
+                    )
                   )
                 ],
                 "Tranquil Meadow": [
-                  [0]: PerformanceDTO(
+                  [0]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Float On",
                     artists: nil,
-                    time: "3:00 PM",
+                    time: ScheduleTime(
+                      hour: 15,
+                      minute: 0
+                    ),
                     endTime: nil
                   ),
-                  [1]: PerformanceDTO(
+                  [1]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Floods",
                     artists: nil,
-                    time: "4:30 PM",
+                    time: ScheduleTime(
+                      hour: 16,
+                      minute: 30
+                    ),
                     endTime: nil
                   ),
-                  [2]: PerformanceDTO(
+                  [2]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: nil,
                     artist: "Overgrowth",
                     artists: nil,
-                    time: "04:00 PM",
-                    endTime: "6:00 PM"
+                    time: ScheduleTime(
+                      hour: 16,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 18,
+                      minute: 0
+                    )
                   ),
-                  [3]: PerformanceDTO(
+                  [3]: (extension in OpenMusicEventParser):Performance.YamlRepresentation(
                     title: "The Wind Down",
                     artist: "The Sleepies",
                     artists: nil,
-                    time: "1:00 AM",
-                    endTime: "2:00 AM"
+                    time: ScheduleTime(
+                      hour: 1,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 2,
+                      minute: 0
+                    )
                   )
                 ]
               ]
             )
             """
         }
+
+        
+    }
+
+
+    @Test
+    func decodeReallySimpleSchedule() throws {
+        let yaml = Data("""
+        Bass:
+          - time: '10:00 PM'
+            artist: "Prism Sound"
+        """.utf8)
+
+        struct Performance: Codable {
+            let time: ScheduleTime
+            let artist: String
+        }
+
+        let result = try Conversions.YamlConversion<[String: [Performance]]>().apply(yaml)
+
     }
 
     @Test
@@ -282,7 +385,7 @@ struct YamlCodingTests {
             - url: http://instagram.com/subsonic
         """.utf8)
 
-        let expectedResult = ArtistInfoFrontMatter(
+        let expectedResult = ArtistConversion.ArtistInfoFrontMatter(
             imageURL: .init(string: "http://example.com/subsonic.jpg"),
             links: [
                 .init(url: URL(string: "http://soundcloud.com/subsonic")!),
@@ -290,17 +393,17 @@ struct YamlCodingTests {
             ]
         )
 
-        let result = try Conversions.YamlConversion<ArtistInfoFrontMatter>().apply(yaml)
+        let result = try Conversions.YamlConversion<ArtistConversion.ArtistInfoFrontMatter>().apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
-            ArtistInfoFrontMatter(
+            ArtistConversion.ArtistInfoFrontMatter(
               imageURL: URL(http://example.com/subsonic.jpg),
               links: [
-                [0]: ArtistDTO.Link(
+                [0]: Artist.Link(
                   url: URL(http://soundcloud.com/subsonic),
                   label: nil
                 ),
-                [1]: ArtistDTO.Link(
+                [1]: Artist.Link(
                   url: URL(http://instagram.com/subsonic),
                   label: nil
                 )
@@ -311,7 +414,8 @@ struct YamlCodingTests {
 
         expectNoDifference(result, expectedResult)
 
-        try expect(expectedResult, toRoundtripUsing: Conversions.YamlConversion<ArtistInfoFrontMatter>().inverted())
+        try expect(expectedResult, toRoundtripUsing: Conversions.YamlConversion<ArtistConversion.ArtistInfoFrontMatter>().inverted())
+
     }
 }
 
@@ -329,20 +433,20 @@ struct ArtistDecodingTests {
         """
 
         var text = Substring(markdown)
-        let parser = MarkdownWithFrontMatter<ArtistInfoFrontMatter>.Parser()
+        let parser = MarkdownWithFrontMatter<ArtistConversion.ArtistInfoFrontMatter>.Parser()
         let dto = try parser.parse(&text)
 
         assertInlineSnapshot(of: dto, as: .customDump) {
             """
             MarkdownWithFrontMatter(
-              frontMatter: ArtistInfoFrontMatter(
+              frontMatter: ArtistConversion.ArtistInfoFrontMatter(
                 imageURL: URL(http://example.com/subsonic.jpg),
                 links: [
-                  [0]: ArtistDTO.Link(
+                  [0]: Artist.Link(
                     url: URL(http://soundcloud.com/subsonic),
                     label: nil
                   ),
-                  [1]: ArtistDTO.Link(
+                  [1]: Artist.Link(
                     url: URL(http://instagram.com/subsonic),
                     label: nil
                   )
@@ -364,7 +468,7 @@ struct ArtistDecodingTests {
         """
 
         var text = Substring(markdown)
-        let parser = MarkdownWithFrontMatter<ArtistInfoFrontMatter>.Parser()
+        let parser = MarkdownWithFrontMatter<ArtistConversion.ArtistInfoFrontMatter>.Parser()
         let dto = try parser.parse(&text)
 
         assertInlineSnapshot(of: dto, as: .customDump) {

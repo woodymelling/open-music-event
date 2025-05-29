@@ -8,6 +8,14 @@
 import Conversions
 import Foundation
 
+
+
+extension ScheduleTime: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = try! ScheduleTimeConversion().apply(value)
+    }
+}
+
 struct ScheduleTimeConversion: Conversion {
     typealias Input = String
     typealias Output = ScheduleTime
@@ -66,7 +74,6 @@ struct ScheduleTimeDecodingError: LocalizedError, Equatable, Sendable {
     static let hourExceeds12HourTimeFormat = { @Sendable (raw: String) in
         ScheduleTimeDecodingError(
             raw: raw,
-
             description: "Invalid 12-hour time format",
             reason: "The provided hour value exceeds 12 hours in 12-hour format",
             suggestion: "Please provide a time between 1:00 and 12:59, followed by AM/PM"

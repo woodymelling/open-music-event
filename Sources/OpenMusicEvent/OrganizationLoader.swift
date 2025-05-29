@@ -13,7 +13,7 @@ import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
-    var fetchOrganizer: @Sendable (_ id: CoreModels.Organizer.ID) async throws -> OpenMusicEventParser.Organizer
+    var fetchOrganizer: @Sendable (_ id: CoreModels.Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
 }
 
 struct FailedToLoadOrganizerError: Error {}
@@ -44,7 +44,7 @@ extension DataFetchingClient: DependencyKey {
         let finalDestination = try getUnzippedDirectory(from: unzippedURL)
         logger.info("Parsing organizer from directory: \(finalDestination)")
 
-        let organizerData = try OpenMusicEventParser.read(from: finalDestination)
+        let organizerData = try OrganizerConfiguration.fileTree.read(from: finalDestination)
 
         logger.info("Clearing temporary directory")
         try FileManager.default.clearDirectory(unzippedURL)
@@ -103,6 +103,12 @@ extension String {
     }
 }
 
+extension OmeID {
+    public init(stabilizedBy values: String...) {
+        self.init(rawValue: values.joined(separator: "-").stableHash)
+    }
+}
+
 func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
@@ -126,19 +132,7 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
             .execute(db)
 
         for event in organizer.events {
-            let eventDraft = MusicEvent.Draft(
-                // Make a stable identifier for events that don't change their name
-                id: .init((organizerURL.absoluteString + event.info.name).stableHash),
-                organizerURL: organizerURL,
-                name: event.info.name,
-                timeZone: event.info.timeZone,
-                startTime: event.info.startTime,
-                endTime: event.info.endTime,
-                imageURL: event.info.imageURL?.rawValue,
-                siteMapImageURL: event.info.siteMapImageURL?.rawValue,
-                location: event.info.location?.draft,
-                contactNumbers: event.info.contactNumbers.map { $0.draft }
-            )
+            let eventDraft: MusicEvent.Draft = event.info
 
             let eventID = try MusicEvent.insert(eventDraft)
                 .returning(\.id)
@@ -148,15 +142,15 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
             var artistNameIDMapping: [String: Artist.ID] = [:]
 
             for stage in event.stages {
-                let stageDraft = Stage.Draft(
-                    id: (String(eventDraft.id!) + stage.name).stableHash,
-                    musicEventID: eventID,
+                let stage = Stage.Draft(
+                    id: Stage.ID(rawValue: (String(eventDraft.id!.rawValue) + stage.name).stableHash),
+                    musicEventID: eventDraft.id,
                     name: stage.name,
-                    iconImageURL: stage.imageURL,
-                    color: Color(hex: stage.color)
+                    iconImageURL: stage.iconImageURL,
+                    color: stage.color
                 )
 
-                let stageID = try Stage.upsert(stageDraft)
+                let stageID = try Stage.upsert(stage)
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -165,12 +159,12 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
 
             for artist in event.artists {
                 let artistDraft = Artist.Draft(
-                    id: (String(eventDraft.id!) + artist.name).stableHash,
+                    id: OmeID(stabilizedBy: String(eventDraft.id!.rawValue), artist.name),
                     musicEventID: eventID,
                     name: artist.name,
                     bio: artist.bio,
                     imageURL: artist.imageURL,
-                    links: artist.links.map { $0.draft }
+                    links: artist.links
                 )
 
                 let artistID = try Artist.upsert(artistDraft)
@@ -179,84 +173,57 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
 
                 artistNameIDMapping[artist.name] = artistID
             }
-
+//
             for schedule in event.schedule {
                 let draft = Schedule.Draft(
-                    id: (String(eventDraft.id!) + (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? UUID().uuidString)).stableHash,
+                    id: .init(
+                        stabilizedBy: String(eventDraft.id!.rawValue),
+                        (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? UUID().uuidString)
+                    ),
                     musicEventID: eventID,
                     startTime: schedule.metadata.startTime,
                     endTime: schedule.metadata.endTime,
                     customTitle: schedule.metadata.customTitle
                 )
-
-                let scheduleID = try Schedule.upsert(draft)
-                    .returning(\.id)
-                    .fetchOne(db)!
-
-                for stageSchedule in schedule.stageSchedules {
-
-                    for performance in stageSchedule.value {
-                        let draft = Performance.Draft(
-                            // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
-                            // Maybe we increment a counter if there are multiple?
-                            id: (String(scheduleID) + stageSchedule.key + performance.title).stableHash,
-                            stageID: stageNameIDMapping[stageSchedule.key]!,
-                            scheduleID: scheduleID,
-                            startTime: performance.startTime,
-                            endTime: performance.endTime,
-                            title: performance.title,
-                            description: nil
-                        )
-
-                        let performanceID = try Performance.upsert(draft)
-                            .returning(\.id)
-                            .fetchOne(db)!
-
-                        for artistName in performance.artistNames {
-                            let artistID = artistNameIDMapping[artistName]
-
-                            let draft = Performance.Artists.Draft(
-                                performanceID: performanceID,
-                                artistID: artistID,
-                                anonymousArtistName: artistID == nil ? artistName : nil
-                            )
-
-                            try Performance.Artists.insert(draft)
-                                .execute(db)
-                        }
-                    }
-                }
+//
+//                let scheduleID = try Schedule.upsert(draft)
+//                    .returning(\.id)
+//                    .fetchOne(db)!
+//
+//                for stageSchedule in schedule.stageSchedules {
+//
+//                    for performance in stageSchedule.value {
+//                        let draft = Performance.Draft(
+//                            // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
+//                            // Maybe we increment a counter if there are multiple?
+//                            id: (String(scheduleID) + stageSchedule.key + performance.title).stableHash,
+//                            stageID: stageNameIDMapping[stageSchedule.key]!,
+//                            scheduleID: scheduleID,
+//                            startTime: performance.startTime,
+//                            endTime: performance.endTime,
+//                            title: performance.title,
+//                            description: nil
+//                        )
+//
+//                        let performanceID = try Performance.upsert(draft)
+//                            .returning(\.id)
+//                            .fetchOne(db)!
+//
+//                        for artistName in performance.artistNames {
+//                            let artistID = artistNameIDMapping[artistName]
+//
+//                            let draft = Performance.Artists.Draft(
+//                                performanceID: performanceID,
+//                                artistID: artistID,
+//                                anonymousArtistName: artistID == nil ? artistName : nil
+//                            )
+//
+//                            try Performance.Artists.insert(draft)
+//                                .execute(db)
+//                        }
+//                    }
+//                }
             }
         }
-    }
-}
-
-import OpenMusicEventParser
-
-extension OpenMusicEventParser.Event.Location {
-    var draft: MusicEvent.Location {
-        let location = if let latitude, let longitude {
-            MusicEvent.Location.Coordinates(latitude: latitude, longitude: longitude)
-        } else {
-            MusicEvent.Location.Coordinates?.none
-        }
-
-        return .init(
-            address: self.address,
-            directions: self.directions,
-            coordinates: location
-        )
-    }
-}
-
-extension OpenMusicEventParser.Event.ContactNumber {
-    var draft: MusicEvent.ContactNumber {
-        .init(phoneNumber: self.phoneNumber, title: self.title, description: self.description)
-    }
-}
-
-extension OpenMusicEventParser.Event.Artist.Link {
-    var draft: Artist.Link {
-        .init(url: self.url, label: self.label)
     }
 }

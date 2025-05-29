@@ -15,6 +15,7 @@ import DependenciesTestSupport
 import CustomDump
 import SnapshotTestingCustomDump
 import InlineSnapshotTesting
+import CoreModels
 
 fileprivate let day = CalendarDate(year: 2024, month: 6, day: 12)
 
@@ -23,31 +24,31 @@ struct DayScheduleConversionTests {
 
     @Test
     func multiStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: DTOs.Event.DaySchedule(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: CoreModels.Schedule.YamlRepresentation(
             customTitle: nil,
             date: CalendarDate(year: 2024, month: 6, day: 12),
             performances: [
                 "Bass Haven": [
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Sunspear",
                         time: "4:30 PM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Phantom Groove",
                         time: "6:30 PM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Caribou State",
                         time: "8:00 PM",
                         endTime: "9:30 PM"
                     )
                 ],
                 "Main Stage": [
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Oaktrail",
                         time: "8:00 PM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Rhythmbox",
                         time: "10:00 PM",
                         endTime: "11:30 PM"
@@ -56,16 +57,16 @@ struct DayScheduleConversionTests {
             ]
         ))
 
-        try assertInlineSnapshot(of: ScheduleDayConversion().apply(dto), as: .customDump) {
+        try assertInlineSnapshot(of: ScheduleConversion().apply(dto), as: .customDump) {
             """
-            StringlyTyped.Schedule(
-              metadata: StringlyTyped.Metadata(
+            (extension in OpenMusicEventParser):Schedule.StringlyTyped(
+              metadata: (extension in OpenMusicEventParser):Schedule.Metadata(
                 date: 6/12/2024,
                 customTitle: nil
               ),
               stageSchedules: [
                 "Bass Haven": [
-                  [0]: StringlyTyped.Schedule.Performance(
+                  [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Sunspear",
                     subtitle: nil,
                     artistNames: Set([
@@ -75,7 +76,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T01:30:00.000Z),
                     stageName: "Bass Haven"
                   ),
-                  [1]: StringlyTyped.Schedule.Performance(
+                  [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Phantom Groove",
                     subtitle: nil,
                     artistNames: Set([
@@ -85,7 +86,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T03:00:00.000Z),
                     stageName: "Bass Haven"
                   ),
-                  [2]: StringlyTyped.Schedule.Performance(
+                  [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Caribou State",
                     subtitle: nil,
                     artistNames: Set([
@@ -97,7 +98,7 @@ struct DayScheduleConversionTests {
                   )
                 ],
                 "Main Stage": [
-                  [0]: StringlyTyped.Schedule.Performance(
+                  [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Oaktrail",
                     subtitle: nil,
                     artistNames: Set([
@@ -107,7 +108,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T05:00:00.000Z),
                     stageName: "Main Stage"
                   ),
-                  [1]: StringlyTyped.Schedule.Performance(
+                  [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Rhythmbox",
                     subtitle: nil,
                     artistNames: Set([
@@ -122,29 +123,28 @@ struct DayScheduleConversionTests {
             )
             """
         }
-
     }
 
     @Test
     func testSingleStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: DTOs.Event.DaySchedule(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: CoreModels.Schedule.YamlRepresentation(
             customTitle: nil,
             date: day,
             performances: [
                 "Bass Haven": [
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Sunspear",
                         time: "6:30 PM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Phantom Groove",
                         time: "10:30 PM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Oaktrail",
                         time: "12:30 AM"
                     ),
-                    PerformanceDTO(
+                    Performance.YamlRepresentation(
                         artist: "Rhythmbox",
                         time: "4:00 AM",
                         endTime: "7:30 AM"
@@ -153,16 +153,16 @@ struct DayScheduleConversionTests {
             ]
         ))
 
-        try assertInlineSnapshot(of: ScheduleDayConversion().apply(dto), as: .customDump) {
+        try assertInlineSnapshot(of: ScheduleConversion().apply(dto), as: .customDump) {
             """
-            StringlyTyped.Schedule(
-              metadata: StringlyTyped.Metadata(
+            (extension in OpenMusicEventParser):Schedule.StringlyTyped(
+              metadata: (extension in OpenMusicEventParser):Schedule.Metadata(
                 date: 6/12/2024,
                 customTitle: nil
               ),
               stageSchedules: [
                 "Bass Haven": [
-                  [0]: StringlyTyped.Schedule.Performance(
+                  [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Sunspear",
                     subtitle: nil,
                     artistNames: Set([
@@ -172,7 +172,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T05:30:00.000Z),
                     stageName: "Bass Haven"
                   ),
-                  [1]: StringlyTyped.Schedule.Performance(
+                  [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Phantom Groove",
                     subtitle: nil,
                     artistNames: Set([
@@ -182,7 +182,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T07:30:00.000Z),
                     stageName: "Bass Haven"
                   ),
-                  [2]: StringlyTyped.Schedule.Performance(
+                  [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Oaktrail",
                     subtitle: nil,
                     artistNames: Set([
@@ -192,7 +192,7 @@ struct DayScheduleConversionTests {
                     endTime: Date(2024-06-13T11:00:00.000Z),
                     stageName: "Bass Haven"
                   ),
-                  [3]: StringlyTyped.Schedule.Performance(
+                  [3]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                     title: "Rhythmbox",
                     subtitle: nil,
                     artistNames: Set([

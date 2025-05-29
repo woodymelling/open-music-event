@@ -56,7 +56,7 @@ public struct OrganizerDetailView: View {
         public var showingLoadingScreen: Bool = false
 
         public func didTapEvent(id: MusicEvent.ID) {
-            logger.info("didTapEvent: \(id)")
+            logger.info("didTapEvent: \(id.rawValue)")
             self.$currentEvent.withLock { $0 = id}
         }
 
@@ -202,7 +202,7 @@ public struct OrganizerDetailView: View {
                             .font(.caption2)
                     }
                     if databaseDebugInfo.isEnabled {
-                        Text(String(event.id))
+                        Text(String(event.id.rawValue))
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }

@@ -6,10 +6,25 @@
 //
 
 import Foundation
+import OrderedCollections
 
 extension Collection {
     var hasElements: Bool {
         !self.isEmpty
+    }
+
+    var nilIfEmpty: Self? {
+        self.isEmpty ? nil : self
+    }
+
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
+extension Set {
+    func sorted(by key: (Element) -> some Comparable) -> OrderedSet<Element> {
+        OrderedSet(self.sorted(by: { key($0) < key($1) }))
     }
 }
 
@@ -23,11 +38,5 @@ extension Optional where Wrapped: Collection {
 
     var hasElements: Bool {
         !isNilOrEmpty
-    }
-}
-
-extension Collection {
-    subscript(safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
     }
 }

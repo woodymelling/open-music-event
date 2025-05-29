@@ -29,8 +29,10 @@ struct EventDecodingTests {
             let event = try OpenFestivalDecoder().decode(from: url)
             assertInlineSnapshot(of: event, as: .customDump) {
                 #"""
-                Event(
-                  info: Event.Info(
+                EventConfiguration(
+                  info: MusicEvent.Draft(
+                    id: nil,
+                    organizerURL: nil,
                     name: "",
                     timeZone: TimeZone(
                       identifier: "America/Denver",
@@ -40,21 +42,19 @@ struct EventDecodingTests {
                     ),
                     startTime: nil,
                     endTime: nil,
-                    imageURL: Tagged(rawValue: URL(https://www.example.com/main-image)),
-                    siteMapImageURL: Tagged(rawValue: URL(https://www.example.com/amap)),
-                    location: Event.Location(
+                    imageURL: URL(https://www.example.com/main-image),
+                    siteMapImageURL: URL(https://www.example.com/amap),
+                    location: MusicEvent.Location(
                       address: "1234, somewhere in a forest",
                       directions: nil,
-                      city: nil,
-                      country: nil,
-                      postalCode: nil,
-                      latitude: nil,
-                      longitude: nil
+                      coordinates: nil
                     ),
                     contactNumbers: []
                   ),
                   artists: [
-                    [0]: Event.Artist(
+                    [0]: Artist.Draft(
+                      id: nil,
+                      musicEventID: nil,
                       name: "Boid",
                       bio: """
                       
@@ -63,17 +63,19 @@ struct EventDecodingTests {
                       """,
                       imageURL: URL(http://boid.com/artist-image.png),
                       links: [
-                        [0]: Event.Artist.Link(
+                        [0]: Artist.Link(
                           url: URL(http://soundcloud.com/boid%22),
                           label: nil
                         ),
-                        [1]: Event.Artist.Link(
+                        [1]: Artist.Link(
                           url: URL(http://instagram.com/boid),
                           label: nil
                         )
                       ]
                     ),
-                    [1]: Event.Artist(
+                    [1]: Artist.Draft(
+                      id: nil,
+                      musicEventID: nil,
                       name: "Subsonic",
                       bio: """
                       
@@ -82,11 +84,11 @@ struct EventDecodingTests {
                       """,
                       imageURL: URL(http://example.com/subsonic.jpg),
                       links: [
-                        [0]: Event.Artist.Link(
+                        [0]: Artist.Link(
                           url: URL(http://soundcloud.com/subsonic),
                           label: nil
                         ),
-                        [1]: Event.Artist.Link(
+                        [1]: Artist.Link(
                           url: URL(http://instagram.com/subsonic),
                           label: nil
                         )
@@ -94,31 +96,70 @@ struct EventDecodingTests {
                     )
                   ],
                   stages: [
-                    [0]: StageDTO(
+                    [0]: Stage.Draft(
+                      id: nil,
+                      musicEventID: nil,
                       name: "Bass Haven",
-                      color: 14635679,
-                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_amp.png?alt=media&token=259c79a0-0df8-4434-931a-e3b9037789a6)
+                      iconImageURL: nil,
+                      color: Color(
+                        provider: ColorBox(
+                          base: ResolvedColorProvider(
+                            color: Color.Resolved(
+                              linearRed: 0.73791057,
+                              linearGreen: 0.084376216,
+                              linearBlue: 0.34670416,
+                              opacity: 1.0
+                            )
+                          )
+                        )
+                      )
                     ),
-                    [1]: StageDTO(
+                    [1]: Stage.Draft(
+                      id: nil,
+                      musicEventID: nil,
                       name: "Mystic Grove",
-                      color: 12237929,
-                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_fractal.png?alt=media&token=fc4b8549-b689-4b90-88d6-e318d8db6e4a)
+                      iconImageURL: nil,
+                      color: Color(
+                        provider: #1 ColorBox(
+                          base: ResolvedColorProvider(
+                            color: Color.Resolved(
+                              linearRed: 0.49102098,
+                              linearGreen: 0.5028866,
+                              linearBlue: 0.14126328,
+                              opacity: 1.0
+                            )
+                          )
+                        )
+                      )
                     ),
-                    [2]: StageDTO(
+                    [2]: Stage.Draft(
+                      id: nil,
+                      musicEventID: nil,
                       name: "Tranquil Meadow",
-                      color: 7847313,
-                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_grove.png?alt=media&token=514a6eca-079f-45cf-8ccf-1decba72b35d)
+                      iconImageURL: nil,
+                      color: Color(
+                        provider: #2 ColorBox(
+                          base: ResolvedColorProvider(
+                            color: Color.Resolved(
+                              linearRed: 0.18447499,
+                              linearGreen: 0.50888145,
+                              linearBlue: 0.2831488,
+                              opacity: 1.0
+                            )
+                          )
+                        )
+                      )
                     )
                   ],
                   schedule: [
-                    [0]: StringlyTyped.Schedule(
-                      metadata: StringlyTyped.Metadata(
+                    [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped(
+                      metadata: (extension in OpenMusicEventParser):Schedule.Metadata(
                         date: 5/27/2024,
                         customTitle: nil
                       ),
                       stageSchedules: [
                         "The Portal": [
-                          [0]: StringlyTyped.Schedule.Performance(
+                          [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Opening Ceremony",
                             subtitle: nil,
                             artistNames: Set([]),
@@ -126,7 +167,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T00:30:00.000Z),
                             stageName: "The Portal"
                           ),
-                          [1]: StringlyTyped.Schedule.Performance(
+                          [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Kerz",
                             subtitle: nil,
                             artistNames: Set([
@@ -136,7 +177,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T01:30:00.000Z),
                             stageName: "The Portal"
                           ),
-                          [2]: StringlyTyped.Schedule.Performance(
+                          [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Overgrown Sunset",
                             subtitle: nil,
                             artistNames: Set([
@@ -146,7 +187,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T02:15:00.000Z),
                             stageName: "The Portal"
                           ),
-                          [3]: StringlyTyped.Schedule.Performance(
+                          [3]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Duskee",
                             subtitle: nil,
                             artistNames: Set([
@@ -156,7 +197,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T03:30:00.000Z),
                             stageName: "The Portal"
                           ),
-                          [4]: StringlyTyped.Schedule.Performance(
+                          [4]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Ghillie, Skbr",
                             subtitle: nil,
                             artistNames: Set([
@@ -167,7 +208,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T04:30:00.000Z),
                             stageName: "The Portal"
                           ),
-                          [5]: StringlyTyped.Schedule.Performance(
+                          [5]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Sub Chakra Takeover",
                             subtitle: nil,
                             artistNames: Set([
@@ -180,7 +221,7 @@ struct EventDecodingTests {
                           )
                         ],
                         "Ursus": [
-                          [0]: StringlyTyped.Schedule.Performance(
+                          [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Woofax",
                             subtitle: nil,
                             artistNames: Set([
@@ -190,7 +231,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-27T23:30:00.000Z),
                             stageName: "Ursus"
                           ),
-                          [1]: StringlyTyped.Schedule.Performance(
+                          [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Tube Screamer",
                             subtitle: nil,
                             artistNames: Set([
@@ -200,7 +241,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T00:30:00.000Z),
                             stageName: "Ursus"
                           ),
-                          [2]: StringlyTyped.Schedule.Performance(
+                          [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Skreid",
                             subtitle: nil,
                             artistNames: Set([
@@ -210,7 +251,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T01:30:00.000Z),
                             stageName: "Ursus"
                           ),
-                          [3]: StringlyTyped.Schedule.Performance(
+                          [3]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Rabbit Hole Records Crew",
                             subtitle: nil,
                             artistNames: Set([
@@ -222,7 +263,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T03:00:00.000Z),
                             stageName: "Ursus"
                           ),
-                          [4]: StringlyTyped.Schedule.Performance(
+                          [4]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Dragon Fli Empire",
                             subtitle: nil,
                             artistNames: Set([
@@ -232,7 +273,7 @@ struct EventDecodingTests {
                             endTime: Date(2024-05-28T04:00:00.000Z),
                             stageName: "Ursus"
                           ),
-                          [5]: StringlyTyped.Schedule.Performance(
+                          [5]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
                             title: "Def3",
                             subtitle: nil,
                             artistNames: Set([
@@ -245,8 +286,7 @@ struct EventDecodingTests {
                         ]
                       ]
                     )
-                  ],
-                  colorScheme: nil
+                  ]
                 )
                 """#
             }

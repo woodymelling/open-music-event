@@ -41,6 +41,14 @@ public struct ScheduleTime: Codable, Sendable {
         self.minute = components.minute ?? 0
     }
 
+
+    public init(from decoder: any Decoder) throws {
+        let string = try decoder.singleValueContainer().decode(String.self)
+        self = try ScheduleTimeConversion().apply(string)
+    }
+
+    
+
     var dateComponents: DateComponents {
         return DateComponents(timeZone: .gmt, year: 1970, hour: hour, minute: minute)
     }
@@ -60,7 +68,6 @@ public struct ScheduleTime: Codable, Sendable {
     var minutesAfterMidnight: Int {
         (hour * 60) + minute
     }
-
 
     func isAfter(_ other: Self, maximumDistance: Int = 720) -> Bool {
         return if minutesAfterMidnight == other.minutesAfterMidnight {
