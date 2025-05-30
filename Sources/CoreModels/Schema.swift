@@ -183,14 +183,24 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public let id: ID
     public let musicEventID: MusicEvent.ID?
     public let name: String
-    public let iconImageURL: URL?
+    public var iconImageURL: URL?
+    public var imageURL: URL?
+
     public let color: Color
 
-    public init(id: ID, musicEventID: MusicEvent.ID? = nil, name: String, iconImageURL: URL? = nil, color: Color) {
+    public init(
+        id: ID,
+        musicEventID: MusicEvent.ID? = nil,
+        name: String,
+        iconImageURL: URL? = nil,
+        imageURL: URL? = nil,
+        color: Color
+    ) {
         self.id = id
         self.musicEventID = musicEventID
         self.name = name
         self.iconImageURL = iconImageURL
+        self.imageURL = imageURL
         self.color = color
     }
 }
