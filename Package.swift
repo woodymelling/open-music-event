@@ -19,15 +19,15 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-identified-collections", from: "1.0.0"),
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
         .package(url: "https://github.com/pointfreeco/swift-validated", from: "0.2.0"),
-        .package(url: "https://github.com/pointfreeco/sharing-grdb", from: "0.2.0"),
         .package(url: "https://github.com/pointfreeco/swift-navigation", from: "2.3.0"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.0"),
+        .package(url: "https://github.com/pointfreeco/sharing-grdb", from: "0.4.0"),
         .package(url: "https://github.com/pointfreeco/swift-structured-queries", from: "0.4.0"),
 
         .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
 
         .package(url: "https://github.com/woodymelling/skip-image-caching", branch: "main"),
-        .package(url: "https://github.com/woodymelling/swift-file-tree", from: "0.2.0"),
+        .package(url: "https://github.com/woodymelling/swift-file-tree", branch: "android-support"),
         .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
         .package(url: "https://github.com/weichsel/ZIPFoundation", from: "0.9.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
@@ -58,7 +58,7 @@ let package = Package(
             name: "CoreModels",
             dependencies: [
                 .product(name: "StructuredQueries", package: "swift-structured-queries")
-            ]
+            ],
         ),
 
         .target(
@@ -75,20 +75,6 @@ let package = Package(
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Tagged", package: "swift-tagged"),
 
-            ]
-        ),
-        .testTarget(
-            name: "OpenMusicEventParserTests",
-            dependencies: [
-                 "OpenMusicEventParser",
-                 "Yams",
-                 .product(name: "CustomDump", package: "swift-custom-dump"),
-                 .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
-                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-                 .product(name: "SnapshotTestingCustomDump", package: "swift-snapshot-testing"),
-            ],
-            resources: [
-                .copy("ExampleFestivals")
             ]
         ),
     ]
