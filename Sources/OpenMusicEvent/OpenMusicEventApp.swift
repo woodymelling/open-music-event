@@ -1,7 +1,8 @@
 import Foundation
-import SwiftUI
-import OSLog
-import SharingGRDB
+import SkipFuse
+import SkipFuseUI
+
+
 /// A logger for the OpenMusicEvent module.
 private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "OpenMusicEvent")
 
@@ -9,8 +10,7 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
 ///
 /// The default implementation merely loads the `ContentView` for the app and logs a message.
 /* SKIP @bridge */public struct OpenMusicEventRootView : View {
-    // SKIP @bridge
-    public init() {
+    /* SKIP @bridge */public init() {
         OME.prepareDependencies()
     }
 
@@ -55,4 +55,3 @@ private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", cate
         logger.debug("onLowMemory")
     }
 }
-

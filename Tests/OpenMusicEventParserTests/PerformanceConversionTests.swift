@@ -4,7 +4,7 @@ import CustomDump
 
 import Dependencies
 import FileTree
-import CoreModels
+import OMECoreModels
 import InlineSnapshotTesting
 
 struct PerformanceConversionTests {

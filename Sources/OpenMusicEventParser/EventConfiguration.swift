@@ -8,25 +8,25 @@
 import Foundation
 import Tagged
 import Collections
-import CoreModels
+import OMECoreModels
 
 public typealias OpenFestivalIDType = UUID
 
 public struct OrganizerConfiguration: Equatable, Sendable {
-    public var info: CoreModels.Organizer.Draft
+    public var info: OMECoreModels.Organizer.Draft
     public var events: [EventConfiguration]
 }
 
 public struct EventConfiguration: Equatable, Sendable {
-    public var info: CoreModels.MusicEvent.Draft
-    public var artists: [CoreModels.Artist.Draft]
-    public var stages: [CoreModels.Stage.Draft]
+    public var info: OMECoreModels.MusicEvent.Draft
+    public var artists: [OMECoreModels.Artist.Draft]
+    public var stages: [OMECoreModels.Stage.Draft]
     public var schedule: [Schedule.StringlyTyped]
 
     public init(
-        info: CoreModels.MusicEvent.Draft,
-        artists: [CoreModels.Artist.Draft],
-        stages: [CoreModels.Stage.Draft],
+        info: OMECoreModels.MusicEvent.Draft,
+        artists: [OMECoreModels.Artist.Draft],
+        stages: [OMECoreModels.Stage.Draft],
         schedule: [Schedule.StringlyTyped],
     ) {
         self.info = info
@@ -36,9 +36,7 @@ public struct EventConfiguration: Equatable, Sendable {
     }
 }
 
-import StructuredQueriesCore
-
-extension CoreModels.Schedule {
+extension OMECoreModels.Schedule {
     public struct StringlyTyped: Equatable, Sendable {
         public var metadata: Metadata
         public var stageSchedules: [String : [Performance]]

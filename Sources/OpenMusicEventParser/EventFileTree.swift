@@ -12,7 +12,7 @@ import IssueReporting
 import Collections
 import Conversions
 import Foundation
-import CoreModels
+import OMECoreModels
 import Foundation
 import Parsing
 import Conversions
@@ -24,11 +24,11 @@ struct OpenFestivalDecoder {
 }
 
 extension OrganizerConfiguration {
-    public static var fileTree: some FileTreeViewable<OrganizerConfiguration> {
+    public static var fileTree: some FileTreeReader<OrganizerConfiguration> {
         FileTree {
             File("organizer-info", "yml")
                 .convert {
-                    Conversions.YamlConversion<CoreModels.Organizer.Draft>()
+                    Conversions.YamlConversion<OMECoreModels.Organizer.Draft>()
                 }
 
             Directory.Many {
@@ -49,10 +49,10 @@ extension OrganizerConfiguration {
 }
 
 // MARK: Event
-public struct EventFileTree: FileTreeViewable {
+public struct EventFileTree: FileTreeReader {
     public init() {}
 
-    public var body: some FileTreeReader<EventConfiguration> & FileTreeViewable {
+    public var body: some FileTreeReader<EventConfiguration> {
         FileTree {
             File("event-info", "yml")
                 .convert(Conversions.YamlConversion<EventConfiguration.EventInfoYaml>())
@@ -74,7 +74,7 @@ public struct EventFileTree: FileTreeViewable {
     struct SchedulesConversion: Conversion {
         var body: some Conversion<FileContent<Data>, Schedule.StringlyTyped> {
             FileContentConversion {
-                Conversions.YamlConversion(CoreModels.Schedule.YamlRepresentation.self)
+                Conversions.YamlConversion(OMECoreModels.Schedule.YamlRepresentation.self)
             }
 
             ScheduleConversion()
@@ -82,7 +82,7 @@ public struct EventFileTree: FileTreeViewable {
     }
 
     struct EventConversion: Conversion {
-        typealias Input = (EventConfiguration.EventInfoYaml, [Schedule.StringlyTyped], [CoreModels.Artist.Draft])
+        typealias Input = (EventConfiguration.EventInfoYaml, [Schedule.StringlyTyped], [OMECoreModels.Artist.Draft])
         typealias Output = EventConfiguration
 
         func apply(_ input: Input) throws -> EventConfiguration {
@@ -91,7 +91,7 @@ public struct EventFileTree: FileTreeViewable {
             let eventInfo = input.0
 
             return EventConfiguration(
-                info: CoreModels.MusicEvent.Draft(
+                info: OMECoreModels.MusicEvent.Draft(
                     name: eventInfo.name ?? "",
                     timeZone: try TimeZoneConversion().apply(eventInfo.timeZone) ?? TimeZone.current,
                     startTime: eventInfo.startDate?.date,
@@ -158,8 +158,8 @@ extension EventConfiguration {
         var startDate: CalendarDate?
         var endDate: CalendarDate?
 
-        var contactNumbers: [CoreModels.MusicEvent.ContactNumber]?
-        var stages: [CoreModels.Stage.Draft]?
+        var contactNumbers: [OMECoreModels.MusicEvent.ContactNumber]?
+        var stages: [OMECoreModels.Stage.Draft]?
     }
 }
 
@@ -167,11 +167,11 @@ struct ArtistConversion: Conversion {
 
     public struct ArtistInfoFrontMatter: Codable, Equatable {
         var imageURL: URL?
-        var links: [CoreModels.Artist.Link]
+        var links: [OMECoreModels.Artist.Link]
     }
 
     
-    var body: some Conversion<FileContent<Data>, CoreModels.Artist.Draft> {
+    var body: some Conversion<FileContent<Data>, OMECoreModels.Artist.Draft> {
         FileContentConversion {
             Conversions.DataToString()
             MarkdownWithFrontMatterConversion<ArtistInfoFrontMatter>()
@@ -182,10 +182,10 @@ struct ArtistConversion: Conversion {
 
     struct FileToArtistConversion: Conversion {
         typealias Input = FileContent<MarkdownWithFrontMatter<ArtistInfoFrontMatter>>
-        typealias Output = CoreModels.Artist.Draft
+        typealias Output = OMECoreModels.Artist.Draft
 
         func apply(_ input: Input) throws -> Output {
-            CoreModels.Artist.Draft(
+            OMECoreModels.Artist.Draft(
                 name: input.fileName,
                 bio: input.data.body,
                 imageURL: input.data.frontMatter?.imageURL,

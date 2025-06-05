@@ -1,12 +1,10 @@
 import SwiftUI
 import OpenMusicEvent
-import SharingGRDB
 
 /// The entry point to the app simply loads the App implementation from SPM module.
 @main struct AppMain: App {
     @AppDelegateAdaptor(AppMainDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
-
 
     var body: some Scene {
         WindowGroup {

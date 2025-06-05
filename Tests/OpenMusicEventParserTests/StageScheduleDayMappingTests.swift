@@ -11,7 +11,7 @@ import Testing
 import Parsing
 import CustomDump
 import InlineSnapshotTesting
-import CoreModels
+import OMECoreModels
 
 typealias ScheduleError = Validation.ScheduleError.StageDayScheduleError
 

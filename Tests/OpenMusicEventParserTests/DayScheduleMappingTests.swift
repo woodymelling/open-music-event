@@ -15,7 +15,7 @@ import DependenciesTestSupport
 import CustomDump
 import SnapshotTestingCustomDump
 import InlineSnapshotTesting
-import CoreModels
+import OMECoreModels
 
 fileprivate let day = CalendarDate(year: 2024, month: 6, day: 12)
 
@@ -24,7 +24,7 @@ struct DayScheduleConversionTests {
 
     @Test
     func multiStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: CoreModels.Schedule.YamlRepresentation(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: OMECoreModels.Schedule.YamlRepresentation(
             customTitle: nil,
             date: CalendarDate(year: 2024, month: 6, day: 12),
             performances: [
@@ -127,7 +127,7 @@ struct DayScheduleConversionTests {
 
     @Test
     func testSingleStage() async throws {
-        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: CoreModels.Schedule.YamlRepresentation(
+        let dto = FileContent(fileName: "2024-06-12", fileType: "yaml", data: OMECoreModels.Schedule.YamlRepresentation(
             customTitle: nil,
             date: day,
             performances: [

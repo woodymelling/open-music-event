@@ -1,15 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
-    "%@" : {
-
-    },
-    "%lld" : {
-
-    },
     "%lld Items" : {
       "comment" : "Header title for a list that contains the number of items",
       "extractionState" : "stale",
@@ -103,9 +94,6 @@
         }
       }
     },
-    "Artists" : {
-
-    },
     "Cancel" : {
       "comment" : "Button title indicating that the operation should be cancelled",
       "extractionState" : "stale",
@@ -135,9 +123,6 @@
           }
         }
       }
-    },
-    "Contact Info" : {
-
     },
     "Dark" : {
       "comment" : "Menu item indicating that the appearance should be in dark mode",
@@ -199,9 +184,6 @@
         }
       }
     },
-    "Directions" : {
-
-    },
     "Favorite" : {
       "comment" : "Item editor title label for marking the item as a favorite",
       "extractionState" : "stale",
@@ -231,12 +213,6 @@
           }
         }
       }
-    },
-    "Favorites" : {
-
-    },
-    "Filter" : {
-
     },
     "Hello [%@](https://skip.tools)!" : {
       "comment" : "Welcome tab contents",
@@ -328,15 +304,6 @@
         }
       }
     },
-    "Links" : {
-
-    },
-    "Location" : {
-
-    },
-    "More" : {
-
-    },
     "Name" : {
       "comment" : "Placeholder title for the Name field in a form",
       "extractionState" : "stale",
@@ -397,7 +364,7 @@
         }
       }
     },
-    "offset: %lf" : {
+    "Organizer Detail" : {
 
     },
     "Organizers" : {
@@ -433,12 +400,6 @@
         }
       }
     },
-    "Previous Events" : {
-
-    },
-    "Reload %@" : {
-
-    },
     "Save" : {
       "comment" : "Button title indicating that the current contents should be saved",
       "extractionState" : "stale",
@@ -468,21 +429,6 @@
           }
         }
       }
-    },
-    "scale: %lf" : {
-
-    },
-    "Schedule" : {
-
-    },
-    "ScrollVisibility" : {
-
-    },
-    "See other Wicked Wood events" : {
-
-    },
-    "Select an Artist" : {
-
     },
     "Settings" : {
       "comment" : "Tab bar item title for the Settings tab",
@@ -609,9 +555,6 @@
           }
         }
       }
-    },
-    "View in Schedule" : {
-
     },
     "Welcome" : {
       "comment" : "Tab bar item title for the Welcome tab",

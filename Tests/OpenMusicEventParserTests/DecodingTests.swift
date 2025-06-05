@@ -7,7 +7,7 @@ import Parsing
 import CustomDump
 import SnapshotTestingCustomDump
 import InlineSnapshotTesting
-import CoreModels
+import OMECoreModels
 
 func expect<C: Conversion>(
     _ data: C.Input,
@@ -61,16 +61,16 @@ struct YamlCodingTests {
         let yaml = Data("""
         - name: "Mystic Grove"
           color: 0x1DB954
-          imageURL: "http://example.com/mystic-grove.jpg"
+          iconImageURL: "http://example.com/mystic-grove.jpg"
 
         - name: "Bass Haven"
           color: 0xFF5733
-          imageURL: "http://example.com/bass-haven.jpg"
+          iconImageURL: "http://example.com/bass-haven.jpg"
 
         - name: "Tranquil Meadow"
           color: 0x4287f5
         """.utf8)
-        let result = try Conversions.YamlConversion([CoreModels.Stage.Draft].self).apply(yaml)
+        let result = try Conversions.YamlConversion([OMECoreModels.Stage.Draft].self).apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [
@@ -78,55 +78,25 @@ struct YamlCodingTests {
                 id: nil,
                 musicEventID: nil,
                 name: "Mystic Grove",
-                iconImageURL: nil,
-                color: Color(
-                  provider: ColorBox(
-                    base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 0.012286487,
-                        linearGreen: 0.48515007,
-                        linearBlue: 0.08865559,
-                        opacity: 1.0
-                      )
-                    )
-                  )
-                )
+                iconImageURL: URL(http://example.com/mystic-grove.jpg),
+                imageURL: nil,
+                color: 1947988
               ),
               [1]: Stage.Draft(
                 id: nil,
                 musicEventID: nil,
                 name: "Bass Haven",
-                iconImageURL: nil,
-                color: Color(
-                  provider: #1 ColorBox(
-                    base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 1.0,
-                        linearGreen: 0.09530746,
-                        linearBlue: 0.033104762,
-                        opacity: 1.0
-                      )
-                    )
-                  )
-                )
+                iconImageURL: URL(http://example.com/bass-haven.jpg),
+                imageURL: nil,
+                color: 16734003
               ),
               [2]: Stage.Draft(
                 id: nil,
                 musicEventID: nil,
                 name: "Tranquil Meadow",
                 iconImageURL: nil,
-                color: Color(
-                  provider: #2 ColorBox(
-                    base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 0.05448028,
-                        linearGreen: 0.2422812,
-                        linearBlue: 0.9130988,
-                        opacity: 1.0
-                      )
-                    )
-                  )
-                )
+                imageURL: nil,
+                color: 4360181
               )
             ]
             """
@@ -143,7 +113,7 @@ struct YamlCodingTests {
           title: "Emergency"
           description: "For emergencies only"
         """.utf8)
-        let result = try Conversions.YamlConversion([CoreModels.MusicEvent.ContactNumber].self).apply(yaml)
+        let result = try Conversions.YamlConversion([OMECoreModels.MusicEvent.ContactNumber].self).apply(yaml)
         assertInlineSnapshot(of: result, as: .customDump) {
             """
             [

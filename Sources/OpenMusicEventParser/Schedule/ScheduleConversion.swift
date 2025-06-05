@@ -10,9 +10,9 @@ import FileTree
 import Foundation
 import Conversions
 import IssueReporting
-import CoreModels
+import OMECoreModels
 
-extension CoreModels.Performance {
+extension OMECoreModels.Performance {
     struct YamlRepresentation: Codable, Equatable {
         var title: String?
         var artist: String?
@@ -31,7 +31,7 @@ extension CoreModels.Performance {
 
 
 // INPUT
-extension CoreModels.Schedule {
+extension OMECoreModels.Schedule {
     struct YamlRepresentation: Codable, Equatable {
         internal init(customTitle: String? = nil, date: CalendarDate? = nil, performances: [String : [Performance.YamlRepresentation]]) {
             self.customTitle = customTitle
@@ -68,8 +68,8 @@ extension CoreModels.Schedule {
 
 struct ScheduleConversion: Conversion {
 
-    typealias Input = FileContent<CoreModels.Schedule.YamlRepresentation>
-    typealias Output = CoreModels.Schedule.StringlyTyped
+    typealias Input = FileContent<OMECoreModels.Schedule.YamlRepresentation>
+    typealias Output = OMECoreModels.Schedule.StringlyTyped
 
     func apply(_ input: FileContent<Schedule.YamlRepresentation>) throws -> Schedule.StringlyTyped {
         let fullSetTimes = try input.data.performances.mapValues { performances in
@@ -153,7 +153,7 @@ struct ScheduleConversion: Conversion {
 //            return schedule
         }
     }
-    func unapply(_ input: CoreModels.Schedule.StringlyTyped) throws -> FileContent<CoreModels.Schedule.YamlRepresentation> {
+    func unapply(_ input: OMECoreModels.Schedule.StringlyTyped) throws -> FileContent<OMECoreModels.Schedule.YamlRepresentation> {
         throw UnimplementedFailure(description: "Cannot unapply ScheduleConversion")
     }
 
