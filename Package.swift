@@ -50,9 +50,9 @@ let package = Package(
 //                .product(name: "CustomizableTabView", package: "swiftui-customizable-tab-view"),
             ],
             resources: [.process("Resources")],
-            plugins: [
+//            plugins: [
 //                .plugin(name: "skipstone", package: "skip")
-            ]
+//            ]
         ),
         .target(
             name: "CoreModels",

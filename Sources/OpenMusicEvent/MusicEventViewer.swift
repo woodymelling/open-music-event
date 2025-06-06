@@ -100,12 +100,9 @@ public class MusicEventFeatures: Identifiable {
     }
 
     public init(_ event: MusicEvent) {
-
         self.artists = ArtistsList()
         self.schedule = ScheduleFeature()
-        self.notifications = Notifications()
         self.more = MoreTabFeature()
-
 
         if !event.contactNumbers.isEmpty {
             self.contactInfo = ContactInfoFeature()
@@ -130,44 +127,10 @@ public class MusicEventFeatures: Identifiable {
 
     public var schedule: ScheduleFeature
     public var artists: ArtistsList
-    public var workshops: Workshops?
-    public var siteMap: SiteMap?
     public var location: LocationFeature?
     public var contactInfo: ContactInfoFeature?
-    public var notifications: Notifications
     var more: MoreTabFeature
-
-    @Observable
-    public class Schedule {
-        // State
-        public var selectedStage: Stage.ID = 0
-
-        public init() { }
-
-        // Data
-//        public var event: MusicEvent
-
-        @ObservationIgnored
-        @FetchAll(Current.stages)
-        public var stages: [Stage] = []
-
-        public func performances(for stageID: Stage.ID) -> [Performance] {
-            return []
-        }
-    }
-
-    @Observable
-    public class Workshops {}
-
-    @Observable
-    public class SiteMap {}
-
-    @Observable
-    public class Notifications {}
-
 }
-
-
 
 public struct MusicEventFeaturesView: View {
     public init(store: MusicEventFeatures) {
@@ -175,7 +138,6 @@ public struct MusicEventFeaturesView: View {
     }
 
     @Bindable var store: MusicEventFeatures
-
 
     public var body: some View {
         TabView(selection: $store.selectedFeature) {
