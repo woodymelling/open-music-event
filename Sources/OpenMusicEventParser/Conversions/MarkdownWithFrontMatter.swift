@@ -6,9 +6,7 @@
 //
 
 import Parsing
-import Conversions
 import Foundation
-
 
 struct MarkdownWithFrontMatter<FrontMatter> {
     let frontMatter: FrontMatter?
@@ -46,35 +44,17 @@ extension Parsers {
         var body: some ParserPrinter<Input, FrontMatter> {
             "---"
             Whitespace(1, .vertical)
-            PrefixUpTo("---").map(Conversions.SubstringToYaml<FrontMatter>())
+            PrefixUpTo("---").map(
+                AnyConversion<Substring, FrontMatter> { (_: Substring) -> FrontMatter in
+                    fatalError()
+                } unapply: { _ in
+                   fatalError()
+                }
+            )
             "---"
         }
     }
 }
 
-extension Conversions {
-    struct SubstringToYaml<T: Codable>: Conversion {
-        var body: some Conversion<Substring, T> {
-            Conversions.SubstringToString()
-            Conversions.DataToString().inverted()
-            YamlConversion<T>()
-        }
-    }
-}
 
-struct MarkdownWithFrontMatterConversion<T: Codable>: Conversion {
-    typealias Input = String
-    typealias Output = MarkdownWithFrontMatter<T>
 
-    func apply(_ input: String) throws -> MarkdownWithFrontMatter<T> {
-        return try MarkdownWithFrontMatter.Parser().parse(input)
-    }
-
-    func unapply(_ output: MarkdownWithFrontMatter<T>) throws -> String {
-        var outputString: Substring = ""
-
-        try MarkdownWithFrontMatter.Parser().print(output, into: &outputString)
-
-        return String(outputString)
-    }
-}

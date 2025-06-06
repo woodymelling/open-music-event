@@ -64,6 +64,9 @@
     "Add Organizer" : {
 
     },
+    "Android Support!" : {
+
+    },
     "Appearance" : {
       "comment" : "Settings select label for the interface style of the controls (light, dark, or default)",
       "extractionState" : "stale",
@@ -243,6 +246,9 @@
           }
         }
       }
+    },
+    "Hello World!" : {
+
     },
     "Home" : {
       "comment" : "Tab bar item title for the Home tab",

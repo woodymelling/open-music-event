@@ -254,7 +254,6 @@ public protocol TimelineRepresentable {
     var endTime: Date { get }
 }
 
-#if !canImport(StructuredQueries)
 extension Organizer {
     public static let tableName = "organizers"
     public struct Draft {
@@ -536,4 +535,3 @@ extension Performance.Artists {
         }
     }
 }
-#endif

@@ -5,7 +5,7 @@
 //  Created by Woodrow Melling on 5/29/25.
 //
 
-import Conversions
+import FileTree
 
 extension Conversions {
     struct FatalError<Input, Output>: Conversion {
@@ -39,5 +39,22 @@ extension Conversion {
     ) -> some Conversion<Input, [NewOutput]>
     where Output == [OutputElement] {
         self.map(Conversions.MapValues(conversion))
+    }
+}
+
+struct MarkdownWithFrontMatterConversion<T: Codable>: Conversion {
+    typealias Input = String
+    typealias Output = MarkdownWithFrontMatter<T>
+
+    func apply(_ input: String) throws -> MarkdownWithFrontMatter<T> {
+        return try MarkdownWithFrontMatter.Parser().parse(input)
+    }
+
+    func unapply(_ output: MarkdownWithFrontMatter<T>) throws -> String {
+        var outputString: Substring = ""
+
+        try MarkdownWithFrontMatter.Parser().print(output, into: &outputString)
+
+        return String(outputString)
     }
 }

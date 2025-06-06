@@ -10,12 +10,9 @@
 import Yams
 import IssueReporting
 import Collections
-import Conversions
 import Foundation
 import OMECoreModels
 import Foundation
-import Parsing
-import Conversions
 
 struct OpenFestivalDecoder {
     public func decode(from url: URL) throws -> EventConfiguration {
@@ -170,6 +167,7 @@ struct ArtistConversion: Conversion {
         var links: [OMECoreModels.Artist.Link]
     }
 
+    
     
     var body: some Conversion<FileContent<Data>, OMECoreModels.Artist.Draft> {
         FileContentConversion {

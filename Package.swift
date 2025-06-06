@@ -11,7 +11,6 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/woodymelling/swift-file-tree", branch: "android-support"),
-        .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
 
         .package(url: "https://source.skip.tools/skip.git", from: "1.5.18"),
         .package(url: "https://source.skip.tools/skip-fuse-ui.git", "0.0.0"..<"2.0.0"),
@@ -22,12 +21,10 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.1"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.0"),
-
-        .package(url: "https://github.com/woodymelling/swift-parsing", from: "0.1.0"),
+        .package(url: "https://github.com/pointfreeco/swift-parsing", from: "0.1.0"),
 
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation", from: "0.9.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
     ],
     targets: [
@@ -40,7 +37,7 @@ let package = Package(
                 .product(name: "GRDB", package: "grdb-sqlcipher"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "CasePaths", package: "swift-case-paths"),
-//                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
+//                .product(name: "SkipZip", package: "skip-zip")
             ],
             plugins: [.plugin(name: "skipstone", package: "skip")]
         ),
@@ -61,7 +58,6 @@ let package = Package(
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),
                 .product(name: "Parsing", package: "swift-parsing"),
-                .product(name: "Conversions", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Tagged", package: "swift-tagged"),
 
