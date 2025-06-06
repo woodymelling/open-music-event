@@ -38,11 +38,14 @@ struct OrganizerListView: View {
     @State var store = ViewModel()
 
     public var body: some View {
-        List(store.organizers, id: \.url) { org in
-            NavigationLink {
-                Row(org: org)
-            } label: {
-                Text("Organizer Detail")
+        List {
+            Text("Android Support!")
+            ForEach(store.organizers, id: \.url) { org in
+                NavigationLink {
+                    Row(org: org)
+                } label: {
+                    Text("Organizer Detail")
+                }
             }
         }
         .listStyle(.plain)

@@ -27,7 +27,6 @@ let package = Package(
 
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
 
-        .package(url: "https://github.com/weichsel/ZIPFoundation", from: "0.9.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
     ],
     targets: [
@@ -40,7 +39,7 @@ let package = Package(
                 .product(name: "GRDB", package: "grdb-sqlcipher"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "CasePaths", package: "swift-case-paths"),
-//                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
+//                .product(name: "SkipZip", package: "skip-zip")
             ],
             plugins: [.plugin(name: "skipstone", package: "skip")]
         ),

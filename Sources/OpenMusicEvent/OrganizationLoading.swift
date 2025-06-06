@@ -1,27 +1,29 @@
-////
-////  DataFetchingClient.swift
-////  open-music-event
-////
-////  Created by Woodrow Melling on 6/5/25.
-////
 //
+//  DataFetchingClient.swift
+//  open-music-event
 //
-//import OpenMusicEventParser
-//import Dependencies
-//import DependenciesMacros
-//import ZIPFoundation
-//import SwiftUI
-//import OMECoreModels
+//  Created by Woodrow Melling on 6/5/25.
 //
-//@DependencyClient
-//struct DataFetchingClient {
-//    var fetchOrganizer: @Sendable (_ id: OMECoreModels.Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
-//}
-//
-//struct FailedToLoadOrganizerError: Error {}
-//
-//extension DataFetchingClient: DependencyKey {
-//    static let liveValue = DataFetchingClient { baseURL in
+
+
+import OpenMusicEventParser
+import Dependencies
+import DependenciesMacros
+import SkipFuse
+import SkipFuseUI
+import OMECoreModels
+import GRDB
+
+@DependencyClient
+struct DataFetchingClient {
+    var fetchOrganizer: @Sendable (_ id: OMECoreModels.Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
+}
+
+struct FailedToLoadOrganizerError: Error {}
+
+extension DataFetchingClient: DependencyKey {
+    static let liveValue = DataFetchingClient { baseURL in
+        fatalError()
 //        let unzippedURL = URL.temporaryDirectory
 //
 //        let targetZipURL = getZipURLForRemoteURL(baseURL)
@@ -52,79 +54,76 @@
 //        try FileManager.default.clearDirectory(unzippedURL)
 //
 //        return organizerData
-//    }
-//}
-//
-//private func getUnzippedDirectory(from zipURL: URL) throws -> URL {
-//    let fileURLs = try FileManager.default.contentsOfDirectory(
-//        at: zipURL,
-//        includingPropertiesForKeys: [.isDirectoryKey],
-//        options: .skipsHiddenFiles
-//    )
-//
-//    guard let directoryURL = fileURLs.first(where: { url in
-//        (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
-//    }) else {
-//        throw NSError(domain: "UnzipError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No directory found in unzipped contents."])
-//    }
-//
-//    return directoryURL
-//}
-//
-//extension FileManager {
-//    func clearDirectory(_ url: URL) throws {
-//        let contents = try contentsOfDirectory(atPath: url.path())
-//        try contents.forEach { file in
-//            let fileUrl = url.appendingPathComponent(file)
-//            try removeItem(atPath: fileUrl.path)
-//        }
-//    }
-//}
-//
-//private func getZipURLForRemoteURL(_ remoteURL: URL) -> URL {
-//    guard remoteURL.absoluteString.contains("github")
-//    else { return remoteURL }
-//
-//    return remoteURL.appendingPathComponent("archive/refs/heads/main.zip")
-//}
-//
-//import OSLog
-//import GRDB
-//
-//private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerLoader")
-//
-//
-//extension String {
-//    var stableHash: Int {
-//        var result = UInt64 (5381)
-//        let buf = [UInt8](self.utf8)
-//        for b in buf {
-//            result = 127 * (result & 0x00ffffffffffffff) + UInt64(b)
-//        }
-//        return Int(result)
-//    }
-//}
-//
-//extension OmeID where RawValue == Int {
-//    public init(stabilizedBy values: String...) {
-//        self.init(rawValue: values.joined(separator: "-").stableHash)
-//    }
-//}
-//
-//func downloadAndStoreOrganizer(id: OMECoreModels.Organizer.ID) async throws {
-//    @Dependency(DataFetchingClient.self) var dataFetchingClient
-//    @Dependency(\.defaultDatabase) var database
-//
-//    let organizer = try await dataFetchingClient.fetchOrganizer(id: id)
-//
-//    let organizerDraft = Organizer.Draft(
-//        url: id,
-//        name: organizer.info.name,
-//        imageURL: organizer.info.imageURL
-//    )
-//
-//    let organizerURL: URL = id
-//
+    }
+}
+
+private func getUnzippedDirectory(from zipURL: URL) throws -> URL {
+    let fileURLs = try FileManager.default.contentsOfDirectory(
+        at: zipURL,
+        includingPropertiesForKeys: [.isDirectoryKey],
+        options: .skipsHiddenFiles
+    )
+
+    guard let directoryURL = fileURLs.first(where: { url in
+        (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
+    }) else {
+        throw NSError(domain: "UnzipError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No directory found in unzipped contents."])
+    }
+
+    return directoryURL
+}
+
+extension FileManager {
+    func clearDirectory(_ url: URL) throws {
+        let contents = try contentsOfDirectory(atPath: url.path())
+        try contents.forEach { file in
+            let fileUrl = url.appendingPathComponent(file)
+            try removeItem(atPath: fileUrl.path)
+        }
+    }
+}
+
+private func getZipURLForRemoteURL(_ remoteURL: URL) -> URL {
+    guard remoteURL.absoluteString.contains("github")
+    else { return remoteURL }
+
+    return remoteURL.appendingPathComponent("archive/refs/heads/main.zip")
+}
+
+private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerLoader")
+
+
+extension String {
+    var stableHash: Int {
+        var result = UInt64 (5381)
+        let buf = [UInt8](self.utf8)
+        for b in buf {
+            result = 127 * (result & 0x00ffffffffffffff) + UInt64(b)
+        }
+        return Int(result)
+    }
+}
+
+extension OmeID where RawValue == Int {
+    public init(stabilizedBy values: String...) {
+        self.init(rawValue: values.joined(separator: "-").stableHash)
+    }
+}
+
+func downloadAndStoreOrganizer(id: OMECoreModels.Organizer.ID) async throws {
+    @Dependency(DataFetchingClient.self) var dataFetchingClient
+    @Dependency(\.defaultDatabase) var database
+
+    let organizer = try await dataFetchingClient.fetchOrganizer(id: id)
+
+    let organizerDraft = Organizer.Draft(
+        url: id,
+        name: organizer.info.name,
+        imageURL: organizer.info.imageURL
+    )
+
+    let organizerURL: URL = id
+
 //    try await database.write { db in
 //        try Organizer.find(organizerURL)
 //            .delete()
@@ -241,4 +240,4 @@
 //            }
 //        }
 //    }
-//}
+}
