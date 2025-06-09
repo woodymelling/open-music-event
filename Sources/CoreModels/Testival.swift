@@ -199,3 +199,32 @@ public extension Stage {
         )
     ]
 }
+//public extension Stage {
+//    static let previewValues: [Stage] = [
+//        Stage(
+//            id: 0,
+//            musicEventID: 0,
+//            name: "Unicorn Lounge",
+//            iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2FF0BC110C-D42E-4CC9-BED3-59E2700938FF.png?alt=media&token=472a66e1-c45a-4a67-895a-5ec7e0ad95c0"), color: .red
+//        ),
+//
+//        Stage(
+//            id: 1,
+//            musicEventID: 0,
+//            name: "The Hallow",
+//            iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2FB36D3658-2659-447C-9ECA-21D07C952A88.png?alt=media&token=d328c04d-6c4d-4be7-8368-786ab5262c9a"), color: .green
+//        ),
+//        Stage(
+//            id: 2,
+//            musicEventID: 0,
+//            name: "Ursus",
+//            iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F274838AC-2BDA-40A0-8FD4-78E9FFC86D6B.png?alt=media&token=b28cc74f-b60d-4472-a31b-900a4f5bfbd8"), color: .blue
+//        ),
+//        Stage(
+//            id: 3,
+//            musicEventID: 0,
+//            name: "The Portal",
+//            iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2F8BD98000-C41A-4360-8106-9AD98BF1AD71.png?alt=media&token=a0df8893-0cc7-4442-8921-d6c4e066569c"), color: .purple
+//        )
+//    ]
+//}
