@@ -42,7 +42,6 @@
     },
     "Add" : {
       "comment" : "Button in items list that will cause a new item to be added",
-      "extractionState" : "stale",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -69,6 +68,9 @@
           }
         }
       }
+    },
+    "Add Organization" : {
+
     },
     "Add Organizer" : {
 
@@ -104,6 +106,12 @@
       }
     },
     "Artists" : {
+
+    },
+    "branch" : {
+
+    },
+    "Branch Name" : {
 
     },
     "Cancel" : {
@@ -238,6 +246,9 @@
     "Filter" : {
 
     },
+    "github.com/your-organization/ome-config" : {
+
+    },
     "Hello [%@](https://skip.tools)!" : {
       "comment" : "Welcome tab contents",
       "extractionState" : "stale",
@@ -297,6 +308,9 @@
           }
         }
       }
+    },
+    "Invalid Repository URL" : {
+
     },
     "Light" : {
       "comment" : "Menu item indicating that the appearance should be in light mode",
@@ -398,6 +412,9 @@
       }
     },
     "offset: %lf" : {
+
+    },
+    "Organization URL" : {
 
     },
     "Organizers" : {
@@ -573,6 +590,12 @@
           }
         }
       }
+    },
+    "version" : {
+
+    },
+    "Version" : {
+
     },
     "Version %@ (%@)" : {
       "comment" : "Settings label showing the current version of the app",

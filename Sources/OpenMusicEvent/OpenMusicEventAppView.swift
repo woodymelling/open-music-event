@@ -24,6 +24,7 @@ public enum OME {
         @ObservationIgnored
         @Shared(.eventID) var eventID
 
+        public init() {}
         public var body: some View {
             if let eventID {
                 MusicEventViewer(id: eventID)

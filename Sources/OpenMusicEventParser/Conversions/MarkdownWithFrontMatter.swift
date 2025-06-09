@@ -10,7 +10,7 @@ import Conversions
 import Foundation
 
 
-struct MarkdownWithFrontMatter<FrontMatter> {
+struct MarkdownWithFrontMatter<FrontMatter: Sendable>: Sendable {
     let frontMatter: FrontMatter?
     let body: String?
 
@@ -62,7 +62,7 @@ extension Conversions {
     }
 }
 
-struct MarkdownWithFrontMatterConversion<T: Codable>: Conversion {
+struct MarkdownWithFrontMatterConversion<T: Codable & Sendable>: Conversion {
     typealias Input = String
     typealias Output = MarkdownWithFrontMatter<T>
 

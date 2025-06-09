@@ -14,21 +14,21 @@ final class MoreTabFeature {
 
     @ObservationIgnored
     @FetchOne(Current.musicEvent)
-    var musicEvent: MusicEvent = .testival
+    var musicEvent: MusicEvent?
 
     var isLoadingOrganizer = false
 
     var errorMessage: String?
 
     func didTapReloadOrganizer() async {
-        guard let currentOrganizerID = musicEvent.organizerURL
+        guard let currentOrganizerID = musicEvent?.organizerURL
         else { return }
         self.errorMessage = nil
 
         self.isLoadingOrganizer = true
 
         do {
-            try await downloadAndStoreOrganizer(id: currentOrganizerID)
+            try await downloadAndStoreOrganizer(from: currentOrganizerID)
             self.isLoadingOrganizer = false
         } catch {
             self.errorMessage = error.localizedDescription

@@ -1,0 +1,171 @@
+//
+//  OrganizationForm.swift
+//  open-music-event
+//
+//  Created by Woodrow Melling on 6/11/25.
+//
+
+import SwiftUI
+import CasePaths
+import Dependencies
+import CoreModels
+
+
+
+struct OrganizationFormView: View {
+    @Observable
+    @MainActor
+    class Model: Identifiable {
+        let id = UUID()
+
+        @CasePathable
+        enum GithubConfigType: CaseIterable, Hashable {
+            case branch
+            case version
+
+            var label: LocalizedStringKey {
+                switch self {
+                case .branch: "branch"
+                case .version: "version"
+                }
+            }
+        }
+
+        var githubURL = ""
+        var githubConfigType: GithubConfigType = .branch
+        var branchText = "main"
+        var versionText = ""
+
+        var isLoading = false
+        var dismiss = ViewTrigger()
+        var errorMessage: LocalizedStringKey?
+
+        enum FocusField {
+            case orgURL
+            case versioning
+        }
+
+        var repositoryLocation: OrganizationReference.Repository? {
+            guard let url = URL(string: githubURL)
+            else { return nil }
+
+            let cleanedURL = url.deletingPathExtension()
+
+            switch githubConfigType {
+            case .branch:
+                guard !branchText.isEmpty else { return nil }
+                return OrganizationReference.Repository(baseURL: cleanedURL, version: .branch(branchText))
+            case .version:
+                guard let version = SemanticVersion(versionText) else { return nil }
+                return OrganizationReference.Repository(baseURL: cleanedURL, version: .version(version))
+            }
+        }
+
+        func didTapSave() async {
+            self.errorMessage = nil
+            
+            guard let repositoryLocation
+            else {
+                errorMessage = "Invalid Repository URL"
+                return
+            }
+
+            self.isLoading = true
+            await withErrorReporting {
+                try await downloadAndStoreOrganizer(from: repositoryLocation.zipURL)
+            }
+            self.dismiss.trigger()
+            self.isLoading = false
+
+        }
+    }
+
+    @Bindable var store = Model()
+    @FocusState var focusField: Model.FocusField?
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        Form {
+            VStack(alignment: .leading) {
+                TextField(
+                    "Organization URL",
+                    text: $store.githubURL,
+                    prompt: Text("github.com/your-organization/ome-config")
+                )
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .textContentType(.URL)
+                .focused($focusField, equals: .orgURL)
+
+                if let errorMessage = store.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.footnote)
+                }
+            }
+
+            HStack {
+                switch store.githubConfigType {
+                case .branch:
+                    TextField("Branch Name", text: $store.branchText)
+                case .version:
+                    TextField("Version", text: $store.versionText)
+                }
+
+                Picker("", selection: $store.githubConfigType) {
+                    ForEach(Model.GithubConfigType.allCases, id: \.self) { configReference in
+                        Text(configReference.label)
+                    }
+                }
+            }
+            .focused($focusField, equals: .orgURL)
+            .frame(maxWidth: .infinity)
+        }
+        .toolbar {
+            if store.isLoading {
+                ProgressView()
+            } else {
+                Button {
+                    Task {
+                        await store.didTapSave()
+                    }
+                } label: {
+                    Text("Add")
+                }
+            }
+        }
+        .onChange(of: store.githubConfigType) { oldValue, newValue in
+            focusField = .versioning
+        }
+        .onTrigger(of: store.dismiss) {
+            dismiss()
+        }
+    }
+}
+
+
+#Preview {
+    Text("Hello World")
+        .sheet(isPresented: .constant(true)) {
+            NavigationStack {
+                OrganizationFormView()
+                    .navigationTitle("Add Organization")
+            }
+        }
+}
+
+
+struct ViewTrigger: Equatable, Sendable {
+    private var value = 0
+    mutating func trigger() {
+        value += 1
+    }
+}
+
+extension View {
+    func onTrigger(of viewTrigger: ViewTrigger, operation: @escaping () -> Void) -> some View {
+        self.onChange(of: viewTrigger) { _, _ in
+            operation()
+        }
+    }
+}

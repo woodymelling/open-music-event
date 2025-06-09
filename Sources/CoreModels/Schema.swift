@@ -42,6 +42,70 @@ extension OmeID: SQLiteType {
   }
 }
 
+public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringConvertible, QueryBindable {
+    case repository(Repository)
+
+    public struct Repository: Hashable, Codable, Sendable {
+        public init(baseURL: URL, version: Version) {
+            self.baseURL = baseURL
+            self.version = version
+        }
+
+        var baseURL: URL
+        var version: Version
+
+        public enum Version: Hashable, Codable, Sendable {
+            case branch(String)
+            case version(SemanticVersion)
+        }
+
+        public var zipURL: URL {
+            switch version {
+            case .branch(let name):
+                return baseURL.appendingPathComponent("archive/refs/heads/\(name).zip")
+            case .version(let version):
+                return baseURL.appendingPathComponent("archive/refs/tags/\(version).zip")
+            }
+        }
+    }
+
+    public init?(_ description: String) {
+        guard let url = URL(string: description)
+        else { return nil }
+
+        let components = url.pathComponents
+                let baseURL = URL(string: "https://\(url.host!)\(components[0...2].joined(separator: "/"))")!
+        let refType = components[safe: 4]
+        let refName = components[safe: 5]?.replacingOccurrences(of: ".zip", with: "")
+
+        switch refType {
+        case "heads":
+            guard let branch = refName else { return nil }
+            self = .repository(.init(baseURL: baseURL, version: .branch(branch)))
+        case "tags":
+            guard let tag = refName, let version = SemanticVersion(tag) else { return nil }
+            self = .repository(.init(baseURL: baseURL, version: .version(version)))
+        default:
+            return nil
+        }
+
+        return nil
+    }
+
+    public var description: String {
+        switch self {
+        case .repository(let repo):
+            return repo.zipURL.absoluteString
+        }
+    }
+}
+
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
 // MARK: Organizer
 @Table
 public struct Organizer: Equatable, Identifiable, Sendable, Codable {
@@ -55,7 +119,7 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     public var name: String
     public var imageURL: URL?
 
-    public init(url: URL, name: String, imageURL: URL? = nil) {
+    public init(url: Organizer.ID, name: String, imageURL: URL? = nil) {
         self.url = url
         self.name = name
         self.imageURL = imageURL

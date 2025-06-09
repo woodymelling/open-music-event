@@ -25,6 +25,7 @@ struct OrganizerListView: View {
         @CasePathable
         enum Destination {
             case organizerDetail(OrganizerDetailView.ViewModel)
+            case addOrganization(OrganizationFormView.Model)
         }
 
         var destination: Destination?
@@ -34,21 +35,42 @@ struct OrganizerListView: View {
         }
 
         func didTapAddOrganizerButton() {
-            unimplemented()
+            self.destination = .addOrganization(.init())
+        }
+
+        func didDeleteOrganization(organization: Organizer) {
+            @Dependency(\.defaultDatabase) var database
+
+            withErrorReporting {
+              try database.write { db in
+                try Organizer.delete(organization)
+                  .execute(db)
+              }
+            }
         }
     }
 
     @State var store = ViewModel()
 
     public var body: some View {
-        List(store.organizers, id: \.url) { org in
-            
-            NavigationLinkButton {
-                store.didTapOrganizer(id: org.id)
-            } label: {
-                Row(org: org)
+        List {
+            ForEach(store.organizers) { org in
+                NavigationLinkButton {
+                    store.didTapOrganizer(id: org.id)
+                } label: {
+                    Row(org: org)
+                }
+                .swipeActions(edge: .trailing) {
+                    Button(role: .destructive) {
+                        store.didDeleteOrganization(organization: org)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .tint(.red)
+                }
             }
         }
+
         .listStyle(.plain)
         .navigationTitle("Organizers")
         .toolbar {
@@ -59,7 +81,13 @@ struct OrganizerListView: View {
         .navigationDestination(item: $store.destination.organizerDetail) { store in
             OrganizerDetailView(store: store)
         }
-//        .navigationDestination(item: <#T##Binding<Optional<Hashable>>#>, destination: <#T##(Hashable) -> View#>)
+        .sheet(item: $store.destination.addOrganization) { store in
+            NavigationStack {
+                OrganizationFormView(store: store)
+                    .navigationTitle("Add Organization")
+            }
+        }
+//        .navigationDestination(item: , destination: <#T##(Hashable) -> View#>)
 //        .sheet(
 //            item: $store.scope(
 //                state: \.destination?.addRepository,

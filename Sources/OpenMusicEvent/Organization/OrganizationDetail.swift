@@ -62,15 +62,16 @@ public struct OrganizerDetailView: View {
 
         public func onPullToRefresh() async  {
             await withErrorReporting {
-                try await downloadAndStoreOrganizer(id: self.id)
+                try await downloadAndStoreOrganizer(from: self.id)
             }
         }
 
         public func onAppear() async {
+            try? await $organizer.load()
             if organizer == nil {
                 await withErrorReporting {
                     self.showingLoadingScreen = true
-                    try await downloadAndStoreOrganizer(id: self.id)
+                    try await downloadAndStoreOrganizer(from: self.id)
 
                     try await withThrowingTaskGroup {
                         if let orgImageURL = organizer?.imageURL {
@@ -292,14 +293,14 @@ let intervalFormatter = DateIntervalFormatter()
 
 
 
-#Preview {
-    prepareDependencies {
-        try! $0.defaultDatabase = appDatabase()
-    }
-
-    return OrganizerDetailView(url: .documentsDirectory)
-        .environment(\.loadingScreenImage, Image("WWVector", bundle: .module))
-}
+//#Preview {
+//    prepareDependencies {
+//        try! $0.defaultDatabase = appDatabase()
+//    }
+//
+//    OrganizerDetailView(url: .init("")!)
+//        .environment(\.loadingScreenImage, Image("WWVector", bundle: .module))
+//}
 
 struct Twirl: Transition {
     func body(content: Content, phase: TransitionPhase) -> some View {

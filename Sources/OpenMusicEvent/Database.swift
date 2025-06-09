@@ -158,19 +158,19 @@ func appDatabase() throws -> any DatabaseWriter {
 extension Database {
     func seedSampleData() throws {
         logger.log("Seeding sample data...")
-        try seed {
-            
-            Organizer.wickedWoods
-            MusicEvent.testival
-            
-            for artist in Artist.previewValues {
-                artist
-            }
-
-            for stage in Stage.previewValues {
-                stage
-            }
-        }
+//        try seed {
+//            
+//            Organizer.wickedWoods
+//            MusicEvent.testival
+//            
+//            for artist in Artist.previewValues {
+//                artist
+//            }
+//
+//            for stage in Stage.previewValues {
+//                stage
+//            }
+//        }
     }
 }
 #endif

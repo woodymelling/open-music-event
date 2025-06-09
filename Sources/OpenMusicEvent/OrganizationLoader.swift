@@ -13,25 +13,31 @@ import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
-    var fetchOrganizer: @Sendable (_ id: CoreModels.Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
+    var fetchOrganizer: @Sendable (_ from: Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
 }
 
 struct FailedToLoadOrganizerError: Error {}
 
 extension DataFetchingClient: DependencyKey {
-    static let liveValue = DataFetchingClient { baseURL in
+    static let liveValue = DataFetchingClient { orgReference in
         let unzippedURL = URL.temporaryDirectory
-
-        let targetZipURL = getZipURLForRemoteURL(baseURL)
-        logger.info("Fetching organizer from: \(targetZipURL)")
+        let targetZipURL = orgReference
 
         try FileManager.default.clearDirectory(URL.temporaryDirectory)
 
         let fileManager = FileManager.default
-
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
+
+
+        logger.info("Downloading from: \(targetZipURL)")
         logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
-        
+
+        if (response as! HTTPURLResponse).statusCode != 200 {
+            reportIssue(response.debugDescription)
+            struct BadRequest: Error {}
+            throw BadRequest()
+        }
+
         logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
 
         do {
@@ -79,12 +85,7 @@ extension FileManager {
     }
 }
 
-private func getZipURLForRemoteURL(_ remoteURL: URL) -> URL {
-    guard remoteURL.absoluteString.contains("github")
-    else { return remoteURL }
 
-    return remoteURL.appendingPathComponent("archive/refs/heads/main.zip")
-}
 
 import OSLog
 import GRDB
@@ -109,22 +110,20 @@ extension OmeID {
     }
 }
 
-func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
+func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
 
-    let organizer = try await dataFetchingClient.fetchOrganizer(id: id)
+    let organizer = try await dataFetchingClient.fetchOrganizer(reference)
 
     let organizerDraft = Organizer.Draft(
-        url: id,
+        url: reference,
         name: organizer.info.name,
         imageURL: organizer.info.imageURL
     )
 
-    let organizerURL: URL = id
-
     try await database.write { db in
-        try Organizer.find(organizerURL)
+        try Organizer.find(reference)
             .delete()
             .execute(db)
 
@@ -134,8 +133,8 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
         for event in organizer.events {
 
             let eventDraft = MusicEvent.Draft(
-                id: MusicEvent.ID(stabilizedBy: id.absoluteString, event.info.name),
-                organizerURL: organizerURL,
+                id: MusicEvent.ID(stabilizedBy: reference.description, event.info.name),
+                organizerURL: reference,
                 name: event.info.name,
                 timeZone: event.info.timeZone,
                 startTime: event.info.startTime,
@@ -199,7 +198,7 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
                     customTitle: schedule.metadata.customTitle
                 )
 
-                let scheduleID = try Schedule.upsert(draft)
+                let scheduleID = try Schedule.upsert { draft }
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -218,7 +217,7 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
                             description: nil
                         )
 
-                        let performanceID = try Performance.upsert(draft)
+                        let performanceID = try Performance.upsert { draft }
                             .returning(\.id)
                             .fetchOne(db)!
 
