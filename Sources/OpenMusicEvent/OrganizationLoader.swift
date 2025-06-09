@@ -112,9 +112,21 @@ extension OmeID {
 
 func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
+import OpenMusicEventParser
+
+func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
+    @Dependency(OrganizationClient.self) var organizationClient
     @Dependency(\.defaultDatabase) var database
 
     let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
+    let organizer = try await organizationClient.fetchOrganizer(id: id)
+    let organizerDraft = Organizer.Draft(
+        url: id,
+        name: organizer.info.name,
+        imageURL: organizer.info.imageURL
+    )
+
+    let organizerURL: URL = id
 
     try await database.write { db in
         try Organizer.find(reference)

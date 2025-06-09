@@ -9,10 +9,12 @@ let package = Package(
     products: [
         .library(name: "OpenMusicEvent", targets: ["OpenMusicEvent"]),
         .library(name: "OpenMusicEventParser", targets: ["OpenMusicEventParser"]),
-        .library(name: "CoreModels", targets: ["CoreModels"])
+        .library(name: "CoreModels", targets: ["CoreModels"]),
+        .executable(name: "open-music-event", targets: ["OpenMusicEventCLI"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
 
         .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.1"),
@@ -39,11 +41,11 @@ let package = Package(
             name: "OpenMusicEvent",
             dependencies: [
                 .product(name: "SharingGRDB", package: "sharing-grdb"),
-                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
                 .product(name: "FileTree", package: "swift-file-tree"),
                 .product(name: "ImageCaching", package: "skip-image-caching"),
                 .product(name: "Yams", package: "Yams"),
-                .product(name: "SwiftUINavigation", package: "swift-navigation"),
+                
+                    .product(name: "SwiftUINavigation", package: "swift-navigation"),
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
                 "OpenMusicEventParser",
                 "CoreModels"
@@ -57,6 +59,7 @@ let package = Package(
         .target(
             name: "CoreModels",
             dependencies: [
+                .product(name: "Tagged", package: "swift-tagged"),
                 .product(name: "StructuredQueries", package: "swift-structured-queries")
             ],
         ),
@@ -74,7 +77,15 @@ let package = Package(
                 .product(name: "Conversions", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Tagged", package: "swift-tagged"),
-
+                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
+            ]
+        ),
+        .executableTarget(
+            name: "OpenMusicEventCLI",
+             dependencies: [
+                "OpenMusicEventParser",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Dependencies", package: "swift-dependencies")
             ]
         ),
         .testTarget(
