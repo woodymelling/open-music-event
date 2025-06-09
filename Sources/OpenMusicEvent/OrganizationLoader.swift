@@ -11,48 +11,6 @@ import DependenciesMacros
 import ZIPFoundation
 import SwiftUI
 
-@DependencyClient
-struct DataFetchingClient {
-    var fetchOrganizer: @Sendable (_ id: CoreModels.Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
-}
-
-struct FailedToLoadOrganizerError: Error {}
-
-extension DataFetchingClient: DependencyKey {
-    static let liveValue = DataFetchingClient { baseURL in
-        let unzippedURL = URL.temporaryDirectory
-
-        let targetZipURL = getZipURLForRemoteURL(baseURL)
-        logger.info("Fetching organizer from: \(targetZipURL)")
-
-        try FileManager.default.clearDirectory(URL.temporaryDirectory)
-
-        let fileManager = FileManager.default
-
-        let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
-        logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
-        
-        logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
-
-        do {
-            try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
-            try fileManager.unzipItem(at: downloadURL, to: unzippedURL)
-        } catch {
-            reportIssue("ERROR: \(error)")
-        }
-
-        let finalDestination = try getUnzippedDirectory(from: unzippedURL)
-        logger.info("Parsing organizer from directory: \(finalDestination)")
-
-        let organizerData = try OrganizerConfiguration.fileTree.read(from: finalDestination)
-
-        logger.info("Clearing temporary directory")
-        try FileManager.default.clearDirectory(unzippedURL)
-
-        return organizerData
-    }
-}
-
 private func getUnzippedDirectory(from zipURL: URL) throws -> URL {
     let fileURLs = try FileManager.default.contentsOfDirectory(
         at: zipURL,
@@ -109,12 +67,13 @@ extension OmeID {
     }
 }
 
+import OpenMusicEventParser
+
 func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
-    @Dependency(DataFetchingClient.self) var dataFetchingClient
+    @Dependency(OrganizationClient.self) var organizationClient
     @Dependency(\.defaultDatabase) var database
 
-    let organizer = try await dataFetchingClient.fetchOrganizer(id: id)
-
+    let organizer = try await organizationClient.fetchOrganizer(id: id)
     let organizerDraft = Organizer.Draft(
         url: id,
         name: organizer.info.name,
