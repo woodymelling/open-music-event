@@ -77,5 +77,19 @@ let package = Package(
 
             ]
         ),
+        .testTarget(
+            name: "OpenMusicEventParserTests",
+            dependencies: [
+                 "OpenMusicEventParser",
+                 "Yams",
+                 .product(name: "CustomDump", package: "swift-custom-dump"),
+                 .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
+                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+                 .product(name: "SnapshotTestingCustomDump", package: "swift-snapshot-testing"),
+            ],
+            resources: [
+                .copy("ExampleFestivals")
+            ]
+        ),
     ]
 )

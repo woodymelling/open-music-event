@@ -7,19 +7,28 @@
 
 import SwiftUI
 import CoreModels
+import SharingGRDB
 
 public extension Stage {
     struct IndicatorView: View {
         public init(colors: [Color]) {
-            self.colors = colors
+            self._colors = .init(wrappedValue: colors)
         }
 
         public init(color: Color) {
             self.init(colors: [color])
         }
 
+        public init(_ stages: [Stage.ID]) {
+
+            let query = Stage.where { $0.id.in(stages) }.select { $0.color }
+            self._colors = FetchAll(query)
+
+        }
+
         var angleHeight: CGFloat = 5 / 2
 
+        @FetchAll
         var colors: [Color]
 
         public var body: some View {

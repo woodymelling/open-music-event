@@ -39,16 +39,34 @@ struct MusicEventViewer: View {
                 @FetchOne(MusicEvent?.find(id))
                 var musicEvent: MusicEvent? = nil
 
+
                 try await $musicEvent.sharedReader.load()
 //                try await Task.sleep(for: .seconds(1))
 
                 if let event = musicEvent {
                     try await withDependencies {
-                        try await loadStageImages()
-
                         $0.musicEventID = self.id
-                    } operation: {
-                        self.eventFeatures = MusicEventFeatures(event)
+                    } operation: { @MainActor in
+
+                        @FetchAll(Current.artists) var artists
+                        @FetchAll(Current.stages) var stages
+                        @FetchAll(Current.schedules) var schedules
+
+                        try await withThrowingTaskGroup {
+                            $0.addTask { try await FetchAll(Current.stages).load() }
+                            $0.addTask { try await FetchAll(Current.artists).load() }
+                            $0.addTask { try await FetchAll(Current.schedules) .load() }
+                            $0.addTask { await prefetchStageImages() }
+
+                            try await $0.waitForAll()
+                        }
+
+                        self.eventFeatures = MusicEventFeatures(
+                            event,
+                            artists: artists,
+                            stages: stages,
+                            schedules: schedules
+                        )
                     }
                 } else {
                     dismiss()
@@ -61,21 +79,22 @@ struct MusicEventViewer: View {
 
 
 import ImageCaching
-private func loadStageImages() async throws {
+private func prefetchStageImages() async {
     @FetchAll(Current.stages) var stages
+    try? await $stages.sharedReader.load()
 
-    try await $stages.sharedReader.load()
-
-    try await withThrowingTaskGroup {
+    await withTaskGroup {
         for stage in stages {
             if let imageURL = stage.iconImageURL {
                 $0.addTask {
-                    _ = try await ImagePipeline.images.image(for: imageURL)
+                    await withErrorReporting {
+                        _ = try await ImagePipeline.images.image(for: imageURL)
+                    }
                 }
             }
         }
 
-        try await $0.waitForAll()
+        await $0.waitForAll()
     }
 }
 
@@ -99,10 +118,19 @@ public class MusicEventFeatures: Identifiable {
         case schedule, artists, contactInfo, siteMap, location, explore, workshops, notifications, more
     }
 
-    public init(_ event: MusicEvent) {
+    public init(
+        _ event: MusicEvent,
+        artists: [Artist],
+        stages: [Stage],
+        schedules: [Schedule]
+    ) {
+
         self.artists = ArtistsList()
-        self.schedule = ScheduleFeature()
         self.more = MoreTabFeature()
+
+        if !schedules.isEmpty {
+            self.schedule = ScheduleFeature()
+        }
 
         if !event.contactNumbers.isEmpty {
             self.contactInfo = ContactInfoFeature()
@@ -125,7 +153,7 @@ public class MusicEventFeatures: Identifiable {
 //    @SharedReader(.appStorage("selectedFeature"))
     public var selectedFeature: Feature = .schedule
 
-    public var schedule: ScheduleFeature
+    public var schedule: ScheduleFeature?
     public var artists: ArtistsList
     public var location: LocationFeature?
     public var contactInfo: ContactInfoFeature?
@@ -141,11 +169,13 @@ public struct MusicEventFeaturesView: View {
 
     public var body: some View {
         TabView(selection: $store.selectedFeature) {
-            NavigationStack {
-                ScheduleView(store: store.schedule)
+            if let schedule = store.schedule {
+                NavigationStack {
+                    ScheduleView(store: schedule)
+                }
+                .tabItem { Label("Schedule", systemImage: "calendar") }
+                .tag(MusicEventFeatures.Feature.schedule)
             }
-            .tabItem { Label("Schedule", systemImage: "calendar") }
-            .tag(MusicEventFeatures.Feature.schedule)
 
             NavigationSplitView {
                 ArtistsListView(store: store.artists)

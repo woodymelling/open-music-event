@@ -52,7 +52,8 @@ func appDatabase() throws -> any DatabaseWriter {
         CREATE TABLE organizers (
             "url" TEXT PRIMARY KEY NOT NULL,
             "name" TEXT NOT NULL,
-            "imageURL" TEXT
+            "imageURL" TEXT,
+            "iconImageURL" TEXT
         ) STRICT;
         """).execute(db)
 
@@ -65,6 +66,7 @@ func appDatabase() throws -> any DatabaseWriter {
             "endTime" TEXT,
             "timeZone" TEXT,
             "imageURL" TEXT,
+            "iconImageURL" TEXT,
             "siteMapImageURL" TEXT,
             "location" TEXT,
             "contactNumbers" TEXT,
@@ -94,8 +96,10 @@ func appDatabase() throws -> any DatabaseWriter {
             "name" TEXT NOT NULL,
             "iconImageURL" TEXT,
             "imageURL" TEXT,
+            "posterImageURL" TEXT,
             "color" INTEGER NOT NULL,
-            
+            "lineup" TEXT,
+        
             FOREIGN KEY("musicEventID") REFERENCES "musicEvents"("id") ON DELETE CASCADE
         ) STRICT;
         """).execute(db)

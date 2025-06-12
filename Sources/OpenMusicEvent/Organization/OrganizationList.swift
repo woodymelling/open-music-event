@@ -109,7 +109,7 @@ struct OrganizerListView: View {
 
         var body: some View {
             HStack {
-                Organizer.ImageView(organizer: org)
+                Organizer.IconView(organizer: org)
                     .frame(width: 60, height: 60)
                     .aspectRatio(contentMode: .fit)
 

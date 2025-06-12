@@ -110,11 +110,10 @@ public struct OrganizerDetailView: View {
                             Organizer.ImageView(organizer: organizer)
                         },
                         listContent: {
-                            Section("Previous Events") {
-                                EventsListView(events: store.events) { eventID in
-                                    store.didTapEvent(id: eventID)
-                                }
+                            EventsListView(events: store.events) { eventID in
+                                store.didTapEvent(id: eventID)
                             }
+
                         }
                     )
                     .refreshable { await store.onPullToRefresh() }
@@ -147,17 +146,55 @@ public struct OrganizerDetailView: View {
         var events: [MusicEvent]
         var onTapEvent: (MusicEvent.ID) -> Void
 
+
+        @Environment(\.date) var date
+
+        var previousEvents: [MusicEvent] {
+            events.filter { event in
+                if let endTime = event.endTime {
+                    endTime < date()
+                } else {
+                    true
+                }
+            }
+        }
+
+        var upcomingEvents: [MusicEvent] {
+            events.filter { event in
+                if let startTime = event.startTime {
+                    startTime > date()
+                } else {
+                    true
+                }
+            }
+        }
+
         var body: some View {
-            ForEach(events) { event in
-                NavigationLinkButton {
-                    onTapEvent(event.id)
-                } label: {
-                    EventRowView(event: event)
+            if !upcomingEvents.isEmpty {
+                Section("Upcoming Events") {
+                    ForEach(upcomingEvents) { event in
+                        NavigationLinkButton {
+                            onTapEvent(event.id)
+                        } label: {
+                            EventRowView(event: event)
+                        }
+                    }
+                }
+            }
+
+            if !previousEvents.isEmpty {
+                Section("Previous Events") {
+                    ForEach(previousEvents) { event in
+                        NavigationLinkButton {
+                            onTapEvent(event.id)
+                        } label: {
+                            EventRowView(event: event)
+                        }
+                    }
                 }
             }
         }
     }
-
 
     struct EventRowView: View {
         var event: MusicEvent
@@ -189,7 +226,7 @@ public struct OrganizerDetailView: View {
 
         var body: some View {
             HStack(spacing: 10) {
-                MusicEvent.ImageView(event: event)
+                MusicEvent.IconImageView(event: event)
                     .frame(width: 60, height: 60)
 //                    .foregroundColor(.label)
 //                .invertForLightMode()
@@ -218,6 +255,7 @@ public struct OrganizerDetailView: View {
 public extension EnvironmentValues {
     @Entry var databaseDebugInformation = DatabaseDebugStatus.disabled
     @Entry var loadingScreenImage: Image?
+    @Entry var date: DateGenerator = .init { Date() }
 }
 
 public enum DatabaseDebugStatus {

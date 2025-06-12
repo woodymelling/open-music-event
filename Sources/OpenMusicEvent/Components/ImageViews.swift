@@ -23,14 +23,14 @@ import CoreModels
 
 
 extension Organizer {
-    struct ImageView: View {
+    struct IconView: View {
         let organizer: Organizer
 
         var body: some View {
             CachedAsyncImage(
                 requests: [
                     ImageRequest(
-                        url: organizer.imageURL,
+                        url: organizer.iconImageURL,
                         processors: [.resize(width: 440)]
                     ).withPipeline(.images)
                 ]
@@ -49,17 +49,44 @@ extension Organizer {
             .frame(maxWidth: .infinity)
         }
     }
-}
 
-extension MusicEvent {
     struct ImageView: View {
-        var event: MusicEvent
+        let organizer: Organizer
 
         var body: some View {
             CachedAsyncImage(
                 requests: [
                     ImageRequest(
-                        url: event.imageURL,
+                        url: organizer.imageURL,
+                        processors: [.resize(width: 440)]
+                    ).withPipeline(.images)
+                ]
+            ) {
+                $0.resizable().renderingMode(.original)
+            } placeholder: {
+                #if !SKIP
+                AnimatedMeshView()
+                    .overlay(Material.thinMaterial)
+                    .opacity(0.25)
+                #else
+                ProgressView().frame(square: 440)
+                #endif
+
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+}
+
+extension MusicEvent {
+    struct IconImageView: View {
+        var event: MusicEvent
+        
+        var body: some View {
+            CachedAsyncImage(
+                requests: [
+                    ImageRequest(
+                        url: event.iconImageURL,
                         processors: [
                             .resize(size: CGSize(width: 60, height: 60))
                         ]
@@ -72,12 +99,19 @@ extension MusicEvent {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                ProgressView()
+                if event.iconImageURL != nil {
+                    ProgressView()
+                } else {
+                    Image(systemName: "x.circle").foregroundStyle(.red)
+                }
+
             }
             .frame(width: 60, height: 60)
             .clipped()
         }
     }
+
+    
 }
 
 
@@ -154,6 +188,7 @@ public extension Stage {
                 wrappedValue: .placeholder,
                 Stage.find(stageID)
             )
+            
         }
 
         @FetchOne
