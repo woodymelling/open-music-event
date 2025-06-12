@@ -22,17 +22,28 @@ public struct EventConfiguration: Equatable, Sendable {
     public var artists: [CoreModels.Artist.Draft]
     public var stages: [CoreModels.Stage.Draft]
     public var schedule: [Schedule.StringlyTyped]
+    public var stageLineups: StageLineups?
 
     public init(
         info: CoreModels.MusicEvent.Draft,
         artists: [CoreModels.Artist.Draft],
         stages: [CoreModels.Stage.Draft],
         schedule: [Schedule.StringlyTyped],
+        stageLineups: StageLineups?
     ) {
         self.info = info
         self.artists = artists
         self.stages = stages
         self.schedule = schedule
+        self.stageLineups = stageLineups
+    }
+}
+
+extension EventConfiguration {
+    public typealias StageLineups = [Stage.Name: StageLineup]
+    public struct StageLineup: Equatable, Sendable, Codable {
+        public var posterURL: URL?
+        public var artists: [Artist.Name]
     }
 }
 
@@ -50,7 +61,6 @@ extension CoreModels.Schedule {
             public var startTime: Date
             public var endTime: Date
             public var stageName: String
-
         }
     }
     public struct Metadata: Equatable, Hashable, Sendable {

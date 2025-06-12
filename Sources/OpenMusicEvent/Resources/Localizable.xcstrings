@@ -258,6 +258,9 @@
     "github.com/your-organization/ome-config" : {
 
     },
+    "Go to Artist" : {
+
+    },
     "Hello [%@](https://skip.tools)!" : {
       "comment" : "Welcome tab contents",
       "extractionState" : "stale",
@@ -605,6 +608,9 @@
           }
         }
       }
+    },
+    "Upcoming Events" : {
+
     },
     "Update to the newest schedule" : {
 

@@ -57,6 +57,7 @@ public enum OME {
 
                 if let eventID {
                     MusicEventViewer(id: eventID)
+                        .transition(.slide)
                         .environment(\.exitEvent) {
                             $eventID.withLock { $0 = nil }
                         }

@@ -24,7 +24,7 @@ struct OpenFestivalDecoder {
 }
 
 extension OrganizerConfiguration {
-    public static var fileTree: some FileTreeViewable<OrganizerConfiguration> {
+    public static var fileTree: some FileTreeReader<OrganizerConfiguration> {
         FileTree {
             File("organizer-info", "yml")
                 .convert {
@@ -49,27 +49,31 @@ extension OrganizerConfiguration {
 }
 
 // MARK: Event
-public struct EventFileTree: FileTreeViewable {
+public struct EventFileTree: FileTreeReader {
     public init() {}
 
-    public var body: some FileTreeReader<EventConfiguration> & FileTreeViewable {
+    public var body: some FileTreeReader<EventConfiguration> {
         FileTree {
             File("event-info", "yml")
                 .convert(Conversions.YamlConversion<EventConfiguration.EventInfoYaml>())
 
 
-            Directory("schedules") {
+            File.Optional("stage-lineups", "yml")
+                .convert(Conversions.YamlConversion<EventConfiguration.StageLineups>())
+
+            Directory.Optional("schedules") {
                 File.Many(withExtension: "yml")
                     .map(SchedulesConversion())
             }
 
-            Directory("artists") {
+            Directory.Optional("artists") {
                 File.Many(withExtension: "md")
                     .map(ArtistConversion())
             }
         }
         .convert(EventConversion())
     }
+
 
     struct SchedulesConversion: Conversion {
         var body: some Conversion<FileContent<Data>, Schedule.StringlyTyped> {
@@ -82,13 +86,20 @@ public struct EventFileTree: FileTreeViewable {
     }
 
     struct EventConversion: Conversion {
-        typealias Input = (EventConfiguration.EventInfoYaml, [Schedule.StringlyTyped], [CoreModels.Artist.Draft])
+        typealias Input = (
+            EventConfiguration.EventInfoYaml,
+            EventConfiguration.StageLineups?,
+            [Schedule.StringlyTyped]?,
+            [CoreModels.Artist.Draft]?
+        )
         typealias Output = EventConfiguration
 
         func apply(_ input: Input) throws -> EventConfiguration {
-            let artists = input.2
-            let schedule = input.1
+
             let eventInfo = input.0
+            let stageLineups = input.1
+            let schedule = input.2
+            let artists = input.3
 
             return EventConfiguration(
                 info: CoreModels.MusicEvent.Draft(
@@ -96,6 +107,7 @@ public struct EventFileTree: FileTreeViewable {
                     timeZone: try TimeZoneConversion().apply(eventInfo.timeZone) ?? TimeZone.current,
                     startTime: eventInfo.startDate?.date,
                     endTime: eventInfo.endDate?.date,
+                    iconImageURL: eventInfo.iconImageURL,
                     imageURL: eventInfo.imageURL,
                     siteMapImageURL: eventInfo.siteMapImageURL,
                     location: .init(
@@ -111,9 +123,10 @@ public struct EventFileTree: FileTreeViewable {
                         )
                     },
                 ),
-                artists: artists,
+                artists: artists ?? [],
                 stages: eventInfo.stages ?? [],
-                schedule: schedule
+                schedule: schedule ?? [],
+                stageLineups: stageLineups
             )
         }
 
@@ -152,6 +165,7 @@ extension EventConfiguration {
         var address: String?
         var timeZone: String?
 
+        var iconImageURL: URL?
         var imageURL: URL?
         var siteMapImageURL: URL?
 
@@ -162,6 +176,7 @@ extension EventConfiguration {
         var stages: [CoreModels.Stage.Draft]?
     }
 }
+
 
 struct ArtistConversion: Conversion {
 

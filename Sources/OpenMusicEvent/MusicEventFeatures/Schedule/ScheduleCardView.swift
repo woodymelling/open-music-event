@@ -49,8 +49,11 @@ extension Performance {
             .contextMenu {
                 ForEach(performingArtists) { artist in
                     Section {
-                        Button("\(artist.name)", systemImage: "person") {
-
+                        Button {
+                            
+                        } label: {
+                            Label("Go to Artist", systemImage: "music.microphone")
+                            Text(artist.name)
                         }
                     }
                 }

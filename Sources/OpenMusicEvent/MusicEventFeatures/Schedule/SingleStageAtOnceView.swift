@@ -71,7 +71,6 @@ extension ScheduleView {
                 }
             }
 
-
             func loadPerformances() async throws {
                 guard let selectedSchedule
                 else { return }

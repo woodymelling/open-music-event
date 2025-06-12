@@ -5,7 +5,6 @@
 //  Created by Woodrow Melling on 4/30/25.
 //
 
-
 import Foundation
 import StructuredQueries
 
@@ -110,7 +109,7 @@ extension Collection {
 @Table
 public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     @Column(primaryKey: true)
-    public let url: URL
+    public var url: URL
 
     public typealias ID = URL
 
@@ -120,11 +119,18 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
 
     public var name: String
     public var imageURL: URL?
+    public var iconImageURL: URL?
 
-    public init(url: Organizer.ID, name: String, imageURL: URL? = nil) {
+    public init(
+        url: Organizer.ID,
+        name: String,
+        imageURL: URL? = nil,
+        iconImageURL: URL? = nil
+    ) {
         self.url = url
         self.name = name
         self.imageURL = imageURL
+        self.iconImageURL = iconImageURL
     }
 }
 
@@ -136,7 +142,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
     
     public let id: MusicEvent.ID
-    public let organizerURL: Organizer.ID?
+    public var organizerURL: Organizer.ID?
     
     public let name: String  //
     
@@ -145,7 +151,8 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public var startTime: Date?
     
     public var endTime: Date?
-    
+
+    public let iconImageURL: URL?
     public let imageURL: URL?
     public let siteMapImageURL: URL?
     
@@ -189,7 +196,19 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
         }
     }
 
-    public init(id: MusicEvent.ID, organizerURL: Organizer.ID?, name: String, timeZone: TimeZone, startTime: Date? = nil, endTime: Date? = nil, imageURL: URL?, siteMapImageURL: URL?, location: Location?, contactNumbers: [ContactNumber]) {
+    public init(
+        id: MusicEvent.ID,
+        organizerURL: Organizer.ID?,
+        name: String,
+        timeZone: TimeZone,
+        startTime: Date? = nil,
+        endTime: Date? = nil,
+        imageURL: URL?,
+        iconImageURL: URL?,
+        siteMapImageURL: URL?,
+        location: Location?,
+        contactNumbers: [ContactNumber]
+    ) {
         self.id = id
         self.organizerURL = organizerURL
         self.name = name
@@ -197,6 +216,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
         self.startTime = startTime
         self.endTime = endTime
         self.imageURL = imageURL
+        self.iconImageURL = iconImageURL
         self.siteMapImageURL = siteMapImageURL
         self.location = location
         self.contactNumbers = contactNumbers
@@ -211,9 +231,10 @@ extension MusicEvent.Draft: Codable, Equatable, Sendable {}
 public struct Artist: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Artist>
     public let id: ID
-    public let musicEventID: MusicEvent.ID?
+    public var musicEventID: MusicEvent.ID?
 
-    public let name: String
+    public typealias Name = String
+    public let name: Name
     public let bio: String?
     public let imageURL: URL?
 
@@ -248,12 +269,20 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public typealias ID = OmeID<Stage>
     public let id: ID
     public let musicEventID: MusicEvent.ID?
-    public let name: String
+
+    public typealias Name = String
+    public let name: Name
+
     public var sortIndex: Int?
-    public var iconImageURL: URL?
-    public var imageURL: URL?
 
     public let color: Color
+
+    public var iconImageURL: URL?
+    public var imageURL: URL?
+    public var posterImageURL: URL?
+
+    @Column(as: [Artist.ID]?.JSONRepresentation.self)
+    public var lineup: [Artist.ID]?
 
     public init(
         id: ID,
@@ -262,19 +291,38 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
         name: String,
         iconImageURL: URL? = nil,
         imageURL: URL? = nil,
-        color: Color
+        color: Color,
+        posterImageURL: URL? = nil,
+        lineup: [Artist.ID]? = []
     ) {
         self.id = id
         self.musicEventID = musicEventID
         self.name = name
         self.sortIndex = sortIndex
         self.iconImageURL = iconImageURL
+        self.posterImageURL = posterImageURL
         self.imageURL = imageURL
         self.color = color
+        self.lineup = lineup
     }
 }
 
 extension Stage.Draft: Codable, Sendable, Equatable {}
+
+public extension Performance {
+    @Table
+    struct StageOnly: Identifiable, Equatable, Sendable {
+        public var id: OmeID<Performance.StageOnly>
+        public var artistID: Artist.ID
+        public var stage: Stage.ID
+
+        public init(id: OmeID<StageOnly>, artistID: Artist.ID, stage: Stage.ID) {
+            self.id = id
+            self.artistID = artistID
+            self.stage = stage
+        }
+    }
+}
 
 // MARK: Schedule
 @Table
@@ -338,8 +386,9 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
         self.title = title
         self.description = description
     }
-
 }
+
+
 
 public protocol TimelineRepresentable {
     var startTime: Date { get }

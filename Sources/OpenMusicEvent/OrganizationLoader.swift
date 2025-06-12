@@ -114,61 +114,30 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
     @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
 
-    let organizer = try await dataFetchingClient.fetchOrganizer(reference)
+    let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
 
-    let organizerDraft = Organizer.Draft(
-        url: reference,
-        name: organizer.info.name,
-        imageURL: organizer.info.imageURL
-    )
 
     try await database.write { db in
         try Organizer.find(reference)
             .delete()
             .execute(db)
 
-        try Organizer.upsert { organizerDraft }
+
+        var info = organizer.info
+        info.url = reference
+        try Organizer.upsert { info }
             .execute(db)
 
         for event in organizer.events {
 
-            let eventDraft = MusicEvent.Draft(
-                id: MusicEvent.ID(stabilizedBy: reference.description, event.info.name),
-                organizerURL: reference,
-                name: event.info.name,
-                timeZone: event.info.timeZone,
-                startTime: event.info.startTime,
-                endTime: event.info.endTime,
-                imageURL: event.info.imageURL,
-                siteMapImageURL: event.info.siteMapImageURL,
-                location: event.info.location,
-                contactNumbers: event.info.contactNumbers
-            )
+            var eventInfo = event.info
+            eventInfo.organizerURL = reference
 
-            let eventID = try MusicEvent.insert { eventDraft }
+            let eventID = try MusicEvent.insert { eventInfo }
                 .returning(\.id)
                 .fetchOne(db)!
 
-            var stageNameIDMapping: [String: Stage.ID] = [:]
             var artistNameIDMapping: [String: Artist.ID] = [:]
-
-            for (index, stage) in event.stages.enumerated() {
-                let stage = Stage.Draft(
-                    id: Stage.ID(rawValue: (String(eventID.rawValue) + stage.name).stableHash),
-                    musicEventID: eventID,
-                    name: stage.name,
-                    sortIndex: index,
-                    iconImageURL: stage.iconImageURL,
-                    imageURL: stage.imageURL,
-                    color: stage.color
-                )
-
-                let stageID = try Stage.upsert { stage }
-                    .returning(\.id)
-                    .fetchOne(db)!
-
-                stageNameIDMapping[stage.name] = stageID
-            }
 
             for artist in event.artists {
                 let artistDraft = Artist.Draft(
@@ -186,7 +155,51 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
 
                 artistNameIDMapping[artist.name] = artistID
             }
-//
+
+
+            func getOrCreateArtist(withName artistName: Artist.Name) throws -> Artist.ID {
+                if let artistID = artistNameIDMapping[artistName] {
+                    artistID
+                } else {
+                    try Artist.upsert {
+                        Artist.Draft(
+                            id: OmeID(stabilizedBy: String(eventID.rawValue), artistName),
+                            musicEventID: eventID,
+                            name: artistName,
+                            links: []
+                        )
+                    }
+                    .returning(\.id)
+                    .fetchOne(db)!
+                }
+
+            }
+            var stageNameIDMapping: [String: Stage.ID] = [:]
+            
+
+            for (index, stage) in event.stages.enumerated() {
+                let lineup = event.stageLineups?[stage.name]
+                let artistIDs = try lineup?.artists.compactMap { try getOrCreateArtist(withName: $0) }
+
+                let stage = Stage.Draft(
+                    id: Stage.ID(rawValue: (String(eventID.rawValue) + stage.name).stableHash),
+                    musicEventID: eventID,
+                    name: stage.name,
+                    sortIndex: index,
+                    color: stage.color,
+                    iconImageURL: stage.iconImageURL,
+                    imageURL: stage.imageURL,
+                    posterImageURL: stage.posterImageURL,
+                    lineup: artistIDs
+                )
+
+                let stageID = try Stage.upsert { stage }
+                    .returning(\.id)
+                    .fetchOne(db)!
+
+                stageNameIDMapping[stage.name] = stageID
+            }
+
             for schedule in event.schedule {
                 let draft = Schedule.Draft(
                     id: .init(
@@ -201,14 +214,18 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
 
                 let scheduleID = try Schedule.upsert { draft }
                     .returning(\.id)
-                    .fetchOne(db)!
+                    .fetchOne(db)
 
                 for stageSchedule in schedule.stageSchedules {
                     for performance in stageSchedule.value {
                         let draft = Performance.Draft(
                             // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
                             // Maybe we increment a counter if there are multiple?
-                            id: .init(stabilizedBy: String(scheduleID.rawValue), stageSchedule.key, performance.title),
+                            id: .init(
+                                stabilizedBy: scheduleID.map { String($0.rawValue) } ?? "",
+                                stageSchedule.key,
+                                performance.title
+                            ),
                             stageID: stageNameIDMapping[stageSchedule.key]!,
                             scheduleID: scheduleID,
                             startTime: performance.startTime,
@@ -222,20 +239,7 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
                             .fetchOne(db)!
 
                         for artistName in performance.artistNames {
-                            let artistID = if let artistID = artistNameIDMapping[artistName] {
-                                artistID
-                            } else {
-                                try Artist.upsert {
-                                    Artist.Draft(
-                                        id: OmeID(stabilizedBy: String(eventID.rawValue), artistName),
-                                        musicEventID: eventID,
-                                        name: artistName,
-                                        links: []
-                                    )
-                                }
-                                .returning(\.id)
-                                .fetchOne(db)!
-                            }
+                            let artistID = try getOrCreateArtist(withName: artistName)
 
                             let draft = Performance.Artists.Draft(
                                 performanceID: performanceID,

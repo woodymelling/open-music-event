@@ -17,22 +17,11 @@ public class ArtistsList {
     // MARK: Data
     @ObservationIgnored
     @FetchAll
-    var artists: [ArtistRow]
+    var artists: [Artist]
 
     @ObservationIgnored
     @Dependency(\.musicEventID)
     var musicEventID
-
-    @Selection
-    struct ArtistRow: Identifiable {
-        var id: Artist.ID?
-        var name: String?
-        var imageURL: URL?
-
-        @Column(as: [Color].JSONRepresentation.self)
-        var performanceColors: [Color]
-    }
-
 
     // MARK: State
     var searchText: String = ""
@@ -42,19 +31,9 @@ public class ArtistsList {
             .where {
                 $0.name.collate(.nocase).contains(self.searchText)
             }
-            .group(by: \.id)
-            .rightJoin(Performance.Artists.all) { $1.artistID.eq($0.id) }
-            .join(Performance.all) { $1.performanceID.eq($2.id) }
-            .join(Stage.all) { $2.stageID.eq($3.id) }
             .order(by: \.name)
-            .select {
-                ArtistRow.Columns(
-                    id: $0.id,
-                    name: $0.name,
-                    imageURL: $0.imageURL,
-                    performanceColors: $3.color.jsonGroupArray()
-                )
-            }
+            .group(by: \.id)
+
 
         await withErrorReporting {
             try await $artists.load(artistsSearchQuery)
@@ -91,27 +70,53 @@ struct ArtistsListView: View {
     }
 
     struct Row: View {
-        init(artist: ArtistsList.ArtistRow) {
+        init(artist: Artist) {
             self.artist = artist
+
+            let query = Performance.Artists
+                .where { $0.artistID.eq(artist.id) }
+                .join(Performance.all, on: { $0.performanceID.eq($1.id) })
+                .join(Stage.all) { $1.stageID.eq($2.id) }
+                .select { $2.color }
+
+
+            self._performanceStageColors = FetchAll(query)
+
         }
 
-        var artist: ArtistsList.ArtistRow
-        var stageColors: [Color] = []
+        var artist: Artist
 
         private var imageSize: CGFloat = 60
 
+        @FetchAll
+        var performanceStageColors: [Color]
+
+        @FetchAll
+        var allStages: [Stage] = []
+        var lineupStagesColors: [Color] {
+            allStages.filter { $0.lineup?.contains(artist.id) ?? false }.map(\.color)
+        }
+
+        var stageColors: Set<Color> {
+            Set(performanceStageColors + lineupStagesColors)
+        }
+
+        @Environment(\.showingArtistImages)
+        var showingArtistImages
+
         var body: some View {
             HStack(spacing: 10) {
-                Artist.ImageView(imageURL: artist.imageURL)
-                    .frame(square: 60)
+                if showingArtistImages {
 
-                Stage.IndicatorView(colors: artist.performanceColors)
-                    .frame(width: 5)
+                    Artist.ImageView(imageURL: artist.imageURL)
+                        .frame(square: 60)
 
-                if let name = artist.name {
-                    Text(name)
-                        .lineLimit(1)
+                    Stage.IndicatorView(colors: Array(stageColors))
+                        .frame(width: 5)
                 }
+
+                Text(artist.name)
+                    .lineLimit(1)
 
                 Spacer()
 
@@ -129,6 +134,10 @@ struct ArtistsListView: View {
             .foregroundStyle(.primary)
         }
     }
+}
+
+extension EnvironmentValues {
+    @Entry var showingArtistImages = true
 }
 
 extension View {

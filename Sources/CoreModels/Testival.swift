@@ -8,14 +8,15 @@ import Foundation
 
 public extension Organizer {
     static let wickedWoods = Organizer(
-        url: Organizer.ID(string: "https://github.com/wicked-woods/wicked-woods-ome/archive/refs/head/main.zip")!,
+        url: Organizer.ID(string: "https://github.com/wicked-woods/wicked-woods-ome/archive/refs/heads/main.zip")!,
         name: "Wicked Woods",
         imageURL: URL(string: "https://images.squarespace-cdn.com/content/v1/66eb917b86dbd460ad209478/5be5a6e6-c5ca-4271-acc3-55767c498061/WW-off_white.png?format=1500w")
     )
 
     static let shambhala = Organizer(
-        url: Organizer.ID(string: "https://github.com/woodymelling/shambhala/archive/refs/head/main.zip")!,
-        name: "Shambhala"
+        url: Organizer.ID(string: "https://github.com/woodymelling/shambhala-ome/archive/refs/heads/main.zip")!,
+        name: "Shambhala Music Festival",
+        iconImageURL: URL("https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Flogo_small.png?alt=media&token=7766fa90-6591-4e25-92b4-2ff354cb970d")
     )
 }
 
@@ -28,6 +29,7 @@ public extension MusicEvent {
         startTime: nil,
         endTime: nil,
         imageURL: nil,
+        iconImageURL: nil,
         siteMapImageURL: nil,
         location: nil,
         contactNumbers: []
@@ -41,6 +43,7 @@ public extension MusicEvent {
         name: "Testival",
         timeZone: .current,
         imageURL: nil,
+        iconImageURL: nil,
         siteMapImageURL: URL(string: "https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2FSite%20Map.webp?alt=media&token=48272d3c-ace0-4d5b-96a9-a5142f1c744a"),
         location: Location(
             address: "3901 Kootenay Hwy, Fairmont Hot Springs, BC V0B 1L1, Canada",
@@ -170,6 +173,7 @@ public extension Stage {
             sortIndex: 0,
             name: "Unicorn Lounge",
             iconImageURL: URL(string: "https://firebasestorage.googleapis.com:443/v0/b/festivl.appspot.com/o/userContent%2FF0BC110C-D42E-4CC9-BED3-59E2700938FF.png?alt=media&token=472a66e1-c45a-4a67-895a-5ec7e0ad95c0"), color: .red
+
         ),
 
         Stage(
