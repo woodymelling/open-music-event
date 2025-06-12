@@ -90,6 +90,7 @@ func appDatabase() throws -> any DatabaseWriter {
         CREATE TABLE stages(
             "id" INTEGER PRIMARY KEY AUTOINCREMENT,
             "musicEventID" INTEGER,
+            "sortIndex" TEXT NOT NULL,
             "name" TEXT NOT NULL,
             "iconImageURL" TEXT,
             "imageURL" TEXT,
@@ -141,7 +142,7 @@ func appDatabase() throws -> any DatabaseWriter {
     }
 
     #if DEBUG
-    if context == .preview {
+    if true /*context == .preview*/ {
         migrator.registerMigration("Seed sample data") { db in
             try db.seedSampleData()
         }
@@ -158,11 +159,10 @@ func appDatabase() throws -> any DatabaseWriter {
 extension Database {
     func seedSampleData() throws {
         logger.log("Seeding sample data...")
-//        try seed {
-//            
-//            Organizer.wickedWoods
-//            MusicEvent.testival
-//            
+        try seed {
+            Organizer.wickedWoods
+            Organizer.shambhala
+
 //            for artist in Artist.previewValues {
 //                artist
 //            }
@@ -170,7 +170,7 @@ extension Database {
 //            for stage in Stage.previewValues {
 //                stage
 //            }
-//        }
+        }
     }
 }
 #endif

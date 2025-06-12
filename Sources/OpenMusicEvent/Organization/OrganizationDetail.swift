@@ -254,11 +254,12 @@ enum Current {
         }
     }
 
-    static var stages: Where<Stage> {
+    static var stages: SelectOf<Stage> {
         Stage.where {
             @Dependency(\.musicEventID) var eventID
             eventID == $0.musicEventID
         }
+        .order(by: \.sortIndex)
     }
 
     static var schedules: Where<Schedule> {

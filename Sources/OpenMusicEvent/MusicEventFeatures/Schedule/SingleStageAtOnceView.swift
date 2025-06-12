@@ -86,7 +86,7 @@ extension ScheduleView {
                         )
                     }
 
-                try await self.$performances.load(performancesQuery)
+                try await self.$performances.load(performancesQuery, animation: .snappy)
 
             }
 

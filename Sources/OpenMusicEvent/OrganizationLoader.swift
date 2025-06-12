@@ -127,7 +127,7 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
             .delete()
             .execute(db)
 
-        try Organizer.upsert(organizerDraft)
+        try Organizer.upsert { organizerDraft }
             .execute(db)
 
         for event in organizer.events {
@@ -145,24 +145,25 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
                 contactNumbers: event.info.contactNumbers
             )
 
-            let eventID = try MusicEvent.insert(eventDraft)
+            let eventID = try MusicEvent.insert { eventDraft }
                 .returning(\.id)
                 .fetchOne(db)!
 
             var stageNameIDMapping: [String: Stage.ID] = [:]
             var artistNameIDMapping: [String: Artist.ID] = [:]
 
-            for stage in event.stages {
+            for (index, stage) in event.stages.enumerated() {
                 let stage = Stage.Draft(
                     id: Stage.ID(rawValue: (String(eventID.rawValue) + stage.name).stableHash),
                     musicEventID: eventID,
                     name: stage.name,
+                    sortIndex: index,
                     iconImageURL: stage.iconImageURL,
                     imageURL: stage.imageURL,
                     color: stage.color
                 )
 
-                let stageID = try Stage.upsert(stage)
+                let stageID = try Stage.upsert { stage }
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -179,7 +180,7 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
                     links: artist.links
                 )
 
-                let artistID = try Artist.upsert(artistDraft)
+                let artistID = try Artist.upsert { artistDraft }
                     .returning(\.id)
                     .fetchOne(db)!
 
@@ -203,7 +204,6 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
                     .fetchOne(db)!
 
                 for stageSchedule in schedule.stageSchedules {
-
                     for performance in stageSchedule.value {
                         let draft = Performance.Draft(
                             // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
@@ -222,15 +222,27 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
                             .fetchOne(db)!
 
                         for artistName in performance.artistNames {
-                            let artistID = artistNameIDMapping[artistName]
+                            let artistID = if let artistID = artistNameIDMapping[artistName] {
+                                artistID
+                            } else {
+                                try Artist.upsert {
+                                    Artist.Draft(
+                                        id: OmeID(stabilizedBy: String(eventID.rawValue), artistName),
+                                        musicEventID: eventID,
+                                        name: artistName,
+                                        links: []
+                                    )
+                                }
+                                .returning(\.id)
+                                .fetchOne(db)!
+                            }
 
                             let draft = Performance.Artists.Draft(
                                 performanceID: performanceID,
-                                artistID: artistID,
-                                anonymousArtistName: artistID == nil ? artistName : nil
+                                artistID: artistID
                             )
 
-                            try Performance.Artists.insert(draft)
+                            try Performance.Artists.insert { draft }
                                 .execute(db)
                         }
                     }

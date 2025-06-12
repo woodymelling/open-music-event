@@ -247,6 +247,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public let id: ID
     public let musicEventID: MusicEvent.ID?
     public let name: String
+    public var sortIndex: Int?
     public var iconImageURL: URL?
     public var imageURL: URL?
 
@@ -255,6 +256,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public init(
         id: ID,
         musicEventID: MusicEvent.ID? = nil,
+        sortIndex: Int? = nil,
         name: String,
         iconImageURL: URL? = nil,
         imageURL: URL? = nil,
@@ -263,6 +265,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
         self.id = id
         self.musicEventID = musicEventID
         self.name = name
+        self.sortIndex = sortIndex
         self.iconImageURL = iconImageURL
         self.imageURL = imageURL
         self.color = color
@@ -270,7 +273,6 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
 }
 
 extension Stage.Draft: Codable, Sendable, Equatable {}
-
 
 // MARK: Schedule
 @Table

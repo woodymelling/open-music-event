@@ -139,6 +139,7 @@ extension Stage {
         Stage.init(
             id: -1,
             musicEventID: nil,
+            sortIndex: 0,
             name: "",
             iconImageURL: nil,
             color: .clear
