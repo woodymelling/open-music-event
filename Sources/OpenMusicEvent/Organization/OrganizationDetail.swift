@@ -247,6 +247,14 @@ enum Current {
         return MusicEvent.find(musicEventID)
     }
 
+    static var organizer: SelectOf<Organizer> {
+        @Dependency(\.musicEventID) var musicEventID
+
+        return Organizer.all
+            .where { $0.url == Current.musicEvent.select(\.organizerURL) }
+            .limit(1)
+    }
+
     static var artists: Where<Artist> {
         @Dependency(\.musicEventID) var eventID
         return Artist.where {

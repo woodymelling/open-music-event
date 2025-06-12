@@ -40,6 +40,9 @@
         }
       }
     },
+    "About" : {
+
+    },
     "Add" : {
       "comment" : "Button in items list that will cause a new item to be added",
       "localizations" : {
@@ -210,6 +213,9 @@
     "Directions" : {
 
     },
+    "Exit and see previous events" : {
+
+    },
     "Favorite" : {
       "comment" : "Item editor title label for marking the item as a favorite",
       "extractionState" : "stale",
@@ -244,6 +250,9 @@
 
     },
     "Filter" : {
+
+    },
+    "GitHub" : {
 
     },
     "github.com/your-organization/ome-config" : {
@@ -414,6 +423,12 @@
     "offset: %lf" : {
 
     },
+    "OME (Open Music Event) is designed to help festival attendees effortlessly get access to information that they need during an event. The main goal of this project is to give concert and festival goers a simple, intuitive way to get information about events they are attending.\n\nThe secondary goal is providing a free and open source way for event organizers to create, maintain and update information about their event.\n\nIf you have any suggestions or discover any issues, please start a discussion and they will be addressed as soon as possible." : {
+
+    },
+    "Open Music Event" : {
+
+    },
     "Organization URL" : {
 
     },
@@ -453,7 +468,7 @@
     "Previous Events" : {
 
     },
-    "Reload %@" : {
+    "Report an Issue" : {
 
     },
     "Save" : {
@@ -495,9 +510,6 @@
     "ScrollVisibility" : {
 
     },
-    "See other Wicked Wood events" : {
-
-    },
     "Select an Artist" : {
 
     },
@@ -530,6 +542,9 @@
           }
         }
       }
+    },
+    "Suggest a feature" : {
+
     },
     "System" : {
       "comment" : "Menu item indicating that the appearance should be in the default system mode",
@@ -590,6 +605,9 @@
           }
         }
       }
+    },
+    "Update to the newest schedule" : {
+
     },
     "version" : {
 

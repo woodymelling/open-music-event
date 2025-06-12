@@ -1,16 +1,15 @@
 import SwiftUI
 import SharingGRDB
 import Observation
+import CoreModels
+
 
 @MainActor
 @Observable
 final class MoreTabFeature {
     @ObservationIgnored
-    @FetchOne(
-        Current.musicEvent
-             .join(Organizer.select(\.name)) { $0.organizerURL.eq($1.url) }
-    )
-    var organizerName: String = ""
+    @FetchOne(Current.organizer)
+    var organizer: Organizer = .init(url: URL.temporaryDirectory, name: "")
 
     @ObservationIgnored
     @FetchOne(Current.musicEvent)
@@ -43,34 +42,87 @@ struct MoreView: View {
 
     var body: some View {
         List {
-            Button {
-                Task {
-                    await store.didTapReloadOrganizer()
-                }
+
+            NavigationLink {
+                AboutAppView(store: store)
             } label: {
-                VStack {
-                    HStack {
-                        Text("Reload \(store.organizerName)")
-                        Spacer()
-                        if store.isLoadingOrganizer {
-                            ProgressView()
-                        }
-                    }
-
-                    if let errorMessage = store.errorMessage {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
+                Label("About", systemImage: "info.circle")
             }
 
-            Button("See other Wicked Wood events") {
-                @Shared(Current.musicEventID)
-                var musicEventID
-
-                $musicEventID.withLock { $0 = nil }
-            }
         }
         .navigationTitle("More")
+    }
+}
+
+
+struct AboutAppView: View {
+    let store: MoreTabFeature
+    var body: some View {
+        List {
+            Section(store.musicEvent?.name ?? "") {
+                Button {
+                    Task {
+                        await store.didTapReloadOrganizer()
+                    }
+                } label: {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Label("Update to the newest schedule", systemImage: "arrow.clockwise")
+                            Spacer()
+                            if store.isLoadingOrganizer {
+                                ProgressView()
+                            }
+                        }
+
+                        if let errorMessage = store.errorMessage {
+                            Label(errorMessage, systemImage: "exclamationmark.circle.fill")
+                                .foregroundStyle(.red)
+                        }
+                    }
+                }
+
+                Button("Exit and see previous events", systemImage: "door.left.hand.open") {
+                    @Shared(Current.musicEventID)
+                    var musicEventID
+
+                    $musicEventID.withLock { $0 = nil }
+                }
+            }
+
+            Section("Open Music Event") {
+                Text("""
+                OME (Open Music Event) is designed to help festival attendees effortlessly get access to information that they need during an event. The main goal of this project is to give concert and festival goers a simple, intuitive way to get information about events they are attending.
+                
+                The secondary goal is providing a free and open source way for event organizers to create, maintain and update information about their event.
+                
+                If you have any suggestions or discover any issues, please start a discussion and they will be addressed as soon as possible.
+                """)
+
+                Link(destination: URL(string: "https://github.com/woodymelling/open-music-event")!) {
+                    Label("GitHub", systemImage: "link")
+                }
+
+                Link(destination: URL(string: "https://github.com/woodymelling/open-music-event/issues/new")!) {
+                    Label("Report an Issue", systemImage: "exclamationmark.bubble")
+                }
+
+                Link(destination: URL(string: "https://github.com/woodymelling/open-music-event/issues/new")!) {
+                    Label("Suggest a feature", systemImage: "plus.bubble")
+                }
+            }
+        }
+        .navigationTitle("About")
+    }
+}
+
+
+#Preview("About App") {
+
+    prepareDependencies {
+        $0.defaultDatabase = try! appDatabase()
+    }
+
+    return NavigationStack {
+        AboutAppView(store: .init())
     }
 }

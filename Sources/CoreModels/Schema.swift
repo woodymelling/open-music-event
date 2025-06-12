@@ -112,6 +112,8 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     @Column(primaryKey: true)
     public let url: URL
 
+    public typealias ID = URL
+
     public var id: URL {
         self.url
     }
