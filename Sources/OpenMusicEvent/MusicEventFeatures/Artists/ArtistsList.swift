@@ -77,10 +77,10 @@ struct ArtistsListView: View {
                 .where { $0.artistID.eq(artist.id) }
                 .join(Performance.all, on: { $0.performanceID.eq($1.id) })
                 .join(Stage.all) { $1.stageID.eq($2.id) }
-                .select { $2.color }
+                .select { $2 }
 
 
-            self._performanceStageColors = FetchAll(query)
+            self._performanceStages = FetchAll(query)
 
         }
 
@@ -89,31 +89,28 @@ struct ArtistsListView: View {
         private var imageSize: CGFloat = 60
 
         @FetchAll
-        var performanceStageColors: [Color]
+        var performanceStages: [Stage]
 
-        @FetchAll
-        var allStages: [Stage] = []
-        var lineupStagesColors: [Color] {
-            allStages.filter { $0.lineup?.contains(artist.id) ?? false }.map(\.color)
-        }
 
-        var stageColors: Set<Color> {
-            Set(performanceStageColors + lineupStagesColors)
-        }
-
-        @Environment(\.showingArtistImages)
-        var showingArtistImages
+        @Environment(\.showArtistImages)
+        var showArtistImages
 
         var body: some View {
             HStack(spacing: 10) {
-                if showingArtistImages {
-
-                    Artist.ImageView(imageURL: artist.imageURL)
-                        .frame(square: 60)
-
-                    Stage.IndicatorView(colors: Array(stageColors))
-                        .frame(width: 5)
+                Group {
+                    if let image = artist.imageURL {
+                        Artist.ImageView(imageURL: image)
+                            .frame(square: 60)
+                    } else {
+                        ForEach(performanceStages) {
+                            Stage.IconView(stageID: $0.id)
+                                .frame(square: 60)
+                        }
+                    }
                 }
+
+                Stage.IndicatorView(colors: performanceStages.map(\.color))
+                    .frame(width: 5, height: 60)
 
                 Text(artist.name)
                     .lineLimit(1)
@@ -130,14 +127,13 @@ struct ArtistsListView: View {
 //                        .padding(.trailing)
 //                }
             }
-            .frame(height: 60)
             .foregroundStyle(.primary)
         }
     }
 }
 
 extension EnvironmentValues {
-    @Entry var showingArtistImages = true
+    @Entry var showArtistImages = true
 }
 
 extension View {

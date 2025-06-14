@@ -26,6 +26,11 @@ public extension Stage {
 
         }
 
+        public init(_ stages: Set<Stage.ID>) {
+            self.init(Array(stages))
+        }
+
+
         var angleHeight: CGFloat = 5 / 2
 
         @FetchAll
