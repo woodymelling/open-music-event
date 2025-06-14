@@ -38,7 +38,6 @@ struct MusicEventViewer: View {
                 @FetchOne(MusicEvent?.find(id))
                 var musicEvent: MusicEvent? = nil
 
-
                 try await $musicEvent.sharedReader.load()
 //                try await Task.sleep(for: .seconds(1))
 
@@ -46,7 +45,6 @@ struct MusicEventViewer: View {
                     try await withDependencies {
                         $0.musicEventID = self.id
                     } operation: { @MainActor in
-
                         @FetchAll(Current.artists) var artists
                         @FetchAll(Current.stages) var stages
                         @FetchAll(Current.schedules) var schedules
@@ -144,6 +142,8 @@ public class MusicEventFeatures: Identifiable {
         self.artists = ArtistsList()
         self.more = MoreTabFeature()
 
+        self.shouldShowArtistImages = !artists.compactMap { $0.imageURL }.isEmpty
+
         if !schedules.isEmpty {
             self.schedule = ScheduleFeature()
         }
@@ -174,6 +174,9 @@ public class MusicEventFeatures: Identifiable {
     public var location: LocationFeature?
     public var contactInfo: ContactInfoFeature?
     var more: MoreTabFeature
+
+
+    var shouldShowArtistImages: Bool = true
 }
 
 public struct MusicEventFeaturesView: View {
@@ -250,5 +253,6 @@ public struct MusicEventFeaturesView: View {
 //            .tabItem { Label("Notifications", systemImage: Icons.notifications) }
 //            .tag(MusicEventFeatures.Feature.notifications)
         }
+        .environment(\.showArtistImages, store.shouldShowArtistImages)
     }
 }

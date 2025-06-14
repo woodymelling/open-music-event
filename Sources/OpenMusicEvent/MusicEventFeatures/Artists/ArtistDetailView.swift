@@ -109,6 +109,9 @@ struct ArtistDetailView: View {
             title: Text(store.artist.name),
             stretchyContent: {
                 ArtistImage(artist: store.artist)
+                    #if !Skip
+                    .environment(\.meshBaseColors, meshColors)
+                    #endif
             },
             listContent: {
                 ForEach(store.performances) { performance in
@@ -137,13 +140,12 @@ struct ArtistDetailView: View {
                                 #endif
                         }
                     }
+                    
                 }
             }
         )
         .listStyle(.plain)
-        #if !Skip
-        .environment(\.meshBaseColors, meshColors)
-        #endif
+
 //        .toolbar {
 //            Toggle("Favorite", isOn: $store.favoriteArtists[store.artist.id])
 //                .frame(square: 20)
