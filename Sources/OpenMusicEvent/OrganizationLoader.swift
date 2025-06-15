@@ -116,12 +116,10 @@ func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
 
     let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
 
-
     try await database.write { db in
         try Organizer.find(reference)
             .delete()
             .execute(db)
-
 
         var info = organizer.info
         info.url = reference
