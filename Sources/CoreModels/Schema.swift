@@ -276,13 +276,12 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
 
     public var sortIndex: Int?
 
-    public let name: String
     public var iconImageURL: URL?
     public var imageURL: URL?
-    public let color: Color
 
-    public var iconImageURL: URL?
-    public var imageURL: URL?
+    @Column(as: Color.HexRepresentation.self)
+    public let color: Color
+    
     public var posterImageURL: URL?
 
     @Column(as: [Artist.ID]?.JSONRepresentation.self)
@@ -416,89 +415,89 @@ extension TimeZone: @retroactive QueryBindable {
     }
 }
 
-public typealias Color = Int
 
-//
-//// MARK: Color HexRepresentation
-//#if canImport(SwiftUI)
-//import SwiftUI
-//extension Color {
-//  public struct HexRepresentation: QueryBindable, QueryRepresentable {
-//    public var queryOutput: Color
-//    public var queryBinding: QueryBinding {
-//        do {
-//            return try .int(Int64(queryOutput.hex))
-//        } catch {
-//            return .invalid(error)
-//        }
-//
-//    }
-//    public init(queryOutput: Color) {
-//      self.queryOutput = queryOutput
-//    }
-//      public init(_ int: Int)  {
-//          self.queryOutput = Color(hex: int)
-//      }
-//    public init(decoder: inout some QueryDecoder) throws {
-//      let hex = try Int(decoder: &decoder)
-//      self.init(
-//        queryOutput: Color(hex: hex)
-//      )
-//    }
-//  }
-//}
-//
-//extension Color: Codable {
-//    public init(from decoder: Decoder) throws {
-//        let container = try decoder.singleValueContainer()
-//        let hexInt = try container.decode(Int.self)
-//        self = Color(hex: hexInt)
-//    }
-//
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.singleValueContainer()
-//        try container.encode(self.hex)
-//    }
-//}
-//
-//extension Color.HexRepresentation: Codable { }
-//
-//
-//public extension Color {
-//    init(hex: Int, opacity: Double = 1.0) {
-//        self.init(
-//            red: Double((hex >> 16) & 0xFF) / 255.0,
-//            green: Double((hex >> 8) & 0xFF) / 255.0,
-//            blue: Double(hex & 0xFF) / 255.0,
-//            opacity: opacity
-//        )
-//    }
-//
-//
-//    #if canImport(UIKit)
-//    var hex: Int {
-//        get throws {
-//            guard let components = UIColor(self).cgColor.components,
-//                  components.count >= 3 else {
-//                struct InvalidColor: Error {}
-//                throw InvalidColor()
-//            }
-//            let r = Int(components[0] * 255.0) << 16
-//            let g = Int(components[1] * 255.0) << 8
-//            let b = Int(components[2] * 255.0)
-//            return r | g | b
-//        }
-//    }
-//    #elseif canImport(AppKit)
-//    var hex: Int {
-//        get throws {
-//
-//        }
-//    }
-//
-//    #endif
-//}
-//#endif
+
+
+
+// MARK: Color HexRepresentation
+#if canImport(SwiftUI)
+import SwiftUI
+extension Color {
+  public struct HexRepresentation: QueryBindable, QueryRepresentable {
+    public var queryOutput: Color
+    public var queryBinding: QueryBinding {
+        do {
+            return try .int(Int64(queryOutput.hex))
+        } catch {
+            return .invalid(error)
+        }
+
+    }
+    public init(queryOutput: Color) {
+      self.queryOutput = queryOutput
+    }
+      public init(_ int: Int)  {
+          self.queryOutput = Color(hex: int)
+      }
+    public init(decoder: inout some QueryDecoder) throws {
+      let hex = try Int(decoder: &decoder)
+      self.init(
+        queryOutput: Color(hex: hex)
+      )
+    }
+  }
+}
+
+extension Color: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let hexInt = try container.decode(Int.self)
+        self = Color(hex: hexInt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.hex)
+    }
+}
+
+extension Color.HexRepresentation: Codable { }
+
+public extension Color {
+    init(hex: Int, opacity: Double = 1.0) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255.0,
+            green: Double((hex >> 8) & 0xFF) / 255.0,
+            blue: Double(hex & 0xFF) / 255.0,
+            opacity: opacity
+        )
+    }
+
+
+    #if canImport(UIKit)
+    var hex: Int {
+        get throws {
+            guard let components = UIColor(self).cgColor.components,
+                  components.count >= 3 else {
+                struct InvalidColor: Error {}
+                throw InvalidColor()
+            }
+            let r = Int(components[0] * 255.0) << 16
+            let g = Int(components[1] * 255.0) << 8
+            let b = Int(components[2] * 255.0)
+            return r | g | b
+        }
+    }
+    #elseif canImport(AppKit)
+    var hex: Int {
+        get throws {
+
+        }
+    }
+
+    #endif
+}
+#endif
 
 // MARK: Queries
 
