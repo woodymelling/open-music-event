@@ -1,0 +1,19 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: "6.1"
+      - name: Build all targets
+        run: swift build --build-tests -v
+      - name: Run tests
+        run: swift test -v
