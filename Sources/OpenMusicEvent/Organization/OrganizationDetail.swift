@@ -62,7 +62,7 @@ public struct OrganizerDetailView: View {
 
         public func onPullToRefresh() async  {
             await withErrorReporting {
-                try await downloadAndStoreOrganizer(from: self.id)
+                try await downloadAndStoreOrganizer(from: .url(self.id))
             }
         }
 
@@ -71,7 +71,7 @@ public struct OrganizerDetailView: View {
             if organizer == nil {
                 await withErrorReporting {
                     self.showingLoadingScreen = true
-                    try await downloadAndStoreOrganizer(from: self.id)
+                    try await downloadAndStoreOrganizer(from: .url(self.id))
 
                     try await withThrowingTaskGroup {
                         if let orgImageURL = organizer?.imageURL {

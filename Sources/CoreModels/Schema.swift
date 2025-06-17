@@ -44,6 +44,7 @@ extension OmeID: SQLiteType {
 
 public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringConvertible, QueryBindable {
     case repository(Repository)
+    case url(URL)
 
     public struct Repository: Hashable, Codable, Sendable {
         public init(baseURL: URL, version: Version) {
@@ -66,6 +67,15 @@ public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringCo
             case .version(let version):
                 return baseURL.appendingPathComponent("archive/refs/tags/\(version).zip")
             }
+        }
+    }
+
+    public var zipURL: URL {
+        switch self {
+        case .repository(let repository):
+            return repository.zipURL
+        case .url(let url):
+            return url
         }
     }
 
@@ -96,6 +106,8 @@ public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringCo
         switch self {
         case .repository(let repo):
             return repo.zipURL.absoluteString
+        case .url(let url):
+            return url.absoluteString
         }
     }
 }
@@ -281,7 +293,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
 
     @Column(as: Color.HexRepresentation.self)
     public let color: Color
-    
+
     public var posterImageURL: URL?
 
     @Column(as: [Artist.ID]?.JSONRepresentation.self)
@@ -365,7 +377,7 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     public let description: String?
 
     // A join table for the many-to-many relationship of Performance -> Artist
-    @Table
+    @Table("performanceArtists")
     public struct Artists: Equatable, Sendable, Identifiable {
         public let id: OmeID<Performance.Artists>
         public let performanceID: Performance.ID

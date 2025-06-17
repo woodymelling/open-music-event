@@ -44,6 +44,7 @@ struct YamlCodingTests {
               name: "Testival",
               address: "123 Festival Road, Music City",
               timeZone: "America/Seattle",
+              iconImageURL: nil,
               imageURL: URL(http://example.com/event-image.jpg),
               siteMapImageURL: URL(http://example.com/site-map.jpg),
               startDate: nil,
@@ -78,55 +79,76 @@ struct YamlCodingTests {
                 id: nil,
                 musicEventID: nil,
                 name: "Mystic Grove",
+                sortIndex: nil,
                 iconImageURL: nil,
+                imageURL: URL(http://example.com/mystic-grove.jpg),
                 color: Color(
                   provider: ColorBox(
                     base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 0.012286487,
-                        linearGreen: 0.48515007,
-                        linearBlue: 0.08865559,
-                        opacity: 1.0
+                      color: (extension in SwiftUI):Color.ResolvedHDR(
+                        base: Color.Resolved(
+                          linearRed: 0.012286487,
+                          linearGreen: 0.48515007,
+                          linearBlue: 0.08865559,
+                          opacity: 1.0
+                        ),
+                        _headroom: nan
                       )
                     )
                   )
-                )
+                ),
+                posterImageURL: nil,
+                lineup: nil
               ),
               [1]: Stage.Draft(
                 id: nil,
                 musicEventID: nil,
                 name: "Bass Haven",
+                sortIndex: nil,
                 iconImageURL: nil,
+                imageURL: URL(http://example.com/bass-haven.jpg),
                 color: Color(
                   provider: #1 ColorBox(
                     base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 1.0,
-                        linearGreen: 0.09530746,
-                        linearBlue: 0.033104762,
-                        opacity: 1.0
+                      color: (extension in SwiftUI):Color.ResolvedHDR(
+                        base: Color.Resolved(
+                          linearRed: 1.0,
+                          linearGreen: 0.09530746,
+                          linearBlue: 0.033104762,
+                          opacity: 1.0
+                        ),
+                        _headroom: nan
                       )
                     )
                   )
-                )
+                ),
+                posterImageURL: nil,
+                lineup: nil
               ),
               [2]: Stage.Draft(
                 id: nil,
                 musicEventID: nil,
                 name: "Tranquil Meadow",
+                sortIndex: nil,
                 iconImageURL: nil,
+                imageURL: nil,
                 color: Color(
                   provider: #2 ColorBox(
                     base: ResolvedColorProvider(
-                      color: Color.Resolved(
-                        linearRed: 0.05448028,
-                        linearGreen: 0.2422812,
-                        linearBlue: 0.9130988,
-                        opacity: 1.0
+                      color: (extension in SwiftUI):Color.ResolvedHDR(
+                        base: Color.Resolved(
+                          linearRed: 0.05448028,
+                          linearGreen: 0.2422812,
+                          linearBlue: 0.9130988,
+                          opacity: 1.0
+                        ),
+                        _headroom: nan
                       )
                     )
                   )
-                )
+                ),
+                posterImageURL: nil,
+                lineup: nil
               )
             ]
             """

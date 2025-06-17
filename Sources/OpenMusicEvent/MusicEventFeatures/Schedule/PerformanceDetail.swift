@@ -38,6 +38,7 @@ struct PerformanceDetail: Identifiable {
     public let startTime: Date
     public let endTime: Date
 
+    @Column(as: Color.HexRepresentation.self)
     public let stageColor: Color
     public let stageName: String
     public let stageImageURL: URL?

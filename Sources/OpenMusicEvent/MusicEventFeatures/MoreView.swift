@@ -27,7 +27,7 @@ final class MoreTabFeature {
         self.isLoadingOrganizer = true
 
         do {
-            try await downloadAndStoreOrganizer(from: currentOrganizerID)
+            try await downloadAndStoreOrganizer(from: .url(currentOrganizerID))
             self.isLoadingOrganizer = false
         } catch {
             self.errorMessage = error.localizedDescription

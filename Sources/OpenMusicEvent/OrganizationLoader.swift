@@ -13,7 +13,7 @@ import SwiftUI
 
 @DependencyClient
 struct DataFetchingClient {
-    var fetchOrganizer: @Sendable (_ from: Organizer.ID) async throws -> OpenMusicEventParser.OrganizerConfiguration
+    var fetchOrganizer: @Sendable (_ from: OrganizationReference) async throws -> OpenMusicEventParser.OrganizerConfiguration
 }
 
 struct FailedToLoadOrganizerError: Error {}
@@ -21,7 +21,7 @@ struct FailedToLoadOrganizerError: Error {}
 extension DataFetchingClient: DependencyKey {
     static let liveValue = DataFetchingClient { orgReference in
         let unzippedURL = URL.temporaryDirectory
-        let targetZipURL = orgReference
+        let targetZipURL = orgReference.zipURL
 
         try FileManager.default.clearDirectory(URL.temporaryDirectory)
 
@@ -110,38 +110,34 @@ extension OmeID {
     }
 }
 
-func downloadAndStoreOrganizer(from reference: Organizer.ID) async throws {
-    @Dependency(DataFetchingClient.self) var dataFetchingClient
-import OpenMusicEventParser
 
-func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
-    @Dependency(OrganizationClient.self) var organizationClient
+func downloadAndStoreOrganizer(from reference: OrganizationReference) async throws {
+    @Dependency(DataFetchingClient.self) var dataFetchingClient
     @Dependency(\.defaultDatabase) var database
 
     let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
-    let organizer = try await organizationClient.fetchOrganizer(id: id)
+
     let organizerDraft = Organizer.Draft(
-        url: id,
+        url: reference.zipURL,
         name: organizer.info.name,
         imageURL: organizer.info.imageURL
     )
 
-    let organizerURL: URL = id
 
     try await database.write { db in
-        try Organizer.find(reference)
+        try Organizer.find(reference.zipURL)
             .delete()
             .execute(db)
 
         var info = organizer.info
-        info.url = reference
+        info.url = reference.zipURL
         try Organizer.upsert { info }
             .execute(db)
 
         for event in organizer.events {
 
             var eventInfo = event.info
-            eventInfo.organizerURL = reference
+            eventInfo.organizerURL = reference.zipURL
 
             let eventID = try MusicEvent.insert { eventInfo }
                 .returning(\.id)
@@ -196,9 +192,9 @@ func downloadAndStoreOrganizer(id: CoreModels.Organizer.ID) async throws {
                     musicEventID: eventID,
                     name: stage.name,
                     sortIndex: index,
-                    color: stage.color,
                     iconImageURL: stage.iconImageURL,
                     imageURL: stage.imageURL,
+                    color: stage.color,
                     posterImageURL: stage.posterImageURL,
                     lineup: artistIDs
                 )

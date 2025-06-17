@@ -42,6 +42,7 @@ struct EventDecodingTests {
                     ),
                     startTime: nil,
                     endTime: nil,
+                    iconImageURL: nil,
                     imageURL: URL(https://www.example.com/main-image),
                     siteMapImageURL: URL(https://www.example.com/amap),
                     location: MusicEvent.Location(
@@ -100,55 +101,76 @@ struct EventDecodingTests {
                       id: nil,
                       musicEventID: nil,
                       name: "Bass Haven",
+                      sortIndex: nil,
                       iconImageURL: nil,
+                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_amp.png?alt=media&token=259c79a0-0df8-4434-931a-e3b9037789a6),
                       color: Color(
                         provider: ColorBox(
                           base: ResolvedColorProvider(
-                            color: Color.Resolved(
-                              linearRed: 0.73791057,
-                              linearGreen: 0.084376216,
-                              linearBlue: 0.34670416,
-                              opacity: 1.0
+                            color: (extension in SwiftUI):Color.ResolvedHDR(
+                              base: Color.Resolved(
+                                linearRed: 0.73791057,
+                                linearGreen: 0.084376216,
+                                linearBlue: 0.34670416,
+                                opacity: 1.0
+                              ),
+                              _headroom: nan
                             )
                           )
                         )
-                      )
+                      ),
+                      posterImageURL: nil,
+                      lineup: nil
                     ),
                     [1]: Stage.Draft(
                       id: nil,
                       musicEventID: nil,
                       name: "Mystic Grove",
+                      sortIndex: nil,
                       iconImageURL: nil,
+                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_fractal.png?alt=media&token=fc4b8549-b689-4b90-88d6-e318d8db6e4a),
                       color: Color(
                         provider: #1 ColorBox(
                           base: ResolvedColorProvider(
-                            color: Color.Resolved(
-                              linearRed: 0.49102098,
-                              linearGreen: 0.5028866,
-                              linearBlue: 0.14126328,
-                              opacity: 1.0
+                            color: (extension in SwiftUI):Color.ResolvedHDR(
+                              base: Color.Resolved(
+                                linearRed: 0.49102098,
+                                linearGreen: 0.5028866,
+                                linearBlue: 0.14126328,
+                                opacity: 1.0
+                              ),
+                              _headroom: nan
                             )
                           )
                         )
-                      )
+                      ),
+                      posterImageURL: nil,
+                      lineup: nil
                     ),
                     [2]: Stage.Draft(
                       id: nil,
                       musicEventID: nil,
                       name: "Tranquil Meadow",
+                      sortIndex: nil,
                       iconImageURL: nil,
+                      imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_grove.png?alt=media&token=514a6eca-079f-45cf-8ccf-1decba72b35d),
                       color: Color(
                         provider: #2 ColorBox(
                           base: ResolvedColorProvider(
-                            color: Color.Resolved(
-                              linearRed: 0.18447499,
-                              linearGreen: 0.50888145,
-                              linearBlue: 0.2831488,
-                              opacity: 1.0
+                            color: (extension in SwiftUI):Color.ResolvedHDR(
+                              base: Color.Resolved(
+                                linearRed: 0.18447499,
+                                linearGreen: 0.50888145,
+                                linearBlue: 0.2831488,
+                                opacity: 1.0
+                              ),
+                              _headroom: nan
                             )
                           )
                         )
-                      )
+                      ),
+                      posterImageURL: nil,
+                      lineup: nil
                     )
                   ],
                   schedule: [
@@ -286,7 +308,8 @@ struct EventDecodingTests {
                         ]
                       ]
                     )
-                  ]
+                  ],
+                  stageLineups: nil
                 )
                 """#
             }

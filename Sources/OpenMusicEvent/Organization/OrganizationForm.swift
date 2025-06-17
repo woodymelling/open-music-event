@@ -22,11 +22,13 @@ struct OrganizationFormView: View {
         enum GithubConfigType: CaseIterable, Hashable {
             case branch
             case version
+            case url
 
             var label: LocalizedStringKey {
                 switch self {
                 case .branch: "branch"
                 case .version: "version"
+                case .url: "url"
                 }
             }
         }
@@ -45,7 +47,7 @@ struct OrganizationFormView: View {
             case versioning
         }
 
-        var repositoryLocation: OrganizationReference.Repository? {
+        var repositoryLocation: OrganizationReference? {
             guard let url = URL(string: githubURL)
             else { return nil }
 
@@ -54,10 +56,12 @@ struct OrganizationFormView: View {
             switch githubConfigType {
             case .branch:
                 guard !branchText.isEmpty else { return nil }
-                return OrganizationReference.Repository(baseURL: cleanedURL, version: .branch(branchText))
+                return .repository(OrganizationReference.Repository(baseURL: cleanedURL, version: .branch(branchText)))
             case .version:
                 guard let version = SemanticVersion(versionText) else { return nil }
-                return OrganizationReference.Repository(baseURL: cleanedURL, version: .version(version))
+                return .repository(OrganizationReference.Repository(baseURL: cleanedURL, version: .version(version)))
+            case .url:
+                return OrganizationReference.url(url)
             }
         }
 
@@ -72,7 +76,7 @@ struct OrganizationFormView: View {
 
             self.isLoading = true
             await withErrorReporting {
-                try await downloadAndStoreOrganizer(from: repositoryLocation.zipURL)
+                try await downloadAndStoreOrganizer(from: repositoryLocation)
             }
             self.dismiss.trigger()
             self.isLoading = false
@@ -110,6 +114,8 @@ struct OrganizationFormView: View {
                     TextField("Branch Name", text: $store.branchText)
                 case .version:
                     TextField("Version", text: $store.versionText)
+                case .url:
+                    EmptyView()
                 }
 
                 Picker("", selection: $store.githubConfigType) {
