@@ -75,7 +75,7 @@ public struct ScheduleCardBackground<Content: View>: View {
                  */
                 Rectangle()
                     .fill(color.opacity(isSelected ? 1 : 0.3))
-                    .background { Color(.systemBackground).opacity(0.8)}
+                    .background { Color.systemBackground.opacity(0.8)}
 
             }
             .foregroundStyle(isSelected ? .white : color)
@@ -285,5 +285,15 @@ extension View {
             .shadow(color: color, radius: radius / 3)
             .shadow(color: color, radius: radius / 3)
             .shadow(color: color, radius: radius / 3)
+    }
+}
+
+extension Color {
+    static var systemBackground: Color {
+        #if os(macOS)
+        Color.red
+        #elseif os(iOS)
+        Color(.systemBackground)
+        #endif
     }
 }

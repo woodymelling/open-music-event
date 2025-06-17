@@ -18,7 +18,11 @@ import SwiftUI
 
 public struct NavigationLinkButtonStyle: ButtonStyle {
     func background(_ configuration: Configuration) -> Color {
+        #if os(iOS) || os(Android)
         configuration.isPressed ? Color(.tertiarySystemBackground) : Color(.systemBackground)
+        #elseif os(macOS)
+        Color.red
+        #endif
     }
 
     public func makeBody(configuration: Configuration) -> some View {

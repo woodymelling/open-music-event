@@ -25,7 +25,7 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     var stretchyContent: StretchyContent
     var listContent: ListContent
 
-    #if os(iOS)
+    #if os(iOS) || os(macOS)
 //    @Environment(\.stretchFactor)
     var stretchFactor: CGFloat = 400
     @State var offset: CGFloat = .zero
@@ -53,8 +53,14 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     /*@Environment(\.showingStretchListDebugInformation)*/
     var showingStretchListDebugInformation = false
 
+    #if os(iOS) || os(Android)
     var headerContentHeight: CGFloat = UIScreen.main.bounds.width
     var headerContentWidth: CGFloat = UIScreen.main.bounds.width
+    #elseif os(macOS)
+    var headerContentHeight: CGFloat = 0 // Untested
+    var headerContentWidth: CGFloat = 0 // Untested
+    #endif
+
 
     var body: some View {
         if #available(iOS 18.0, *) {
@@ -98,7 +104,9 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
 
         }
         .ignoresSafeArea(.all, edges: .top)
+        #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .navigationTitle(showNavigationBar ? self.titleContent : Text(""))
         .toolbarBackground(showNavigationBar ? .visible : .hidden)
         .animation(.default, value: self.showNavigationBar)
@@ -106,7 +114,11 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
     }
 
     private var topDimOverlay: some View {
+        #if os(iOS)
         let shadowColor = Color(.systemBackground)
+        #else
+        let shadowColor = Color.red
+        #endif
         // Adjust the height/opacity to taste:
         return LinearGradient(
             gradient: Gradient(colors: [
@@ -151,8 +163,8 @@ struct StretchyHeaderList<StretchyContent: View, ListContent: View>: View {
         .navigationBarTitleDisplayMode(.inline)
     }
     #else
-    #error("Unsuppported Platform")
-    #endif
+
+#endif
 }
 
 #if SKIP
@@ -162,11 +174,14 @@ import SkipUI
 struct StretchyHeaderListTitleView: View {
     var titleContent: Text
 
-    #if !SKIP
+    #if os(iOS)
     let mainColor = Color(.systemBackground)
-    #else
+    #elseif SKIP
     let mainColor = Color.systemBackground
+    #else
+    let mainColor = Color.red
     #endif
+
     var body: some View {
         self.titleContent
             .font(.largeTitle)

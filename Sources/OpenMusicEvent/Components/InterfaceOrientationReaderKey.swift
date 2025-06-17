@@ -11,7 +11,7 @@ import Sharing
 
 
 import SwiftUI
-
+#if os(iOS) || os(Android)
 extension InterfaceOrientation {
     init?(_ orientation: UIInterfaceOrientation) {
         switch orientation {
@@ -91,3 +91,4 @@ extension SharedReaderKey where Self == InterfaceOrientationReaderKey.Default {
         Self[InterfaceOrientationReaderKey(), default: .portrait]
     }
 }
+#endif

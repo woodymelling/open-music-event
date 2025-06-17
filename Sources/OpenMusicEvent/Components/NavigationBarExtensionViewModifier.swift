@@ -62,6 +62,8 @@ struct NavigationBarExtensionViewModifier<ExtensionContent: View>: ViewModifier 
                 .background(Material.bar.opacity(min(1, max(0, yPosition))))
                 .offset(dragsWithScroll ? CGSize(width: 0, height: max(0, -yPosition)) : .zero)
         }
+        #if !os(macOS)
         .toolbarBackground(.hidden, for: .navigationBar)
+        #endif
     }
 }

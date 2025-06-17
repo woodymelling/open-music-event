@@ -13,6 +13,7 @@ import StructuredQueries
 import SwiftUI
 #endif
 
+
 //public typealias OmeID<T> = Int
 
 public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
@@ -460,6 +461,13 @@ extension Color {
   }
 }
 
+import CustomDump
+extension Color: @retroactive CustomDumpStringConvertible {
+    public var customDumpDescription: String {
+        try! String(self.hex)
+    }
+}
+
 extension Color: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -503,7 +511,15 @@ public extension Color {
     #elseif canImport(AppKit)
     var hex: Int {
         get throws {
-
+            guard let components = NSColor(self).cgColor.components,
+                  components.count >= 3 else {
+                struct InvalidColor: Error {}
+                throw InvalidColor()
+            }
+            let r = Int(components[0] * 255.0) << 16
+            let g = Int(components[1] * 255.0) << 8
+            let b = Int(components[2] * 255.0)
+            return r | g | b
         }
     }
 

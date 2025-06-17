@@ -82,21 +82,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: URL(http://example.com/mystic-grove.jpg),
-                color: Color(
-                  provider: ColorBox(
-                    base: ResolvedColorProvider(
-                      color: (extension in SwiftUI):Color.ResolvedHDR(
-                        base: Color.Resolved(
-                          linearRed: 0.012286487,
-                          linearGreen: 0.48515007,
-                          linearBlue: 0.08865559,
-                          opacity: 1.0
-                        ),
-                        _headroom: nan
-                      )
-                    )
-                  )
-                ),
+                color: 1947987,
                 posterImageURL: nil,
                 lineup: nil
               ),
@@ -107,21 +93,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: URL(http://example.com/bass-haven.jpg),
-                color: Color(
-                  provider: #1 ColorBox(
-                    base: ResolvedColorProvider(
-                      color: (extension in SwiftUI):Color.ResolvedHDR(
-                        base: Color.Resolved(
-                          linearRed: 1.0,
-                          linearGreen: 0.09530746,
-                          linearBlue: 0.033104762,
-                          opacity: 1.0
-                        ),
-                        _headroom: nan
-                      )
-                    )
-                  )
-                ),
+                color: 16733746,
                 posterImageURL: nil,
                 lineup: nil
               ),
@@ -132,21 +104,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: nil,
-                color: Color(
-                  provider: #2 ColorBox(
-                    base: ResolvedColorProvider(
-                      color: (extension in SwiftUI):Color.ResolvedHDR(
-                        base: Color.Resolved(
-                          linearRed: 0.05448028,
-                          linearGreen: 0.2422812,
-                          linearBlue: 0.9130988,
-                          opacity: 1.0
-                        ),
-                        _headroom: nan
-                      )
-                    )
-                  )
-                ),
+                color: 4360181,
                 posterImageURL: nil,
                 lineup: nil
               )
