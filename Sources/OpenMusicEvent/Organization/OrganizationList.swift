@@ -113,7 +113,12 @@ struct OrganizerListView: View {
                     .frame(width: 60, height: 60)
                     .aspectRatio(contentMode: .fit)
 
+                VStack {
                     Text(org.name)
+                    Text(org.url.absoluteString)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

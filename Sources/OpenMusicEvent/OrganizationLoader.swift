@@ -17,7 +17,6 @@ struct DataFetchingClient {
 }
 
 struct FailedToLoadOrganizerError: Error {}
-
 extension DataFetchingClient: DependencyKey {
     static let liveValue = DataFetchingClient { orgReference in
         let unzippedURL = URL.temporaryDirectory
@@ -117,13 +116,6 @@ func downloadAndStoreOrganizer(from reference: OrganizationReference) async thro
 
     let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
 
-    let organizerDraft = Organizer.Draft(
-        url: reference.zipURL,
-        name: organizer.info.name,
-        imageURL: organizer.info.imageURL
-    )
-
-
     try await database.write { db in
         try Organizer.find(reference.zipURL)
             .delete()
@@ -162,14 +154,13 @@ func downloadAndStoreOrganizer(from reference: OrganizationReference) async thro
                 artistNameIDMapping[artist.name] = artistID
             }
 
-
             func getOrCreateArtist(withName artistName: Artist.Name) throws -> Artist.ID {
                 if let artistID = artistNameIDMapping[artistName] {
                     artistID
                 } else {
                     try Artist.upsert {
                         Artist.Draft(
-                            id: OmeID(stabilizedBy: String(eventID.rawValue), artistName),
+                            id: OmeID(stabilizedBy: String(eventID.rawValue).lowercased(), artistName),
                             musicEventID: eventID,
                             name: artistName,
                             links: []
