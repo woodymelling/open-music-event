@@ -12,31 +12,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
-    name: Linux (Swift ${{ matrix.swift }})
+  core-linux:
+    name: Core (Linux)
     strategy:
       matrix:
-        swift:
-          - '6.1'
+        swift: [ '6.1' ]
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run tests
-        run: swift test --enable-test-discovery --verbose        
-
-      - name: Run tests
-        run: swift test --filter OpenMusicEventParserTests --enable-test-discovery --verbose
-
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
 
-      - name: Build CLI release binary
-        run: swift build -c release --product open-music-event
+      - name: Run Core Tests
+        run: |
+          cd Core
+          swift test --enable-test-discovery --parallel
 
-      - name: Upload CLI Artifact
+      - name: Build CLI release binary
+        run: |
+          cd Core
+          swift build -c release --product open-music-event
+
+      - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
         with:
           name: open-music-event-linux-${{ matrix.swift }}
-          path: .build/release/open-music-event
+          path: Core/.build/release/open-music-event

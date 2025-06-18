@@ -438,7 +438,7 @@ import SwiftUI
 import CustomDump
 
 public extension OMEColor {
-    public var swiftUIColor: SwiftUI.Color {
+    var swiftUIColor: SwiftUI.Color {
         return Color(hex: self.rawValue)
     }
 }

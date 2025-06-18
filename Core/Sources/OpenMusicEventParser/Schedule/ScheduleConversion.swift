@@ -283,7 +283,12 @@ extension Validation.ScheduleError {
             case .cannotDetermineEndTimeForPerformance:
                 return "Cannot determine end time for performance"
             case .endTimeBeforeStartTime(let performance):
-                return "End time \(performance.endTime) is before start time \(performance.startTime)"
+                guard let endTime = performance.endTime
+                else {
+                    reportIssue("Having a null performance here shouldn't be possible, and can get resolved in the type system")
+                    return ""
+                }
+                return "End time \(endTime) is before start time \(performance.startTime)"
             case .overlappingPerformances:
                 return "Performances are overlapping"
             }

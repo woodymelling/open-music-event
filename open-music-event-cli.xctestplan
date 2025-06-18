@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "8309ECB2-4924-456E-8470-0B0DC1E41848",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "OpenMusicEventParserTests",
+        "name" : "OpenMusicEventParserTests"
+      }
+    }
+  ],
+  "version" : 1
+}

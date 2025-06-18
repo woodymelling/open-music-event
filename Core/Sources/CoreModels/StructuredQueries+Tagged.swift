@@ -1,19 +1,16 @@
 import Tagged
 import StructuredQueries
 
-extension Tagged: _OptionalPromotable where RawValue: _OptionalPromotable {}
-
-extension Tagged: QueryBindable where RawValue: QueryBindable {}
-
-extension Tagged: QueryDecodable where RawValue: QueryDecodable {}
-
-extension Tagged: QueryExpression where RawValue: QueryExpression {
+extension Tagged: @retroactive _OptionalPromotable where RawValue: _OptionalPromotable {}
+extension Tagged: @retroactive QueryBindable where RawValue: QueryBindable {}
+extension Tagged: @retroactive QueryDecodable where RawValue: QueryDecodable {}
+extension Tagged: @retroactive QueryExpression where RawValue: QueryExpression {
     public var queryFragment: QueryFragment {
         rawValue.queryFragment
     }
 }
 
-extension Tagged: QueryRepresentable where RawValue: QueryRepresentable {
+extension Tagged: @retroactive QueryRepresentable where RawValue: QueryRepresentable {
     public typealias QueryOutput = Tagged<Tag, RawValue.QueryOutput>
 
     public var queryOutput: QueryOutput {
@@ -25,7 +22,7 @@ extension Tagged: QueryRepresentable where RawValue: QueryRepresentable {
     }
 }
 
-extension Tagged: SQLiteType where RawValue: SQLiteType {
+extension Tagged: @retroactive SQLiteType where RawValue: SQLiteType {
     public static var typeAffinity: SQLiteTypeAffinity {
         RawValue.typeAffinity
     }
