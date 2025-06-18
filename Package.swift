@@ -31,7 +31,7 @@ let package = Package(
         .package(url: "https://github.com/woodymelling/skip-image-caching", branch: "main"),
         .package(url: "https://github.com/woodymelling/swift-file-tree", branch: "android-support"),
         .package(url: "https://github.com/woodymelling/swift-frontmatter-parsing", from: "0.1.0"),
-        .package(url: "https://github.com/weichsel/ZIPFoundation", from: "0.9.0"),
+        .package(url: "https://github.com/vapor-community/Zip.git", from: "2.2.6"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
 
 //        .package(url: "https://github.com/woodymelling/swiftui-customizable-tab-view", branch: "main"),
@@ -44,7 +44,7 @@ let package = Package(
                 .product(name: "FileTree", package: "swift-file-tree"),
                 .product(name: "ImageCaching", package: "skip-image-caching"),
                 .product(name: "Yams", package: "Yams"),
-                
+                .product(name: "Zip", package: "zip"),
                 .product(name: "SwiftUINavigation", package: "swift-navigation"),
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
                 "OpenMusicEventParser",
@@ -77,7 +77,6 @@ let package = Package(
                 .product(name: "Conversions", package: "swift-parsing"),
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Tagged", package: "swift-tagged"),
-                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
             ]
         ),
         .executableTarget(

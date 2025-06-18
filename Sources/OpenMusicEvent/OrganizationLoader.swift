@@ -8,7 +8,6 @@
 import OpenMusicEventParser
 import Dependencies
 import DependenciesMacros
-import ZIPFoundation
 import SwiftUI
 
 @DependencyClient
@@ -27,7 +26,6 @@ extension DataFetchingClient: DependencyKey {
         let fileManager = FileManager.default
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
 
-
         logger.info("Downloading from: \(targetZipURL)")
         logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
 
@@ -41,7 +39,8 @@ extension DataFetchingClient: DependencyKey {
 
         do {
             try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
-            try fileManager.unzipItem(at: downloadURL, to: unzippedURL)
+            @Dependency(ZipClient.self) var zipClient
+            try zipClient.unzipFile(source: downloadURL, destination: unzippedURL)
         } catch {
             reportIssue("ERROR: \(error)")
         }
@@ -83,8 +82,6 @@ extension FileManager {
         }
     }
 }
-
-
 
 import OSLog
 import GRDB
