@@ -292,8 +292,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public var iconImageURL: URL?
     public var imageURL: URL?
 
-    @Column(as: Color.HexRepresentation.self)
-    public let color: Color
+    public let color: OMEColor
 
     public var posterImageURL: URL?
 
@@ -307,7 +306,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
         name: String,
         iconImageURL: URL? = nil,
         imageURL: URL? = nil,
-        color: Color,
+        color: OMEColor,
         posterImageURL: URL? = nil,
         lineup: [Artist.ID]? = []
     ) {
@@ -431,57 +430,18 @@ extension TimeZone: @retroactive QueryBindable {
 
 
 
-
+public enum _ColorTag {}
+public typealias OMEColor = Tagged<_ColorTag, Int>
 // MARK: Color HexRepresentation
 #if canImport(SwiftUI)
 import SwiftUI
-extension Color {
-  public struct HexRepresentation: QueryBindable, QueryRepresentable {
-    public var queryOutput: Color
-    public var queryBinding: QueryBinding {
-        do {
-            return try .int(Int64(queryOutput.hex))
-        } catch {
-            return .invalid(error)
-        }
-
-    }
-    public init(queryOutput: Color) {
-      self.queryOutput = queryOutput
-    }
-      public init(_ int: Int)  {
-          self.queryOutput = Color(hex: int)
-      }
-    public init(decoder: inout some QueryDecoder) throws {
-      let hex = try Int(decoder: &decoder)
-      self.init(
-        queryOutput: Color(hex: hex)
-      )
-    }
-  }
-}
-
 import CustomDump
-extension Color: @retroactive CustomDumpStringConvertible {
-    public var customDumpDescription: String {
-        try! String(self.hex)
+
+public extension OMEColor {
+    public var swiftUIColor: SwiftUI.Color {
+        return Color(hex: self.rawValue)
     }
 }
-
-extension Color: Codable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let hexInt = try container.decode(Int.self)
-        self = Color(hex: hexInt)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(self.hex)
-    }
-}
-
-extension Color.HexRepresentation: Codable { }
 
 public extension Color {
     init(hex: Int, opacity: Double = 1.0) {
@@ -525,6 +485,8 @@ public extension Color {
 
     #endif
 }
+#else
+
 #endif
 
 // MARK: Queries

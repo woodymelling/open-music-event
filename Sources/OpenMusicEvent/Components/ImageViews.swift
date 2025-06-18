@@ -176,7 +176,7 @@ extension Stage {
             sortIndex: 0,
             name: "",
             iconImageURL: nil,
-            color: .clear
+            color: .init(0)
         )
     }
 }

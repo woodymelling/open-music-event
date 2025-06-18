@@ -82,7 +82,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: URL(http://example.com/mystic-grove.jpg),
-                color: 1947987,
+                color: Tagged(rawValue: 1947988),
                 posterImageURL: nil,
                 lineup: nil
               ),
@@ -93,7 +93,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: URL(http://example.com/bass-haven.jpg),
-                color: 16733746,
+                color: Tagged(rawValue: 16734003),
                 posterImageURL: nil,
                 lineup: nil
               ),
@@ -104,7 +104,7 @@ struct YamlCodingTests {
                 sortIndex: nil,
                 iconImageURL: nil,
                 imageURL: nil,
-                color: 4360181,
+                color: Tagged(rawValue: 4360181),
                 posterImageURL: nil,
                 lineup: nil
               )

@@ -101,7 +101,7 @@ struct ArtistDetailView: View {
     }
 
     var meshColors: [Color] {
-        store.performances.map(\.stageColor)
+        store.performances.map(\.stageColor.swiftUIColor)
     }
 
     var body: some View {
@@ -116,7 +116,7 @@ struct ArtistDetailView: View {
             listContent: {
                 ForEach(store.performances) { performance in
                     PerformanceDetailRow(performance: performance)
-                        .environment(\.meshBaseColors, [performance.stageColor])
+                        .environment(\.meshBaseColors, [performance.stageColor.swiftUIColor])
                 }
 
                 if let bio = bioMarkdown {

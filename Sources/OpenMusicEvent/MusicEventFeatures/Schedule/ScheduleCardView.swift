@@ -34,7 +34,10 @@ extension Performance {
         let isSelected: Bool = false
 
         public var body: some View {
-            ScheduleCardBackground(color: performance.stageColor, isSelected: isSelected) {
+            ScheduleCardBackground(
+                color: performance.stageColor.swiftUIColor,
+                isSelected: isSelected
+            ) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading) {
                         Text(performance.title)

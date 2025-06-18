@@ -38,8 +38,7 @@ struct PerformanceDetail: Identifiable {
     public let startTime: Date
     public let endTime: Date
 
-    @Column(as: Color.HexRepresentation.self)
-    public let stageColor: Color
+    public let stageColor: OMEColor
     public let stageName: String
     public let stageImageURL: URL?
 
@@ -55,7 +54,7 @@ struct PerformanceDetail: Identifiable {
         stageID: .init(0),
         startTime: Date(),
         endTime: Date(),
-        stageColor: .gray,
+        stageColor: .init(0),
         stageName: "",
         stageImageURL: nil
     )
@@ -162,7 +161,7 @@ extension Performance {
                         .frame(square: 60)
                         .background {
                             Circle()
-                                .fill(performance.stageColor)
+                                .fill(performance.stageColor.swiftUIColor)
                                 .shadow()
                         }
                 }
@@ -173,7 +172,7 @@ extension Performance {
                 .overlay(Material.thinMaterial)
                 .opacity(0.25)
             )
-            .environment(\.meshBaseColors, [performance.stageColor])
+            .environment(\.meshBaseColors, [performance.stageColor.swiftUIColor])
 //            .background(.ultraThinMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
@@ -213,7 +212,7 @@ extension PerformanceDetail {
             stageID: 1,
             startTime: Date(hour: 22, minute: 30)!,
             endTime: Date(hour: 23, minute: 30)!,
-            stageColor: .purple,
+            stageColor: 0,
             stageName: "The Hallow",
             stageImageURL: Stage.previewValues.first?.iconImageURL
         )

@@ -11,11 +11,11 @@ import SharingGRDB
 
 public extension Stage {
     struct IndicatorView: View {
-        public init(colors: [Color]) {
+        public init(colors: [OMEColor]) {
             self._colors = .init(wrappedValue: colors)
         }
 
-        public init(color: Color) {
+        public init(color: OMEColor) {
             self.init(colors: [color])
         }
 
@@ -34,12 +34,12 @@ public extension Stage {
         var angleHeight: CGFloat = 5 / 2
 
         @FetchAll
-        var colors: [Color]
+        var colors: [OMEColor]
 
         public var body: some View {
             Canvas { context, size in
                 let segmentHeight = size.height / CGFloat(colors.count)
-                for (index, color) in colors.enumerated() {
+                for (index, color) in colors.map(\.swiftUIColor).enumerated() {
                     let index = CGFloat(index)
 
                     context.fill(
