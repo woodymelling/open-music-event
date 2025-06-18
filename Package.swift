@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
 
         .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.3.3"),
         .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.1"),
@@ -34,6 +35,8 @@ let package = Package(
         .package(url: "https://github.com/vapor-community/Zip.git", from: "2.2.6"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
 
+
+
 //        .package(url: "https://github.com/woodymelling/swiftui-customizable-tab-view", branch: "main"),
     ],
     targets: [
@@ -48,8 +51,8 @@ let package = Package(
                 .product(name: "SwiftUINavigation", package: "swift-navigation"),
                 .product(name: "DependenciesMacros", package: "swift-dependencies"),
                 "OpenMusicEventParser",
-                "CoreModels"
-//                .product(name: "CustomizableTabView", package: "swiftui-customizable-tab-view"),
+                "CoreModels",
+                .product(name: "Logging", package: "swift-log"),
             ],
             resources: [.process("Resources")],
 //            plugins: [
@@ -84,7 +87,8 @@ let package = Package(
              dependencies: [
                 "OpenMusicEventParser",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-                .product(name: "Dependencies", package: "swift-dependencies")
+                .product(name: "Dependencies", package: "swift-dependencies"),
+                .product(name: "Logging", package: "swift-log"),
             ]
         ),
 

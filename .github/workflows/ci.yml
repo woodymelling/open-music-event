@@ -23,6 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Run tests
+        run: swift test
+        
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
 

@@ -9,7 +9,7 @@ import Foundation
 import Observation
 import SwiftUI
 import Dependencies
-import OSLog
+import Logging
 import ImageCaching
 import SharingGRDB
 import CoreModels

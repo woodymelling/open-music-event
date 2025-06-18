@@ -10,11 +10,16 @@ import ArgumentParser
 import OpenMusicEventParser
 import Dependencies
 import Foundation
-import OSLog
+import Logging
 
 
 extension Logger {
     static let cli = Logger(subsystem: "com.openfestival.ome", category: "CLI")
+}
+extension Logger {
+    init(subsystem: String, category: String) {
+        self.init(label: subsystem + "." + category)
+    }
 }
 
 @main
@@ -24,7 +29,6 @@ struct OpenMusicEvent: AsyncParsableCommand {
         abstract: "A Swift command-line tool to parse OpenFestival data",
         subcommands: [Validate.self]
     )
-
 
     struct Validate: ParsableCommand {
         static let configuration = CommandConfiguration(
@@ -43,13 +47,13 @@ struct OpenMusicEvent: AsyncParsableCommand {
 //                Logger.cli.debug("Verbose mode enabled")
 //            }
 
-            Logger.cli.info("Validating OpenFestival data at path: \(path, privacy: .public)")
+            Logger.cli.info("Validating OME data at path: \(path)")
 
             do {
                 _ = try OrganizerConfiguration.fileTree.read(from: URL(filePath: path))
                 Logger.cli.info("✅ Parsed successfully! This data can be used in the OpenFestival app 🎉")
             } catch {
-                Logger.cli.error("❌ Failed to parse: \(error.localizedDescription, privacy: .public)")
+                Logger.cli.error("❌ Failed to parse: \(error.localizedDescription)")
                 throw error
             }
         }

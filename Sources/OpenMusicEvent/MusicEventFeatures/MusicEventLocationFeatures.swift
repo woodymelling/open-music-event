@@ -161,7 +161,7 @@ struct LocationView: View {
 
 }
 
-import OSLog
+import Logging
 extension Logger {
     static let geocoderLogging = Logger(subsystem: "OpenFestival", category: "geocoding")
 }

@@ -1,6 +1,6 @@
 import Foundation
 import SwiftUI
-import OSLog
+import Logging
 import SharingGRDB
 /// A logger for the OpenMusicEvent module.
 private let logger: Logger = Logger(subsystem: "bundle.ome.OpenMusicEvent", category: "OpenMusicEvent")

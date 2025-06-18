@@ -83,8 +83,13 @@ extension FileManager {
     }
 }
 
-import OSLog
+import Logging
 import GRDB
+extension Logger {
+    init(subsystem: String, category: String) {
+        self.init(label: subsystem + "." + category)
+    }
+}
 
 private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerLoader")
 
