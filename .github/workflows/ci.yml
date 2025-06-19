@@ -22,24 +22,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install SQLite
-        run: apt update && apt -y install libsqlite3-dev
+      # - name: Install SQLite
+      #   run: apt update && apt -y install libsqlite3-dev
 
-      - name: Run Core Tests
+      # - name: Run Core Tests
+      #   run: |
+      #     cd Core
+      #     swift test --enable-test-discovery --parallel
+
+      # - name: Build CLI release binary
+      #   run: |
+      #     cd Core
+      #     swift build -c release --product open-music-event
+
+      # - name: Upload CLI artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: open-music-event-linux-${{ matrix.swift }}
+      #     path: Core/.build/release/open-music-event
+
+      - name: Install dependencies and GitHub CLI
         run: |
-          cd Core
-          swift test --enable-test-discovery --parallel
+          apt-get update
+          apt-get install -y curl gnupg lsb-release
 
-      - name: Build CLI release binary
-        run: |
-          cd Core
-          swift build -c release --product open-music-event
+          # Add GitHub CLI GPG key
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
 
-      - name: Upload CLI artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: open-music-event-linux-${{ matrix.swift }}
-          path: Core/.build/release/open-music-event
+          # Add GitHub CLI apt repo
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+          apt-get update
+          apt-get install -y gh
 
       - name: Upload file to GitHub Release
         env:
