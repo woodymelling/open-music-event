@@ -64,14 +64,14 @@ struct ScheduleHeaderButton: View {
 
     var body: some View {
         Stage.IconView(stageID: stage.id)
-            .foregroundStyle(isSelected ? .white : stage.color)
+            .foregroundStyle(isSelected ? .white : stage.color.swiftUIColor)
             .frame(idealWidth: 60, idealHeight: 60)
             .frame(maxWidth: 60, maxHeight: 60)
             .contentShape(Circle())
             .background {
                 if isSelected {
                     Circle()
-                        .fill(stage.color)
+                        .fill(stage.color.swiftUIColor)
                         .shadow()
                 }
             }

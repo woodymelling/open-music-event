@@ -7,7 +7,7 @@
 
 import SharingGRDB
 import Foundation
-import OSLog
+import Logging
 
 private let logger = Logger(
     subsystem: "OpenMusicEvent",
@@ -162,7 +162,6 @@ func appDatabase() throws -> any DatabaseWriter {
 #if DEBUG
 extension Database {
     func seedSampleData() throws {
-        logger.log("Seeding sample data...")
         try seed {
             Organizer.wickedWoods
             Organizer.shambhala

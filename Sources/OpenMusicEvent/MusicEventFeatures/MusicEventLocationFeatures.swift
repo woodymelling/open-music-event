@@ -84,7 +84,7 @@ struct LocationView: View {
 
     var body: some View {
         Group {
-            #if os(iOS)
+            #if os(iOS) || os(macOS)
             List {
                 Section("") {
                     if let coordinates = store.coordinates {
@@ -138,7 +138,11 @@ struct LocationView: View {
                 Spacer()
 
                 Button {
+                    #if os(iOS)
                     UIPasteboard.general.string = address
+                    #elseif os(macOS)
+                    NSPasteboard.general.setString(address, forType: .string)
+                    #endif
                 } label: {
                     Image(systemName: "document.on.document")
                 }
@@ -157,7 +161,7 @@ struct LocationView: View {
 
 }
 
-import OSLog
+import Logging
 extension Logger {
     static let geocoderLogging = Logger(subsystem: "OpenFestival", category: "geocoding")
 }

@@ -8,7 +8,6 @@
 import OpenMusicEventParser
 import Dependencies
 import DependenciesMacros
-import ZIPFoundation
 import SwiftUI
 
 @DependencyClient
@@ -17,7 +16,6 @@ struct DataFetchingClient {
 }
 
 struct FailedToLoadOrganizerError: Error {}
-
 extension DataFetchingClient: DependencyKey {
     static let liveValue = DataFetchingClient { orgReference in
         let unzippedURL = URL.temporaryDirectory
@@ -27,7 +25,6 @@ extension DataFetchingClient: DependencyKey {
 
         let fileManager = FileManager.default
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
-
 
         logger.info("Downloading from: \(targetZipURL)")
         logger.info("Response: \((response as! HTTPURLResponse).statusCode), to url: \(downloadURL)")
@@ -42,7 +39,8 @@ extension DataFetchingClient: DependencyKey {
 
         do {
             try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
-            try fileManager.unzipItem(at: downloadURL, to: unzippedURL)
+            @Dependency(ZipClient.self) var zipClient
+            try zipClient.unzipFile(source: downloadURL, destination: unzippedURL)
         } catch {
             reportIssue("ERROR: \(error)")
         }
@@ -85,10 +83,13 @@ extension FileManager {
     }
 }
 
-
-
-import OSLog
+import Logging
 import GRDB
+extension Logger {
+    init(subsystem: String, category: String) {
+        self.init(label: subsystem + "." + category)
+    }
+}
 
 private let logger = Logger(subsystem: "open-music-event.event-viewer", category: "OrganizerLoader")
 
@@ -116,13 +117,6 @@ func downloadAndStoreOrganizer(from reference: OrganizationReference) async thro
     @Dependency(\.defaultDatabase) var database
 
     let organizer: OrganizerConfiguration = try await dataFetchingClient.fetchOrganizer(reference)
-
-    let organizerDraft = Organizer.Draft(
-        url: reference.zipURL,
-        name: organizer.info.name,
-        imageURL: organizer.info.imageURL
-    )
-
 
     try await database.write { db in
         try Organizer.find(reference.zipURL)
@@ -162,14 +156,13 @@ func downloadAndStoreOrganizer(from reference: OrganizationReference) async thro
                 artistNameIDMapping[artist.name] = artistID
             }
 
-
             func getOrCreateArtist(withName artistName: Artist.Name) throws -> Artist.ID {
                 if let artistID = artistNameIDMapping[artistName] {
                     artistID
                 } else {
                     try Artist.upsert {
                         Artist.Draft(
-                            id: OmeID(stabilizedBy: String(eventID.rawValue), artistName),
+                            id: OmeID(stabilizedBy: String(eventID.rawValue).lowercased(), artistName),
                             musicEventID: eventID,
                             name: artistName,
                             links: []

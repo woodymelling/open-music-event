@@ -87,7 +87,12 @@ extension [Color] {
             // The hue shift is scaled by `colorRotationSpeed`.
 
             let hueShift = cos(offset / 5 + Double(index) * 0.5) * colorShiftAmount
+
+            #if os(iOS)
             return color.shiftHue(by: hueShift)
+            #elseif os(macOS)
+            return color
+            #endif
         }
 
         return shiftedColors
@@ -139,6 +144,7 @@ private func generatePoints(width: Int, height: Int, margin: CGFloat) -> [SIMD2<
 }
 
 
+#if os(iOS)
 private extension Color {
     /// Shift hue by `amount` in [-1.0, 1.0].
     func shiftHue(by amount: Double) -> Color {
@@ -159,4 +165,5 @@ private extension Color {
                      opacity: Double(alpha))
     }
 }
+#endif
 //#endif

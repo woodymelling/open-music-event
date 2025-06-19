@@ -16,11 +16,10 @@ import Foundation
 import Observation
 import SwiftUI
 import Dependencies
-import OSLog
+import Logging
 import ImageCaching
 import SharingGRDB
 import CoreModels
-
 
 extension Organizer {
     struct IconView: View {
@@ -176,7 +175,7 @@ extension Stage {
             sortIndex: 0,
             name: "",
             iconImageURL: nil,
-            color: .clear
+            color: .init(0)
         )
     }
 }

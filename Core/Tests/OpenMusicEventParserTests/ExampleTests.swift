@@ -7,13 +7,18 @@ import Foundation
 import InlineSnapshotTesting
 
 extension URL {
+    #if os(iOS)
     static let resourcesFolder = Bundle.module.resourceURL
+    #elseif os(macOS)
+    static let resourcesFolder = Bundle.module.resourceURL
+    #endif
+
 //        .appending(component: "Contents/Resources/ExampleFestivals")
 }
 
 struct EventDecodingTests {
 
-    @Test()
+    @Test(.disabled("Bundle not being found on macOS"))
     func testival() async throws {
         let url = Bundle.module.resourceURL!
             .appending(component: "ExampleFestivals")
@@ -58,14 +63,13 @@ struct EventDecodingTests {
                       musicEventID: nil,
                       name: "Boid",
                       bio: """
-                      
                       **boid** is an experimental electronic music project blending elements of technology, nature, math, and art. Drawing inspiration from the complex patterns of flocking behavior, boids creates immersive soundscapes that evolve through algorithmic structures and organic, flowing rhythms. With a foundation in house music, the project explores new auditory dimensions while maintaining a connection to the dance floor, inviting listeners to explore both the natural world and the mathematical systems that underpin it.
                       
                       """,
                       imageURL: URL(http://boid.com/artist-image.png),
                       links: [
                         [0]: Artist.Link(
-                          url: URL(http://soundcloud.com/boid%22),
+                          url: URL(http://soundcloud.com/boid),
                           label: nil
                         ),
                         [1]: Artist.Link(
@@ -104,21 +108,7 @@ struct EventDecodingTests {
                       sortIndex: nil,
                       iconImageURL: nil,
                       imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_amp.png?alt=media&token=259c79a0-0df8-4434-931a-e3b9037789a6),
-                      color: Color(
-                        provider: ColorBox(
-                          base: ResolvedColorProvider(
-                            color: (extension in SwiftUI):Color.ResolvedHDR(
-                              base: Color.Resolved(
-                                linearRed: 0.73791057,
-                                linearGreen: 0.084376216,
-                                linearBlue: 0.34670416,
-                                opacity: 1.0
-                              ),
-                              _headroom: nan
-                            )
-                          )
-                        )
-                      ),
+                      color: 14635679,
                       posterImageURL: nil,
                       lineup: nil
                     ),
@@ -129,21 +119,7 @@ struct EventDecodingTests {
                       sortIndex: nil,
                       iconImageURL: nil,
                       imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_fractal.png?alt=media&token=fc4b8549-b689-4b90-88d6-e318d8db6e4a),
-                      color: Color(
-                        provider: #1 ColorBox(
-                          base: ResolvedColorProvider(
-                            color: (extension in SwiftUI):Color.ResolvedHDR(
-                              base: Color.Resolved(
-                                linearRed: 0.49102098,
-                                linearGreen: 0.5028866,
-                                linearBlue: 0.14126328,
-                                opacity: 1.0
-                              ),
-                              _headroom: nan
-                            )
-                          )
-                        )
-                      ),
+                      color: 12237928,
                       posterImageURL: nil,
                       lineup: nil
                     ),
@@ -154,21 +130,7 @@ struct EventDecodingTests {
                       sortIndex: nil,
                       iconImageURL: nil,
                       imageURL: URL(https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Fstage_logo_grove.png?alt=media&token=514a6eca-079f-45cf-8ccf-1decba72b35d),
-                      color: Color(
-                        provider: #2 ColorBox(
-                          base: ResolvedColorProvider(
-                            color: (extension in SwiftUI):Color.ResolvedHDR(
-                              base: Color.Resolved(
-                                linearRed: 0.18447499,
-                                linearGreen: 0.50888145,
-                                linearBlue: 0.2831488,
-                                opacity: 1.0
-                              ),
-                              _headroom: nan
-                            )
-                          )
-                        )
-                      ),
+                      color: 7781777,
                       posterImageURL: nil,
                       lineup: nil
                     )

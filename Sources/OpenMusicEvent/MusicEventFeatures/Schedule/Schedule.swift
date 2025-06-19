@@ -93,14 +93,25 @@ public struct ScheduleView: View {
         self.store = store
     }
 
+    #if os(iOS)
     @SharedReader(.interfaceOrientation)
     var interfaceOrientation
+    #endif
+
+
+    enum ScheduleType {
+        case singleStageAtOnce
+        case allStagesAtOnce
+    }
+
+    @State var visibleSchedule: ScheduleType = .singleStageAtOnce
 
     public var body: some View {
         Group {
-            if interfaceOrientation.isPortrait {
+            switch visibleSchedule {
+            case .singleStageAtOnce:
                 SingleStageAtOnceView(store: store.singleStageAtOnceFeature)
-            } else {
+            case .allStagesAtOnce:
                 AllStagesAtOnceView(store: store)
             }
         }
@@ -173,7 +184,9 @@ public struct ScheduleView: View {
                     }
                 }
                 .navigationTitle(selectedSchedule.map { label(for: $0) } ?? "")
+                #if !os(macOS)
                 .navigationBarTitleDisplayMode(.inline)
+                #endif
         }
     }
 }

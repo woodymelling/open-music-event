@@ -38,6 +38,7 @@ typealias AppMainDelegateBase = NSApplicationDelegate
 typealias AppType = NSApplication
 #endif
 
+@MainActor
 class AppMainDelegate: NSObject, AppMainDelegateBase {
     let application = AppType.shared
 

@@ -2,6 +2,7 @@ import SwiftUI
 import SharingGRDB
 import Observation
 import CoreModels
+import OpenMusicEventParser
 
 
 @MainActor

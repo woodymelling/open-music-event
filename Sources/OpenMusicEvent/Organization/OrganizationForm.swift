@@ -97,8 +97,10 @@ struct OrganizationFormView: View {
                     prompt: Text("github.com/your-organization/ome-config")
                 )
                 .autocorrectionDisabled()
+                #if !os(macOS)
                 .textInputAutocapitalization(.never)
                 .textContentType(.URL)
+                #endif
                 .focused($focusField, equals: .orgURL)
 
                 if let errorMessage = store.errorMessage {

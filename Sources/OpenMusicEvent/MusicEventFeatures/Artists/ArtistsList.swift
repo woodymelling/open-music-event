@@ -60,7 +60,9 @@ struct ArtistsListView: View {
             }
         }
         .autocorrectionDisabled()
+        #if os(iOS)
         .textInputAutocapitalization(.never)
+        #endif
         .navigationTitle("Artists")
         .listStyle(.plain)
         .navigationDestination(for: Artist.ID.self) {

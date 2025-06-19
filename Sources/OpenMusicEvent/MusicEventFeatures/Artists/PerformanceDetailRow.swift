@@ -22,8 +22,7 @@ public struct PerformanceDetailRow: View {
 
         public let title: String
 
-        @Column(as: Color.HexRepresentation.self)
-        public let stageColor: Color
+        public let stageColor: OMEColor
     }
 
     init(performance: ArtistPerformance) {
