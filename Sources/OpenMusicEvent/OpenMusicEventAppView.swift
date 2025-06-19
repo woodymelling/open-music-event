@@ -14,8 +14,8 @@ import CoreModels
 
 
 public enum OME {
-    public static func prepareDependencies() {
-        try! Dependencies.prepareDependencies {
+    public static func prepareDependencies() throws {
+        try Dependencies.prepareDependencies {
             $0.defaultDatabase = try appDatabase()
         }
     }
