@@ -59,5 +59,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config --global --add safe.directory /__w/open-music-event/open-music-event
           TAG=$(gh release view --json tagName -q .tagName)
           gh release upload $TAG Core/.build/release/open-music-event --clobber
