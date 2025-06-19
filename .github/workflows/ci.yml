@@ -22,9 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install GitHub CLI
-        uses: cli/cli-action@v2
-
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
 
