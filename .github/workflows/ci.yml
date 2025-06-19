@@ -22,24 +22,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # - name: Install SQLite
-      #   run: apt update && apt -y install libsqlite3-dev
+      - name: Install SQLite
+        run: apt update && apt -y install libsqlite3-dev
 
-      # - name: Run Core Tests
-      #   run: |
-      #     cd Core
-      #     swift test --enable-test-discovery --parallel
+      - name: Run Core Tests
+        run: |
+          cd Core
+          swift test --enable-test-discovery --parallel
 
-      # - name: Build CLI release binary
-      #   run: |
-      #     cd Core
-      #     swift build -c release --product open-music-event
+      - name: Build CLI release binary
+        run: |
+          cd Core
+          swift build -c release --product open-music-event
 
-      # - name: Upload CLI artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: open-music-event-linux-${{ matrix.swift }}
-      #     path: Core/.build/release/open-music-event
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-music-event-linux-${{ matrix.swift }}
+          path: Core/.build/release/open-music-event
 
       - name: Install dependencies and GitHub CLI
         run: |
