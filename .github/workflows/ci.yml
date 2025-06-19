@@ -22,6 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install GitHub CLI
+        uses: cli/cli-action@v2
+
       - name: Install SQLite
         run: apt update && apt -y install libsqlite3-dev
 
@@ -40,3 +43,10 @@ jobs:
         with:
           name: open-music-event-linux-${{ matrix.swift }}
           path: Core/.build/release/open-music-event
+
+      - name: Upload file to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=$(gh release view --json tagName -q .tagName)
+          gh release upload $TAG Core/.build/release/open-music-event --clobber
