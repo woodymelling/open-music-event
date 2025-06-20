@@ -18,12 +18,15 @@ struct DataFetchingClient {
 struct FailedToLoadOrganizerError: Error {}
 extension DataFetchingClient: DependencyKey {
     static let liveValue = DataFetchingClient { orgReference in
-        let unzippedURL = URL.temporaryDirectory
+        let unzippedURL = URL.documentsDirectory
+            .appending(path: "ome-zips")
+            .appending(path: orgReference.zipURL.absoluteString)
+        
         let targetZipURL = orgReference.zipURL
-
-        try FileManager.default.clearDirectory(URL.temporaryDirectory)
-
         let fileManager = FileManager.default
+        try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
+        try fileManager.clearDirectory(unzippedURL)
+
         let (downloadURL, response) = try await URLSession.shared.download(from: targetZipURL)
 
         logger.info("Downloading from: \(targetZipURL)")
@@ -36,14 +39,12 @@ extension DataFetchingClient: DependencyKey {
         }
 
         logger.info("Unzipping from \(downloadURL) to \(unzippedURL)")
+        let contents = try fileManager.contentsOfDirectory(at: unzippedURL, includingPropertiesForKeys: nil)
 
-        do {
-            try fileManager.createDirectory(at: unzippedURL, withIntermediateDirectories: true)
-            @Dependency(ZipClient.self) var zipClient
-            try zipClient.unzipFile(source: downloadURL, destination: unzippedURL)
-        } catch {
-            reportIssue("ERROR: \(error)")
-        }
+        logger.info("Contents of \(unzippedURL): \(contents)")
+
+        @Dependency(ZipClient.self) var zipClient
+        try zipClient.unzipFile(source: downloadURL, destination: unzippedURL)
 
         let finalDestination = try getUnzippedDirectory(from: unzippedURL)
         logger.info("Parsing organizer from directory: \(finalDestination)")

@@ -33,14 +33,14 @@ struct OrganizationFormView: View {
             }
         }
 
-        var githubURL = ""
+        var githubURL = "https://github.com/woodymelling/shambhala-ome"
         var githubConfigType: GithubConfigType = .branch
         var branchText = "main"
         var versionText = ""
 
         var isLoading = false
         var dismiss = ViewTrigger()
-        var errorMessage: LocalizedStringKey?
+        var errorMessage: String?
 
         enum FocusField {
             case orgURL
@@ -75,8 +75,11 @@ struct OrganizationFormView: View {
             }
 
             self.isLoading = true
-            await withErrorReporting {
+            do {
                 try await downloadAndStoreOrganizer(from: repositoryLocation)
+            } catch {
+                self.errorMessage = error.localizedDescription
+                reportIssue(error)
             }
             self.dismiss.trigger()
             self.isLoading = false
