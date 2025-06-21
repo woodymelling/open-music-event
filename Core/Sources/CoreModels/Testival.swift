@@ -18,6 +18,12 @@ public extension Organizer {
         name: "Shambhala Music Festival",
         iconImageURL: URL(string: "https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Flogo_small.png?alt=media&token=7766fa90-6591-4e25-92b4-2ff354cb970d")
     )
+
+    static let testToolz = Organizer(
+        url: Organizer.ID(string: "https://github.com/woodymelling/test-tewlz/archive/refs/heads/main.zip")!,
+        name: "Shambhala Music Festival",
+        iconImageURL: URL(string: "https://firebasestorage.googleapis.com/v0/b/festivl.appspot.com/o/userContent%2Flogo_small.png?alt=media&token=7766fa90-6591-4e25-92b4-2ff354cb970d")
+    )
 }
 
 public extension MusicEvent {

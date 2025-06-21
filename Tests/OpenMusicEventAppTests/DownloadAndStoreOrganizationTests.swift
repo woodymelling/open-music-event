@@ -15,17 +15,6 @@ import SharingGRDB
 import GRDBSnapshotTesting
 import InlineSnapshotTesting
 
-@Suite(
-    .dependency(\.defaultDatabase, { try! appDatabase() }()),
-    .dependency(\.calendar, calendar)
-)
-struct MainAppSuite {}
-
-fileprivate let calendar = { @Sendable in
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = .gmt
-    return calendar
-}()
 
 
 extension Tag {
@@ -33,7 +22,7 @@ extension Tag {
 }
 
 
-extension MainAppSuite {
+extension OpenMusicEventBaseTestSuite {
     @Suite(.snapshots(record: .failed))
     struct OrganizationStoringTests {
         @Test
@@ -174,13 +163,13 @@ extension MainAppSuite {
                 """
                 artists: 548 rows
                 grdb_migrations: 1 rows
-                musicEvents: 2 rows
-                organizers: 1 rows
+                musicEvents: 5 rows
+                organizers: 4 rows
                 performanceArtists: 565 rows
                 performances: 542 rows
-                schedules: 8 rows
-                stages: 14 rows
-                
+                schedules: 9 rows
+                stages: 22 rows
+
                 """
             }
         }
@@ -193,12 +182,12 @@ extension MainAppSuite {
                 """
                 artists: 607 rows
                 grdb_migrations: 1 rows
-                musicEvents: 4 rows
-                organizers: 1 rows
+                musicEvents: 7 rows
+                organizers: 4 rows
                 performanceArtists: 593 rows
                 performances: 522 rows
-                schedules: 12 rows
-                stages: 15 rows
+                schedules: 13 rows
+                stages: 23 rows
 
                 """
             }

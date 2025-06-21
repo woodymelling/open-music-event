@@ -400,9 +400,6 @@ extension TimeZone: @retroactive QueryBindable {
     }
 }
 
-
-
-
 public enum _ColorTag {}
 public typealias OMEColor = Tagged<_ColorTag, Int>
 // MARK: Color HexRepresentation

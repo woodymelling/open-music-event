@@ -21,7 +21,6 @@ struct OrganizerListView: View {
         @FetchAll(Organizer.all.order(by: \.name))
         var organizers
 
-
         @CasePathable
         enum Destination {
             case organizerDetail(OrganizerDetailView.ViewModel)
