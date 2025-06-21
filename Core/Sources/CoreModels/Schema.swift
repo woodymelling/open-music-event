@@ -127,28 +127,28 @@ extension Organizer.Draft: Equatable, Codable, Sendable {}
 @Table
 public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
-    
+
     public let id: MusicEvent.ID
     public var organizerURL: Organizer.ID?
-    
+
     public let name: String  //
-    
+
     public var timeZone: TimeZone
-    
+
     public var startTime: Date?
-    
+
     public var endTime: Date?
 
     public let iconImageURL: URL?
     public let imageURL: URL?
     public let siteMapImageURL: URL?
-    
+
     @Column(as: Location.JSONRepresentation?.self)
     public let location: Location?
-    
+
     @Column(as: [ContactNumber].JSONRepresentation.self)
     public let contactNumbers: [ContactNumber]
-    
+
     public struct ContactNumber: Equatable, Sendable, Codable {
         public let phoneNumber: String
         public let title: String
@@ -160,7 +160,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
             self.description = description
         }
     }
-    
+
     public struct Location: Equatable, Sendable, Codable {
         public let address: String?
         public let directions: String?
@@ -389,7 +389,7 @@ extension TimeZone: @retroactive QueryBindable {
     public var queryBinding: StructuredQueriesCore.QueryBinding {
         .text(identifier)
     }
-    
+
     struct InvalidTimeZone: Error {}
     public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
         guard let timeZone = Self(identifier: try String(decoder: &decoder)) else {

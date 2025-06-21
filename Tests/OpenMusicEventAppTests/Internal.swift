@@ -14,6 +14,8 @@ import CoreModels
 
         $0.defaultDatabase = try! OpenMusicEvent.appDatabase()
         try $0.defaultDatabase.write { try $0.seedTestData() }
+
+        $0.imagePrefetchClient = .noop
     },
     .snapshots(record: .failed)
 )
@@ -24,28 +26,16 @@ extension Database {
         try seed {
             // Organizers
 
-            Organizer.testToolz
+            Organizer.omeTools
             Organizer.wickedWoods
             Organizer.shambhala
 
             // MusicEvents
-            MusicEvent(
-                id: 1,
-                organizerURL: Organizer.testToolz.url,
-                name: "Testival",
-                timeZone: .current,
-                startTime: baseDate.addingTimeInterval(-86400),  // started yesterday
-                endTime: baseDate.addingTimeInterval(86400 * 2), // ends in 2 days
-                imageURL: nil,
-                iconImageURL: nil,
-                siteMapImageURL: nil,
-                location: nil,
-                contactNumbers: []
-            )
+            MusicEvent.testival
 
             MusicEvent(
                 id: 2,
-                organizerURL: Organizer.testToolz.url,
+                organizerURL: Organizer.omeTools.url,
                 name: "Nightfall Collective",
                 timeZone: .init(identifier: "America/Vancouver")!,
                 startTime: baseDate,
@@ -59,7 +49,7 @@ extension Database {
 
             MusicEvent(
                 id: 3,
-                organizerURL: Organizer.testToolz.url,
+                organizerURL: Organizer.omeTools.url,
                 name: "Beats & Botanicals",
                 timeZone: .init(identifier: "America/Los_Angeles")!,
                 startTime: baseDate,
