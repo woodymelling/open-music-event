@@ -7,39 +7,31 @@ enum ContentTab: String, Hashable {
 }
 
 struct MusicEventViewer: View {
-    var id: MusicEvent.ID
 
-    @State
-    var eventFeatures: MusicEventFeatures?
 
-    var isLoading: Bool { eventFeatures == nil }
-
-    @State
-    var error: LocalizedStringKey?
-
-    @Environment(\.exitEvent) var dismiss
-
-    var body: some View {
-        ZStack {
-            AnimatedMeshView()
-                .ignoresSafeArea()
-
-            if let eventFeatures {
-                MusicEventFeaturesView(store: eventFeatures)
-            }
+    @Observable
+    @MainActor
+    class Model {
+        init(id: MusicEvent.ID) {
+            self.id = id
         }
-        .animation(.default, value: isLoading)
-        .task(id: id) {
-            @Dependency(\.defaultDatabase)
-            var database
 
+        var id: MusicEvent.ID
+
+        var eventFeatures: MusicEventFeatures?
+
+        var isLoading: Bool { eventFeatures == nil }
+
+
+        func onAppear() async {
+            @Dependency(\.defaultDatabase) var database
             self.eventFeatures = nil
-            await withErrorReporting {
+
+            do {
                 @FetchOne(MusicEvent?.find(id))
                 var musicEvent: MusicEvent? = nil
 
                 try await $musicEvent.sharedReader.load()
-//                try await Task.sleep(for: .seconds(1))
 
                 if let event = musicEvent {
                     try await withDependencies {
@@ -52,7 +44,7 @@ struct MusicEventViewer: View {
                         try await withThrowingTaskGroup {
                             $0.addTask { try await FetchAll(Current.stages).load() }
                             $0.addTask { try await FetchAll(Current.artists).load() }
-                            $0.addTask { try await FetchAll(Current.schedules) .load() }
+                            $0.addTask { try await FetchAll(Current.schedules).load() }
                             $0.addTask { await prefetchStageImages() }
 
                             try await $0.waitForAll()
@@ -65,12 +57,32 @@ struct MusicEventViewer: View {
                             schedules: schedules
                         )
                     }
-                } else {
-                    dismiss()
                 }
+            } catch {
+                reportIssue(error)
             }
         }
+    }
 
+
+    let store: Model
+    public init(store: Model) {
+        self.store = store
+    }
+
+    var body: some View {
+        ZStack {
+            AnimatedMeshView()
+                .ignoresSafeArea()
+
+            if let eventFeatures = store.eventFeatures {
+                MusicEventFeaturesView(store: eventFeatures)
+            }
+        }
+        .animation(.default, value: store.isLoading)
+        .task(id: store.id) {
+            await store.onAppear()
+        }
     }
 }
 
