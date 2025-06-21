@@ -119,7 +119,7 @@ extension String {
     }
 }
 
-extension OmeID {
+extension OmeID where RawValue == Int {
     public init(stabilizedBy values: String...) {
         self.init(rawValue: values.joined(separator: "-").stableHash)
     }

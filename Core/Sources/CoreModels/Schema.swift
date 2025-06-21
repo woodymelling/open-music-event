@@ -7,41 +7,14 @@
 
 import Foundation
 import StructuredQueries
-
+@_exported import Tagged
 
 #if canImport(SwiftUI)
 import SwiftUI
 #endif
 
 
-//public typealias OmeID<T> = Int
-
-public struct OmeID<T>: Hashable, Sendable, ExpressibleByIntegerLiteral, RawRepresentable, QueryBindable, Codable {
-    public let rawValue: Int
-    public init(_ intValue: Int) {
-        self.rawValue = intValue
-    }
-
-    public init(rawValue: Int) {
-        self.rawValue = rawValue
-    }
-
-    public init(integerLiteral value: IntegerLiteralType) {
-        self.rawValue = value
-    }
-}
-
-import Tagged
-
-extension OmeID: _OptionalPromotable {}
-extension OmeID: QueryDecodable {}
-extension OmeID: QueryExpression {}
-extension OmeID: QueryRepresentable {}
-extension OmeID: SQLiteType {
-  public static var typeAffinity: SQLiteTypeAffinity {
-      .integer
-  }
-}
+public typealias OmeID<T> = Tagged<T, Int>
 
 public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringConvertible, QueryBindable {
     case repository(Repository)
