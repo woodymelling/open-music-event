@@ -53,30 +53,42 @@ struct OrganizerListView: View {
     @State var store = ViewModel()
 
     public var body: some View {
-        List {
-            ForEach(store.organizers) { org in
-                NavigationLinkButton {
-                    store.didTapOrganizer(id: org.id)
-                } label: {
-                    Row(org: org)
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.didDeleteOrganization(organization: org)
-                    } label: {
-                        Image(systemName: "trash")
+        Group {
+
+            if !store.organizers.isEmpty {
+                List {
+                    ForEach(store.organizers) { org in
+                        NavigationLinkButton {
+                            store.didTapOrganizer(id: org.id)
+                        } label: {
+                            Row(org: org)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                store.didDeleteOrganization(organization: org)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .tint(.red)
+                        }
                     }
-                    .tint(.red)
                 }
+                .listStyle(.plain)
+
+            } else {
+                ContentUnavailableView(
+                    "No Organizations Yet",
+                    systemImage: "folder.badge.plus",
+                    description: Text("Use the + button in the top right, and add a link to any Open Music Event directory")
+                )
             }
         }
-
-        .listStyle(.plain)
-        .navigationTitle("Organizers")
+        .navigationTitle("Organizations")
         .toolbar {
-            Button("Add Organizer", systemImage: "plus") {
+            Button("Add Organization", systemImage: "plus") {
                 store.didTapAddOrganizerButton()
             }
+            .popoverTip(AddOrganizationTip())
         }
         .navigationDestination(item: $store.destination.organizerDetail) { store in
             OrganizerDetailView(store: store)
@@ -87,21 +99,7 @@ struct OrganizerListView: View {
                     .navigationTitle("Add Organization")
             }
         }
-//        .navigationDestination(item: , destination: <#T##(Hashable) -> View#>)
-//        .sheet(
-//            item: $store.scope(
-//                state: \.destination?.addRepository,
-//                action: \.destination.addRepository
-//            ),
-//            content: AddRepositoryView.init(store:)
-//        )
-//        .navigationDestination(
-//            item: $store.scope(
-//                state: \.destination?.organizerDetail,
-//                action: \.destination.organizerDetail
-//            ),
-//            destination: OrganizerDetailView.init(store:)
-//        )
+
     }
 
     struct Row: View {
@@ -122,5 +120,21 @@ struct OrganizerListView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+}
+
+import TipKit
+
+struct AddOrganizationTip: Tip {
+    var title: Text {
+        Text("Add an Organization")
+    }
+
+    var message: Text? {
+        Text("Tap the + button in the top right to add a new organization from a local directory.")
+    }
+
+    var image: Image? {
+        Image(systemName: "plus.circle.fill")
     }
 }

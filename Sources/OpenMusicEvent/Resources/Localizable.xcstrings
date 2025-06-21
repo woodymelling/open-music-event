@@ -72,10 +72,10 @@
         }
       }
     },
-    "Add Organization" : {
+    "Add an Organization" : {
 
     },
-    "Add Organizer" : {
+    "Add Organization" : {
 
     },
     "Appearance" : {
@@ -393,6 +393,9 @@
         }
       }
     },
+    "No Organizations Yet" : {
+
+    },
     "Notes" : {
       "comment" : "Item editor form label for the Notes field",
       "extractionState" : "stale",
@@ -435,7 +438,7 @@
     "Organization URL" : {
 
     },
-    "Organizers" : {
+    "Organizations" : {
 
     },
     "Powered by [Skip](https://skip.tools)" : {
@@ -579,6 +582,9 @@
         }
       }
     },
+    "Tap the + button in the top right to add a new organization from a local directory." : {
+
+    },
     "Title" : {
       "comment" : "Label for the item editor form indicating the title of the item",
       "extractionState" : "stale",
@@ -616,6 +622,9 @@
 
     },
     "url" : {
+
+    },
+    "Use the + button in the top right, and add a link to any Open Music Event directory" : {
 
     },
     "version" : {
