@@ -11,6 +11,11 @@ import StructuredQueries
 public protocol GRDBDraft:
     EncodableRecord, PersistableRecord, MutablePersistableRecord, TableRecord
 {}
+public protocol GRDBTable: FetchableRecord {}
+
+extension StructuredQueries.Table: GRDBTable {
+
+}
 
 
 public extension GRDBDraft where Self: TableDraft {
@@ -28,3 +33,11 @@ public extension GRDBDraft where Self: MutableIdentifiable, ID: Numeric {
 public protocol MutableIdentifiable: Identifiable {
     var id: ID { get set }
 }
+
+extension Organizer.Draft:  MutableIdentifiable, GRDBDraft {}
+extension MusicEvent.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Artist.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Stage.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Schedule.Draft: MutableIdentifiable, GRDBDraft {}
+extension Performance.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Performance.Artists.Draft:  MutableIdentifiable, GRDBDraft {}
