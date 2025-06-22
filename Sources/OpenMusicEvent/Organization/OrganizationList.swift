@@ -102,7 +102,6 @@ struct OrganizerListView: View {
                     .navigationTitle("Add Organization")
             }
         }
-
     }
 
     struct Row: View {
