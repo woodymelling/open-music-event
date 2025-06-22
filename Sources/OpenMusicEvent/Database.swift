@@ -176,3 +176,10 @@ extension Database {
 }
 #endif
 
+extension Organizer.Draft:  MutableIdentifiable, GRDBDraft {}
+extension MusicEvent.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Artist.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Stage.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Schedule.Draft: MutableIdentifiable, GRDBDraft {}
+extension Performance.Draft:  MutableIdentifiable, GRDBDraft {}
+extension Performance.Artists.Draft:  MutableIdentifiable, GRDBDraft {}

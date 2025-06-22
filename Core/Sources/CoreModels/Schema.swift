@@ -15,26 +15,7 @@ import SwiftUI
 
 
 
-import GRDB
-public protocol GRDBDraft:
-    EncodableRecord, PersistableRecord, MutablePersistableRecord, TableRecord
-{}
 
-
-public extension GRDBDraft where Self: TableDraft {
-    static var databaseTableName: String {
-        Self.tableName
-    }
-}
-public extension GRDBDraft where Self: MutableIdentifiable, ID: Numeric {
-    mutating func didInsert(_ inserted: InsertionSuccess) {
-        self.id = .init(exactly: inserted.rowID)!
-    }
-}
-
-public protocol MutableIdentifiable: Identifiable {
-    var id: ID { get set }
-}
 
 public typealias OmeID<T> = Tagged<T, Int>
 
@@ -53,11 +34,10 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
 
     public var id: ID {
         get { self.url }
+        set { self.url = newValue }
     }
 
     public typealias ID = URL
-
-
 
     public var name: String
     public var imageURL: URL?
@@ -77,7 +57,12 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
 }
 
 
-extension Organizer.Draft: Equatable, Codable, Sendable, GRDBDraft {}
+extension Organizer.Draft: Identifiable, Equatable, Codable, Sendable {
+    public var id: URL? {
+        get { self.url }
+        set { self.url = newValue }
+    }
+}
 
 // MARK: Music Event
 @Table
@@ -166,12 +151,7 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     }
 }
 
-extension MusicEvent.Draft {
-    public mutating func didInsert(_ inserted: InsertionSuccess) {
-        id = .init(exactly: inserted.rowID)
-    }
-}
-extension MusicEvent.Draft: Codable, Equatable, Sendable, GRDBDraft, MutableIdentifiable {}
+extension MusicEvent.Draft: Codable, Equatable, Sendable {}
 
 // MARK: Artist
 @Table
@@ -208,7 +188,7 @@ public struct Artist: Identifiable, Equatable, Sendable {
     }
 }
 
-extension Artist.Draft: Equatable, Sendable, Codable, GRDBDraft {}
+extension Artist.Draft: Equatable, Sendable, Codable {}
 
 // MARK: Stage
 @Table
@@ -255,7 +235,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     }
 }
 
-extension Stage.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+extension Stage.Draft: Codable, Sendable, Equatable {}
 
 public extension Performance {
     @Table
@@ -293,7 +273,7 @@ public struct Schedule: Identifiable, Equatable, Sendable {
     }
 }
 
-extension Schedule.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+extension Schedule.Draft: Codable, Sendable, Equatable {}
 
 // MARK: Performance
 @Table
@@ -338,9 +318,9 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     }
 }
 
-extension Performance.Draft: Codable, Sendable, Equatable, GRDBDraft {}
-extension Performance.Artists.Draft: Codable, Sendable, Equatable, GRDBDraft {}
-extension Performance.StageOnly.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+extension Performance.Draft: Codable, Sendable, Equatable {}
+extension Performance.Artists.Draft: Codable, Sendable, Equatable {}
+extension Performance.StageOnly.Draft: Codable, Sendable, Equatable {}
 
 public protocol TimelineRepresentable {
     var startTime: Date { get }
