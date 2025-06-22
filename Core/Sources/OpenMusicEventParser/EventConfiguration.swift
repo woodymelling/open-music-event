@@ -54,7 +54,89 @@ extension EventConfiguration {
 
 import StructuredQueriesCore
 
+struct UnresolvableDateError: Error {
+    let message: String
+}
+
 extension CoreModels.Schedule {
+    public struct WithUnresolvedTimes: Equatable, Sendable {
+        public var metadata: Metadata
+        public var stageSchedules: [String: [Performance]]
+
+        public func resolved(timeZone: TimeZone) throws -> CoreModels.Schedule.StringlyTyped {
+            guard let day = metadata.date else {
+                throw UnresolvableDateError(message: "Cannot resolve schedule times without a Date")
+            }
+
+            let resolvedStageSchedules = stageSchedules.mapValues { performances in
+                performances.map { $0.resolved(day: day, timeZone: timeZone) }
+            }
+
+            let allPerformances = resolvedStageSchedules.values.flatMap { $0 }
+
+            guard let earliestStart = allPerformances.min(by: { $0.startTime < $1.startTime })?.startTime,
+                  let latestEnd = allPerformances.max(by: { $0.endTime < $1.endTime })?.endTime
+            else {
+                throw UnresolvableDateError(message: "No performances to resolve")
+            }
+
+            return CoreModels.Schedule.StringlyTyped(
+                metadata: .init(
+                    startTime: earliestStart,
+                    endTime: latestEnd,
+                    customTitle: metadata.customTitle
+                ),
+                stageSchedules: resolvedStageSchedules
+            )
+        }
+
+
+        public struct Performance: Equatable, Sendable {
+            public var title: String
+            public var subtitle: String?
+            public var artistNames: OrderedSet<String>
+            public var startTime: ScheduleTime
+            public var endTime: ScheduleTime
+            public var stageName: String
+
+            func resolved(day: CalendarDate, timeZone: TimeZone) -> CoreModels.Schedule.StringlyTyped.Performance {
+                let startDate = day.resolveTime(startTime, timeZone: timeZone)
+                let endDate = day.resolveTime(endTime, timeZone: timeZone)
+
+                return CoreModels.Schedule.StringlyTyped.Performance(
+                    title: self.title,
+                    subtitle: self.subtitle,
+                    artistNames: self.artistNames,
+                    startTime: startDate,
+                    endTime: endDate,
+                    stageName: self.stageName
+                )
+            }
+
+        }
+
+        public struct Metadata: Equatable, Hashable, Sendable {
+            public init(
+                date: CalendarDate? = nil,
+                customTitle: String? = nil
+            ) {
+                self.date = date
+                self.customTitle = customTitle
+            }
+
+            public var date: CalendarDate?
+            public var customTitle: String?
+
+            public var startTime: Date? {
+                date?.date
+            }
+
+            public var endTime: Date? {
+                nil
+            }
+        }
+    }
+
     public struct StringlyTyped: Equatable, Sendable {
         public var metadata: Metadata
         public var stageSchedules: [String : [Performance]]
@@ -67,30 +149,25 @@ extension CoreModels.Schedule {
             public var endTime: Date
             public var stageName: String
         }
-    }
-    public struct Metadata: Equatable, Hashable, Sendable {
-        public init(
-            date: CalendarDate? = nil,
-            customTitle: String? = nil
-        ) {
-            self.date = date
-            self.customTitle = customTitle
-        }
 
-        public var date: CalendarDate?
-        public var customTitle: String?
-
-        public var startTime: Date? {
-            date?.date
-        }
-
-        public var endTime: Date? {
-            nil
+        public struct Metadata: Equatable, Hashable, Sendable {
+            public var startTime: Date
+            public var endTime: Date
+            public var customTitle: String?
         }
     }
 }
 
 
+//extension Schedule.StringlyTyped {
+//    func withTimeZone(_ timeZone: TimeZone) -> Schedule.StringlyTyped {
+//        var result = self
+//        result.stageSchedules.forEach { key, value in
+//            result.stageSchedules[key] = value.map(\.withTimeZone(timeZone))
+//        }
+//        return result
+//    }
+//}
 
 import Foundation
 

@@ -76,7 +76,7 @@ public struct EventFileTree: FileTreeReader {
 
 
     struct SchedulesConversion: Conversion {
-        var body: some Conversion<FileContent<Data>, Schedule.StringlyTyped> {
+        var body: some Conversion<FileContent<Data>, Schedule.WithUnresolvedTimes> {
             FileContentConversion {
                 Conversions.YamlConversion(CoreModels.Schedule.YamlRepresentation.self)
             }
@@ -84,12 +84,11 @@ public struct EventFileTree: FileTreeReader {
             ScheduleConversion()
         }
     }
-
-    struct EventConversion: Conversion {
+struct EventConversion: Conversion {
         typealias Input = (
             EventConfiguration.EventInfoYaml,
             EventConfiguration.StageLineups?,
-            [Schedule.StringlyTyped]?,
+            [Schedule.WithUnresolvedTimes]?,
             [CoreModels.Artist.Draft]?
         )
         typealias Output = EventConfiguration
@@ -98,13 +97,16 @@ public struct EventFileTree: FileTreeReader {
 
             let eventInfo = input.0
             let stageLineups = input.1
-            let schedule = input.2
             let artists = input.3
+
+            let timeZone = try TimeZoneConversion().apply(eventInfo.timeZone) ?? TimeZone.current
+
+            let resolvedSchedule = try input.2?.map { try $0.resolved(timeZone: timeZone) }
 
             return EventConfiguration(
                 info: CoreModels.MusicEvent.Draft(
                     name: eventInfo.name ?? "",
-                    timeZone: try TimeZoneConversion().apply(eventInfo.timeZone) ?? TimeZone.current,
+                    timeZone: timeZone,
                     startTime: eventInfo.startDate?.date,
                     endTime: eventInfo.endDate?.date,
                     iconImageURL: eventInfo.iconImageURL,
@@ -125,7 +127,7 @@ public struct EventFileTree: FileTreeReader {
                 ),
                 artists: artists ?? [],
                 stages: eventInfo.stages ?? [],
-                schedule: schedule ?? [],
+                schedule: resolvedSchedule ?? [],
                 stageLineups: stageLineups
             )
         }

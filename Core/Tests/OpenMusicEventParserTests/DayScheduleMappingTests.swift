@@ -64,63 +64,93 @@ struct DayScheduleConversionTests {
     
              try assertInlineSnapshot(of: ScheduleConversion().apply(dto), as: .customDump) {
                  """
-                 (extension in OpenMusicEventParser):Schedule.StringlyTyped(
-                   metadata: (extension in OpenMusicEventParser):Schedule.Metadata(
+                 (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes(
+                   metadata: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Metadata(
                      date: 6/12/2024,
                      customTitle: nil
                    ),
                    stageSchedules: [
                      "Bass Haven": [
-                       [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                       [0]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                          title: "Sunspear",
                          subtitle: nil,
                          artistNames: Set([
                            "Sunspear"
                          ]),
-                         startTime: Date(2024-06-12T16:30:00.000Z),
-                         endTime: Date(2024-06-12T18:30:00.000Z),
+                         startTime: ScheduleTime(
+                           hour: 16,
+                           minute: 30
+                         ),
+                         endTime: ScheduleTime(
+                           hour: 18,
+                           minute: 30
+                         ),
                          stageName: "Bass Haven"
                        ),
-                       [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                       [1]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                          title: "Phantom Groove",
                          subtitle: nil,
                          artistNames: Set([
                            "Phantom Groove"
                          ]),
-                         startTime: Date(2024-06-12T18:30:00.000Z),
-                         endTime: Date(2024-06-12T20:00:00.000Z),
+                         startTime: ScheduleTime(
+                           hour: 18,
+                           minute: 30
+                         ),
+                         endTime: ScheduleTime(
+                           hour: 20,
+                           minute: 0
+                         ),
                          stageName: "Bass Haven"
                        ),
-                       [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                       [2]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                          title: "Caribou State",
                          subtitle: nil,
                          artistNames: Set([
                            "Caribou State"
                          ]),
-                         startTime: Date(2024-06-12T20:00:00.000Z),
-                         endTime: Date(2024-06-12T21:30:00.000Z),
+                         startTime: ScheduleTime(
+                           hour: 20,
+                           minute: 0
+                         ),
+                         endTime: ScheduleTime(
+                           hour: 21,
+                           minute: 30
+                         ),
                          stageName: "Bass Haven"
                        )
                      ],
                      "Main Stage": [
-                       [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                       [0]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                          title: "Oaktrail",
                          subtitle: nil,
                          artistNames: Set([
                            "Oaktrail"
                          ]),
-                         startTime: Date(2024-06-12T20:00:00.000Z),
-                         endTime: Date(2024-06-12T22:00:00.000Z),
+                         startTime: ScheduleTime(
+                           hour: 20,
+                           minute: 0
+                         ),
+                         endTime: ScheduleTime(
+                           hour: 22,
+                           minute: 0
+                         ),
                          stageName: "Main Stage"
                        ),
-                       [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                       [1]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                          title: "Rhythmbox",
                          subtitle: nil,
                          artistNames: Set([
                            "Rhythmbox"
                          ]),
-                         startTime: Date(2024-06-12T22:00:00.000Z),
-                         endTime: Date(2024-06-12T23:30:00.000Z),
+                         startTime: ScheduleTime(
+                           hour: 22,
+                           minute: 0
+                         ),
+                         endTime: ScheduleTime(
+                           hour: 23,
+                           minute: 30
+                         ),
                          stageName: "Main Stage"
                        )
                      ]
@@ -160,51 +190,75 @@ struct DayScheduleConversionTests {
 
         try assertInlineSnapshot(of: ScheduleConversion().apply(dto), as: .customDump) {
             """
-            (extension in OpenMusicEventParser):Schedule.StringlyTyped(
-              metadata: (extension in OpenMusicEventParser):Schedule.Metadata(
+            (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes(
+              metadata: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Metadata(
                 date: 6/12/2024,
                 customTitle: nil
               ),
               stageSchedules: [
                 "Bass Haven": [
-                  [0]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                  [0]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                     title: "Sunspear",
                     subtitle: nil,
                     artistNames: Set([
                       "Sunspear"
                     ]),
-                    startTime: Date(2024-06-12T18:30:00.000Z),
-                    endTime: Date(2024-06-12T22:30:00.000Z),
+                    startTime: ScheduleTime(
+                      hour: 18,
+                      minute: 30
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 22,
+                      minute: 30
+                    ),
                     stageName: "Bass Haven"
                   ),
-                  [1]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                  [1]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                     title: "Phantom Groove",
                     subtitle: nil,
                     artistNames: Set([
                       "Phantom Groove"
                     ]),
-                    startTime: Date(2024-06-12T22:30:00.000Z),
-                    endTime: Date(2024-06-13T00:30:00.000Z),
+                    startTime: ScheduleTime(
+                      hour: 22,
+                      minute: 30
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 24,
+                      minute: 30
+                    ),
                     stageName: "Bass Haven"
                   ),
-                  [2]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                  [2]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                     title: "Oaktrail",
                     subtitle: nil,
                     artistNames: Set([
                       "Oaktrail"
                     ]),
-                    startTime: Date(2024-06-13T00:30:00.000Z),
-                    endTime: Date(2024-06-13T04:00:00.000Z),
+                    startTime: ScheduleTime(
+                      hour: 24,
+                      minute: 30
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 28,
+                      minute: 0
+                    ),
                     stageName: "Bass Haven"
                   ),
-                  [3]: (extension in OpenMusicEventParser):Schedule.StringlyTyped.Performance(
+                  [3]: (extension in OpenMusicEventParser):Schedule.WithUnresolvedTimes.Performance(
                     title: "Rhythmbox",
                     subtitle: nil,
                     artistNames: Set([
                       "Rhythmbox"
                     ]),
-                    startTime: Date(2024-06-13T04:00:00.000Z),
-                    endTime: Date(2024-06-13T07:30:00.000Z),
+                    startTime: ScheduleTime(
+                      hour: 28,
+                      minute: 0
+                    ),
+                    endTime: ScheduleTime(
+                      hour: 31,
+                      minute: 30
+                    ),
                     stageName: "Bass Haven"
                   )
                 ]

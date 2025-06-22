@@ -69,9 +69,9 @@ extension CoreModels.Schedule {
 struct ScheduleConversion: Conversion {
 
     typealias Input = FileContent<CoreModels.Schedule.YamlRepresentation>
-    typealias Output = CoreModels.Schedule.StringlyTyped
+    typealias Output = CoreModels.Schedule.WithUnresolvedTimes
 
-    func apply(_ input: FileContent<Schedule.YamlRepresentation>) throws -> Schedule.StringlyTyped {
+    func apply(_ input: FileContent<Schedule.YamlRepresentation>) throws -> Output {
         let fullSetTimes = try input.data.performances.mapValues { performances in
             try DetermineFullSetTimesConversion().apply(performances)
         }
@@ -153,13 +153,13 @@ struct ScheduleConversion: Conversion {
 //            return schedule
         }
     }
-    func unapply(_ input: CoreModels.Schedule.StringlyTyped) throws -> FileContent<CoreModels.Schedule.YamlRepresentation> {
+    func unapply(_ input: Output) throws -> FileContent<CoreModels.Schedule.YamlRepresentation> {
         throw UnimplementedFailure(description: "Cannot unapply ScheduleConversion")
     }
 
     struct FileContentToTupleScheduleDayConversion: Conversion {
         typealias Input = (FileContent<Schedule.YamlRepresentation>, [String: [(Performance.YamlRepresentation, endTime: ScheduleTime)]])
-        typealias Output = Schedule.StringlyTyped
+        typealias Output = Schedule.WithUnresolvedTimes
 
         func apply(_ input: Input) throws -> Output {
 
@@ -193,18 +193,18 @@ struct ScheduleConversion: Conversion {
                         title = artistNames.joined(separator: ", ")
                     }
 
-                    return Schedule.StringlyTyped.Performance(
+                    return Schedule.WithUnresolvedTimes.Performance(
                         title: title,
                         subtitle: nil,
                         artistNames: artistNames,
-                        startTime: scheduleDate.atTime($0.0.startTime),
-                        endTime: scheduleDate.atTime($0.endTime),
+                        startTime: $0.0.startTime,
+                        endTime: $0.endTime,
                         stageName: key
                     )
                 }
             }
 
-            return Schedule.StringlyTyped(
+            return Schedule.WithUnresolvedTimes(
                 metadata: .init(
                     date: scheduleDate,
                     customTitle: customTitle

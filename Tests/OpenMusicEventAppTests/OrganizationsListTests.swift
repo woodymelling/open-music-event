@@ -14,7 +14,7 @@ import Sharing
 extension OpenMusicEventBaseTestSuite {
     @MainActor
     @Suite()
-    struct EventViewerTests {
+    struct OrganizationLoadingAndSelectionTests {
         @Test
         func testOrgListLoadsNavtoOrgDetailSelectAnEvent() async throws {
             @Shared(.eventID) var eventID

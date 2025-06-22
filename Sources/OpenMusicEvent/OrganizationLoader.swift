@@ -222,7 +222,7 @@ extension OrganizerConfiguration {
                     let draft = Schedule.Draft(
                         id: .init(
                             stabilizedBy: String(eventID.rawValue),
-                            (schedule.metadata.customTitle ?? schedule.metadata.startTime?.description ?? UUID().uuidString)
+                            (schedule.metadata.customTitle ?? schedule.metadata.startTime.description)
                         ),
                         musicEventID: eventID,
                         startTime: schedule.metadata.startTime,
