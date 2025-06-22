@@ -125,6 +125,78 @@ extension OmeID where RawValue == Int {
     }
 }
 
+import StructuredQueries
+
+public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringConvertible, QueryBindable {
+    case repository(Repository)
+    case url(URL)
+
+    public struct Repository: Hashable, Codable, Sendable {
+        public init(baseURL: URL, version: Version) {
+            self.baseURL = baseURL
+            self.version = version
+        }
+
+        var baseURL: URL
+        var version: Version
+
+        public enum Version: Hashable, Codable, Sendable {
+            case branch(String)
+            case version(SemanticVersion)
+        }
+
+        public var zipURL: URL {
+            switch version {
+            case .branch(let name):
+                return baseURL.appendingPathComponent("archive/refs/heads/\(name).zip")
+            case .version(let version):
+                return baseURL.appendingPathComponent("archive/refs/tags/\(version).zip")
+            }
+        }
+    }
+
+    public var zipURL: URL {
+        switch self {
+        case .repository(let repository):
+            return repository.zipURL
+        case .url(let url):
+            return url
+        }
+    }
+
+    public init?(_ description: String) {
+        guard let url = URL(string: description)
+        else { return nil }
+
+        let components = url.pathComponents
+                let baseURL = URL(string: "https://\(url.host!)\(components[0...2].joined(separator: "/"))")!
+        let refType = components[safe: 4]
+        let refName = components[safe: 5]?.replacingOccurrences(of: ".zip", with: "")
+
+        switch refType {
+        case "heads":
+            guard let branch = refName else { return nil }
+            self = .repository(.init(baseURL: baseURL, version: .branch(branch)))
+        case "tags":
+            guard let tag = refName, let version = SemanticVersion(tag) else { return nil }
+            self = .repository(.init(baseURL: baseURL, version: .version(version)))
+        default:
+            return nil
+        }
+
+        return nil
+    }
+
+    public var description: String {
+        switch self {
+        case .repository(let repo):
+            return repo.zipURL.absoluteString
+        case .url(let url):
+            return url.absoluteString
+        }
+    }
+}
+
 
 func downloadAndStoreOrganizer(from reference: OrganizationReference) async throws {
     @Dependency(\.organizationFetchingClient) var dataFetchingClient
@@ -140,22 +212,17 @@ extension OrganizerConfiguration {
         info.url = url
 
         try await database.write { db in
-            try Organizer.find(url)
-                .delete()
-                .execute(db)
 
-            try Organizer.upsert { self.info }
-                .execute(db)
+            try db.execute(literal: """
+                DELETE FROM organizers WHERE url = \(url);
+                """)
+
+            try self.info.save(db)
 
             for event in self.events {
-
                 var eventInfo = event.info
                 eventInfo.organizerURL = url
-
-                let eventID = try MusicEvent.insert { eventInfo }
-                    .returning(\.id)
-                    .fetchOne(db)!
-
+                let eventID = try eventInfo.saved(db).id!
                 var artistNameIDMapping: [String: Artist.ID] = [:]
 
                 for artist in event.artists {
@@ -168,37 +235,32 @@ extension OrganizerConfiguration {
                         links: artist.links
                     )
 
-                    let artistID = try Artist.upsert { artistDraft }
-                        .returning(\.id)
-                        .fetchOne(db)!
+                    let artistID = try artistDraft.saved(db).id!
 
                     artistNameIDMapping[artist.name] = artistID
                 }
 
                 func getOrCreateArtist(withName artistName: Artist.Name) throws -> Artist.ID {
                     if let artistID = artistNameIDMapping[artistName] {
-                        artistID
+                        return artistID
                     } else {
-                        try Artist.upsert {
-                            Artist.Draft(
-                                id: OmeID(stabilizedBy: String(eventID.rawValue).lowercased(), artistName),
-                                musicEventID: eventID,
-                                name: artistName,
-                                links: []
-                            )
-                        }
-                        .returning(\.id)
-                        .fetchOne(db)!
+                        let draft = Artist.Draft(
+                            id: OmeID(stabilizedBy: String(eventID.rawValue).lowercased(), artistName),
+                            musicEventID: eventID,
+                            name: artistName,
+                            links: []
+                        )
+
+                        let artistID = try draft.saved(db).id!
+                        return artistID
                     }
-
                 }
-                var stageNameIDMapping: [String: Stage.ID] = [:]
 
+                var stageNameIDMapping: [String: Stage.ID] = [:]
 
                 for (index, stage) in event.stages.enumerated() {
                     let lineup = event.stageLineups?[stage.name]
                     let artistIDs = try lineup?.artists.compactMap { try getOrCreateArtist(withName: $0) }
-
                     let stage = Stage.Draft(
                         id: Stage.ID(rawValue: (String(eventID.rawValue) + stage.name).stableHash),
                         musicEventID: eventID,
@@ -211,15 +273,13 @@ extension OrganizerConfiguration {
                         lineup: artistIDs
                     )
 
-                    let stageID = try Stage.upsert { stage }
-                        .returning(\.id)
-                        .fetchOne(db)!
+                    let stageID = try stage.saved(db).id!
 
                     stageNameIDMapping[stage.name] = stageID
                 }
 
                 for schedule in event.schedule {
-                    let draft = Schedule.Draft(
+                    let scheduleDraft = Schedule.Draft(
                         id: .init(
                             stabilizedBy: String(eventID.rawValue),
                             (schedule.metadata.customTitle ?? schedule.metadata.startTime.description)
@@ -230,9 +290,7 @@ extension OrganizerConfiguration {
                         customTitle: schedule.metadata.customTitle
                     )
 
-                    let scheduleID = try Schedule.upsert { draft }
-                        .returning(\.id)
-                        .fetchOne(db)
+                    let scheduleID = try scheduleDraft.saved(db).id!
 
                     for stageSchedule in schedule.stageSchedules {
                         for performance in stageSchedule.value {
@@ -240,7 +298,7 @@ extension OrganizerConfiguration {
                                 // Stable for each performance **BUT*** will fail if an artist has two performances on the same stage on the same day
                                 // Maybe we increment a counter if there are multiple?
                                 id: .init(
-                                    stabilizedBy: scheduleID.map { String($0.rawValue) } ?? "",
+                                    stabilizedBy: String(scheduleID.rawValue),
                                     stageSchedule.key,
                                     performance.title
                                 ),
@@ -252,25 +310,22 @@ extension OrganizerConfiguration {
                                 description: nil
                             )
 
-                            let performanceID = try Performance.upsert { draft }
-                                .returning(\.id)
-                                .fetchOne(db)!
+                            let performanceID = try draft.saved(db).id!
 
                             for artistName in performance.artistNames {
                                 let artistID = try getOrCreateArtist(withName: artistName)
-
-                                let draft = Performance.Artists.Draft(
-                                    performanceID: performanceID,
-                                    artistID: artistID
-                                )
-
-                                try Performance.Artists.insert { draft }
-                                    .execute(db)
                             }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+extension Array {
+    public subscript(safe index: Index) -> Element? {
+        guard indices.contains(index) else { return nil }
+        return self[index]
     }
 }

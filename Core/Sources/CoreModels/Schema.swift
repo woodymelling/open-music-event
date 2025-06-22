@@ -14,77 +14,30 @@ import SwiftUI
 #endif
 
 
-public typealias OmeID<T> = Tagged<T, Int>
 
-public enum OrganizationReference: Hashable, Codable, Sendable, LosslessStringConvertible, QueryBindable {
-    case repository(Repository)
-    case url(URL)
+import GRDB
+public protocol GRDBDraft:
+    EncodableRecord, PersistableRecord, MutablePersistableRecord, TableRecord
+{}
 
-    public struct Repository: Hashable, Codable, Sendable {
-        public init(baseURL: URL, version: Version) {
-            self.baseURL = baseURL
-            self.version = version
-        }
 
-        var baseURL: URL
-        var version: Version
-
-        public enum Version: Hashable, Codable, Sendable {
-            case branch(String)
-            case version(SemanticVersion)
-        }
-
-        public var zipURL: URL {
-            switch version {
-            case .branch(let name):
-                return baseURL.appendingPathComponent("archive/refs/heads/\(name).zip")
-            case .version(let version):
-                return baseURL.appendingPathComponent("archive/refs/tags/\(version).zip")
-            }
-        }
-    }
-
-    public var zipURL: URL {
-        switch self {
-        case .repository(let repository):
-            return repository.zipURL
-        case .url(let url):
-            return url
-        }
-    }
-
-    public init?(_ description: String) {
-        guard let url = URL(string: description)
-        else { return nil }
-
-        let components = url.pathComponents
-                let baseURL = URL(string: "https://\(url.host!)\(components[0...2].joined(separator: "/"))")!
-        let refType = components[safe: 4]
-        let refName = components[safe: 5]?.replacingOccurrences(of: ".zip", with: "")
-
-        switch refType {
-        case "heads":
-            guard let branch = refName else { return nil }
-            self = .repository(.init(baseURL: baseURL, version: .branch(branch)))
-        case "tags":
-            guard let tag = refName, let version = SemanticVersion(tag) else { return nil }
-            self = .repository(.init(baseURL: baseURL, version: .version(version)))
-        default:
-            return nil
-        }
-
-        return nil
-    }
-
-    public var description: String {
-        switch self {
-        case .repository(let repo):
-            return repo.zipURL.absoluteString
-        case .url(let url):
-            return url.absoluteString
-        }
+public extension GRDBDraft where Self: TableDraft {
+    static var databaseTableName: String {
+        Self.tableName
     }
 }
+public extension GRDBDraft where Self: MutableIdentifiable, ID: Numeric {
+    mutating func didInsert(_ inserted: InsertionSuccess) {
+        self.id = .init(exactly: inserted.rowID)!
+    }
+}
+
+public protocol MutableIdentifiable: Identifiable {
+    var id: ID { get set }
+}
+
+public typealias OmeID<T> = Tagged<T, Int>
+
 
 extension Collection {
     subscript(safe index: Index) -> Element? {
@@ -98,11 +51,13 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     @Column(primaryKey: true)
     public var url: URL
 
+    public var id: ID {
+        get { self.url }
+    }
+
     public typealias ID = URL
 
-    public var id: URL {
-        self.url
-    }
+
 
     public var name: String
     public var imageURL: URL?
@@ -121,14 +76,15 @@ public struct Organizer: Equatable, Identifiable, Sendable, Codable {
     }
 }
 
-extension Organizer.Draft: Equatable, Codable, Sendable {}
+
+extension Organizer.Draft: Equatable, Codable, Sendable, GRDBDraft {}
 
 // MARK: Music Event
 @Table
 public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
     public typealias ID = OmeID<MusicEvent>
 
-    public let id: MusicEvent.ID
+    public var id: MusicEvent.ID
     public var organizerURL: Organizer.ID?
 
     public let name: String  //
@@ -208,16 +164,20 @@ public struct MusicEvent: Equatable, Identifiable, Sendable, Codable {
         self.location = location
         self.contactNumbers = contactNumbers
     }
-
 }
 
-extension MusicEvent.Draft: Codable, Equatable, Sendable {}
+extension MusicEvent.Draft {
+    public mutating func didInsert(_ inserted: InsertionSuccess) {
+        id = .init(exactly: inserted.rowID)
+    }
+}
+extension MusicEvent.Draft: Codable, Equatable, Sendable, GRDBDraft, MutableIdentifiable {}
 
 // MARK: Artist
 @Table
 public struct Artist: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Artist>
-    public let id: ID
+    public var id: ID
     public var musicEventID: MusicEvent.ID?
 
     public typealias Name = String
@@ -248,13 +208,13 @@ public struct Artist: Identifiable, Equatable, Sendable {
     }
 }
 
-extension Artist.Draft: Equatable, Sendable, Codable {}
+extension Artist.Draft: Equatable, Sendable, Codable, GRDBDraft {}
 
 // MARK: Stage
 @Table
 public struct Stage: Identifiable, Equatable, Sendable, Codable {
     public typealias ID = OmeID<Stage>
-    public let id: ID
+    public var id: ID
     public let musicEventID: MusicEvent.ID?
 
     public typealias Name = String
@@ -295,7 +255,7 @@ public struct Stage: Identifiable, Equatable, Sendable, Codable {
     }
 }
 
-extension Stage.Draft: Codable, Sendable, Equatable {}
+extension Stage.Draft: Codable, Sendable, Equatable, GRDBDraft {}
 
 public extension Performance {
     @Table
@@ -316,7 +276,7 @@ public extension Performance {
 @Table
 public struct Schedule: Identifiable, Equatable, Sendable {
     public typealias ID = OmeID<Schedule>
-    public let id: ID
+    public var id: ID
     public let musicEventID: MusicEvent.ID?
 
     public let startTime: Date?
@@ -333,11 +293,13 @@ public struct Schedule: Identifiable, Equatable, Sendable {
     }
 }
 
+extension Schedule.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+
 // MARK: Performance
 @Table
 public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresentable {
     public typealias ID = OmeID<Performance>
-    public let id: ID
+    public var id: ID
     public let stageID: Stage.ID
     public let scheduleID: Schedule.ID?
 
@@ -352,7 +314,7 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     // A join table for the many-to-many relationship of Performance -> Artist
     @Table("performanceArtists")
     public struct Artists: Equatable, Sendable, Identifiable {
-        public let id: OmeID<Performance.Artists>
+        public var id: OmeID<Performance.Artists>
         public let performanceID: Performance.ID
         public let artistID: Artist.ID?
         public let anonymousArtistName: String?
@@ -376,7 +338,9 @@ public struct Performance: Identifiable, Equatable, Sendable, TimelineRepresenta
     }
 }
 
-
+extension Performance.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+extension Performance.Artists.Draft: Codable, Sendable, Equatable, GRDBDraft {}
+extension Performance.StageOnly.Draft: Codable, Sendable, Equatable, GRDBDraft {}
 
 public protocol TimelineRepresentable {
     var startTime: Date { get }
@@ -392,11 +356,28 @@ extension TimeZone: @retroactive QueryBindable {
 
     struct InvalidTimeZone: Error {}
     public init(decoder: inout some StructuredQueriesCore.QueryDecoder) throws {
-        guard let timeZone = Self(identifier: try String(decoder: &decoder)) else {
+        let id = try String(decoder: &decoder)
+
+        guard let timeZone = Self(identifier: id) else {
             throw InvalidTimeZone()
         }
 
         self = timeZone
+    }
+}
+
+import GRDB
+
+extension TimeZone: DatabaseValueConvertible {
+    public var databaseValue: DatabaseValue {
+        identifier.databaseValue
+    }
+
+    public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> TimeZone? {
+        guard let identifier = String.fromDatabaseValue(dbValue) else {
+            return nil
+        }
+        return TimeZone(identifier: identifier)
     }
 }
 

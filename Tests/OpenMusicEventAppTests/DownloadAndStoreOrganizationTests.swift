@@ -165,7 +165,7 @@ extension OpenMusicEventBaseTestSuite {
                 grdb_migrations: 1 rows
                 musicEvents: 5 rows
                 organizers: 4 rows
-                performanceArtists: 565 rows
+                performanceArtists: 0 rows
                 performances: 542 rows
                 schedules: 9 rows
                 stages: 22 rows
@@ -184,7 +184,7 @@ extension OpenMusicEventBaseTestSuite {
                 grdb_migrations: 1 rows
                 musicEvents: 7 rows
                 organizers: 4 rows
-                performanceArtists: 593 rows
+                performanceArtists: 0 rows
                 performances: 522 rows
                 schedules: 13 rows
                 stages: 23 rows
