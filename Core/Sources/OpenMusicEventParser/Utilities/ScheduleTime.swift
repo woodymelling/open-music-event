@@ -107,7 +107,7 @@ extension ScheduleTime: Comparable {
 
 import Dependencies
 extension CalendarDate {
-    public func atTime(_ time: ScheduleTime) -> Date {
+    public func resolveTime(_ time: ScheduleTime, timeZone: TimeZone) -> Date {
         var components = DateComponents()
         components.year = year
         components.month = month

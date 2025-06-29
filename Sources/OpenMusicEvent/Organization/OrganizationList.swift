@@ -5,21 +5,21 @@
 //  Created by Woodrow Melling on 5/7/25.
 //
 
+import CoreModels
 import SwiftUI
-import SharingGRDB
 import SwiftUINavigation
 import ImageCaching
-
+import GRDB
 
 struct OrganizerListView: View {
+
     @MainActor
     @Observable
-    class ViewModel {
+    class Model {
         public init() {}
 
-        @ObservationIgnored
-        @FetchAll(Organizer.all.order(by: \.name))
-        var organizers
+        // The live list
+        var organizers: [Organizer] = []
 
 
         @CasePathable
@@ -29,6 +29,22 @@ struct OrganizerListView: View {
         }
 
         var destination: Destination?
+
+        // The observation handle
+        private var observation: AnyDatabaseCancellable?
+        func onAppear() async {
+            guard observation == nil else { return }
+            do {
+                self.observation = try await fetchAndObserveQuery(
+                    query: Organizer.order(Column("name")),
+                    on: self,
+                    at: \.organizers
+                )
+            } catch {
+
+            }
+        }
+
 
         func didTapOrganizer(id: Organizer.ID) {
             self.destination = .organizerDetail(.init(url: id))
@@ -50,7 +66,7 @@ struct OrganizerListView: View {
         }
     }
 
-    @State var store = ViewModel()
+    @Bindable var store: Model
 
     public var body: some View {
         Group {
@@ -83,6 +99,7 @@ struct OrganizerListView: View {
                 )
             }
         }
+        .onAppear { Task { await store.onAppear() }}
         .navigationTitle("Organizations")
         .toolbar {
             Button("Add Organization", systemImage: "plus") {
@@ -99,7 +116,6 @@ struct OrganizerListView: View {
                     .navigationTitle("Add Organization")
             }
         }
-
     }
 
     struct Row: View {
@@ -137,4 +153,58 @@ struct AddOrganizationTip: Tip {
     var image: Image? {
         Image(systemName: "plus.circle.fill")
     }
+}
+
+@MainActor
+func observe<Model: AnyObject, Entity: FetchableRecord & TableRecord & Sendable>(
+    query: QueryInterfaceRequest<Entity>,
+    at keyPath: ReferenceWritableKeyPath<Model, [Entity]>,
+    for model: Model,
+    dbWriter: any DatabaseWriter
+) async throws -> AnyDatabaseCancellable {
+    try await withCheckedThrowingContinuation { continuation in
+        let observation = ValueObservation
+            .tracking { db in
+                try query.fetchAll(db)
+            }
+
+        var firstValueRecieved = false
+
+        let token = observation
+            .start(
+                in: dbWriter,
+                onError: { error in
+                    reportIssue(error, "Failed to observe query")
+                    if !firstValueRecieved {
+                        continuation.resume(throwing: error)
+                    }
+                },
+                onChange: { [weak model] entities in
+                    guard let model = model else { return }
+                    model[keyPath: keyPath] = entities
+
+
+                    if !firstValueRecieved {
+                        firstValueRecieved = true
+                        continuation.resume(returning: token)
+                    }
+                }
+            )
+    }
+}
+
+// Overload — uses defaultDatabase automatically
+import Dependencies
+func fetchAndObserveQuery<Model: AnyObject, Entity: FetchableRecord & TableRecord & Sendable>(
+    query: QueryInterfaceRequest<Entity>,
+    on model: Model,
+    at keyPath: ReferenceWritableKeyPath<Model, [Entity]>
+) async throws -> AnyDatabaseCancellable {
+    @Dependency(\.defaultDatabase) var dbWriter
+    return try await observe(
+        query: query,
+        at: keyPath,
+        for: model,
+        dbWriter: dbWriter
+    )
 }
